@@ -10,7 +10,9 @@
  * 10px) with a CSS halftone dot layer at 50 percent opacity in
  * multiply blend mode over the flat fill - not a gradient, and the
  * texture is static (the earlier 18s highlight drift was a v2
- * interpretation and has been removed). A dotted rule of 1px
+ * interpretation and has been removed). Four 10px white corner
+ * ticks echo the hero selection handles: faint at rest, full
+ * opacity on card hover/focus. A dotted rule of 1px
  * square tiles sits under each title line (repeating gradient on
  * an inline title span). A transparent white-outline pill button
  * sits at the card bottom-left and stays invisible until its card
@@ -168,11 +170,32 @@ export default function Services() {
           position: relative;
           z-index: 1;
         }
+        /* Hero-frame corner ticks: 10px white squares, fully
+           inside the card corners, faint at rest, full opacity on
+           card hover/focus-within. Never intercept pointer events.
+           Defined after the child rule above so absolute wins. */
+        .svc-tick {
+          position: absolute;
+          width: 10px;
+          height: 10px;
+          background: #FFFFFF;
+          opacity: 0.35;
+          pointer-events: none;
+          z-index: 2;
+          transition: opacity 0.3s ease;
+        }
+        .svc-card:hover .svc-tick,
+        .svc-card:focus-within .svc-tick {
+          opacity: 1;
+        }
         /* Dotted title rule: 1px square tiles from a repeating
            gradient, applied to an inline span so a wrapped title
            gets one rule per line. */
         .svc-card-title {
           font-size: 36px;
+          /* Explicit light color: the global h1-h6 rule forces dark
+             #1D1D1F and beats the card's inherited white. */
+          color: #FFFFFF;
         }
         .svc-dotted-title {
           background-image: repeating-linear-gradient(to right, rgba(255, 255, 255, 0.9) 0 1px, transparent 1px 4px);
@@ -206,6 +229,14 @@ export default function Services() {
         .svc-card:focus-within .svc-pill {
           opacity: 1;
           visibility: visible;
+        }
+        /* Touch has no hover, and a hidden link cannot receive
+           focus, so the pill must be visible on touch devices. */
+        @media (hover: none) {
+          .svc-pill {
+            opacity: 1;
+            visibility: visible;
+          }
         }
         .svc-pill a:focus-visible {
           outline: 2px solid #FFFFFF;
@@ -260,6 +291,10 @@ export default function Services() {
           .svc-pill {
             transition: none;
           }
+          .svc-tick {
+            opacity: 1;
+            transition: none;
+          }
         }
       `}</style>
       <div style={{ maxWidth: 1160, margin: "0 auto" }}>
@@ -296,6 +331,9 @@ export default function Services() {
             letterSpacing: "-0.02em",
             fontWeight: 700,
             margin: "0 0 80px",
+            /* Explicit: same global h2 trap as Manifesto - the
+               global dark title color beats section inheritance. */
+            color: "#FFFFFF",
           }}
         >
           Three ways of working.
@@ -317,6 +355,10 @@ export default function Services() {
                   className="svc-hairline"
                   style={{ animationDelay: `${base}s` }}
                 />
+                <span aria-hidden="true" className="svc-tick" style={{ top: 10, left: 10 }} />
+                <span aria-hidden="true" className="svc-tick" style={{ top: 10, right: 10 }} />
+                <span aria-hidden="true" className="svc-tick" style={{ bottom: 10, left: 10 }} />
+                <span aria-hidden="true" className="svc-tick" style={{ bottom: 10, right: 10 }} />
                 <p
                   style={{
                     fontFamily: MONO,

@@ -8,6 +8,18 @@ import { researchItems } from "../data/content";
  * NOT cards, NOT a grid of tiles. One idea per row, generous whitespace,
  * mono metadata, blue accent only on interactive hover.
  *
+ * Hero-scale visual layers (decorative, no new facts):
+ * - A giant outlined index numeral (01-09) beside each row: display
+ *   type with transparent fill and a 1px grey outline, faint,
+ *   aria-hidden. Rows gain left padding to make room for it.
+ * - One vertical dashed route line on the left of the list,
+ *   connecting all 9 rows, drawing top-to-bottom (scaleY) when the
+ *   list scrolls into view.
+ * - A per-row visual tag under the description: the row type taken
+ *   from its existing meta label, in mono, plus one tiny abstract
+ *   CSS glyph for that type (circle, diamond, triangle, square).
+ *   Shapes only, no images, no new facts.
+ *
  * Integrity rules enforced here:
  * - The FAERS row shows ONLY N = 6,601 and the verified framing. NO ROR
  *   values appear in this file at all. The forest plot lives on the
@@ -146,6 +158,23 @@ const archiveRows: WorkRow[] = [
 
 const rows: WorkRow[] = [...featuredRows, ...archiveRows];
 
+/* Row type, taken from the existing meta label ("2026 - Poster" ->
+   "Poster"). No new facts: the tag only repeats what meta says. */
+function tagFor(meta: string): string {
+  const parts = meta.split(" - ");
+  return parts.length > 1 ? parts[parts.length - 1] : meta;
+}
+
+/* One abstract glyph class per row type. Shapes only. */
+function glyphFor(tag: string): string {
+  if (tag === "Poster" || tag === "Systematic review") return "wk-glyph-circle";
+  if (tag === "Live tool" || tag === "Conference paper, IC-CVD")
+    return "wk-glyph-triangle";
+  if (tag === "Web project" || tag === "Journal research")
+    return "wk-glyph-square";
+  return "wk-glyph-diamond";
+}
+
 export default function Works() {
   const listRef = useRef<HTMLOListElement | null>(null);
 
@@ -153,8 +182,12 @@ export default function Works() {
     const list = listRef.current;
     if (!list) return;
     const rows = Array.from(list.querySelectorAll(".wk-row"));
+    /* The route line lives in the wrapper around the list, so the
+       draw class goes on the wrapper, not the list itself. */
+    const wrapper = list.parentElement;
     if (typeof IntersectionObserver === "undefined") {
       rows.forEach((row) => row.classList.add("wk-in"));
+      wrapper?.classList.add("wk-route-in");
       return;
     }
     const observer = new IntersectionObserver(
@@ -169,7 +202,23 @@ export default function Works() {
       { threshold: 0.15, rootMargin: "0px 0px -8% 0px" },
     );
     rows.forEach((row) => observer.observe(row));
-    return () => observer.disconnect();
+    /* The route line draws once when the list itself enters view. */
+    const routeObserver = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            wrapper?.classList.add("wk-route-in");
+            routeObserver.disconnect();
+          }
+        });
+      },
+      { threshold: 0.05 },
+    );
+    routeObserver.observe(list);
+    return () => {
+      observer.disconnect();
+      routeObserver.disconnect();
+    };
   }, []);
 
   return (
@@ -187,7 +236,92 @@ export default function Works() {
           from { opacity: 0; transform: translateY(14px); }
           to { opacity: 1; transform: translateY(0); }
         }
-        .wk-row { opacity: 0; transition: background-color 300ms cubic-bezier(0.22, 1, 0.36, 1); }
+        .wk-row { opacity: 0; position: relative; transition: background-color 300ms cubic-bezier(0.22, 1, 0.36, 1); }
+        /* Giant outlined index numeral, decorative only. */
+        @keyframes wkGiantIn {
+          from { opacity: 0; transform: translateY(calc(-50% + 14px)); }
+          to { opacity: 1; transform: translateY(-50%); }
+        }
+        .wk-giant {
+          position: absolute;
+          left: 0;
+          top: 50%;
+          transform: translateY(-50%);
+          font-size: clamp(64px, 9vw, 120px);
+          line-height: 1;
+          font-weight: 700;
+          letter-spacing: -0.02em;
+          color: transparent;
+          -webkit-text-stroke: 1px #D8D8D8;
+          pointer-events: none;
+          opacity: 0;
+        }
+        .wk-row.wk-in .wk-giant {
+          animation: wkGiantIn 600ms cubic-bezier(0.22, 1, 0.36, 1) forwards;
+        }
+        /* Vertical dashed route line through the list. */
+        .wk-route {
+          position: absolute;
+          left: 70px;
+          top: 0;
+          bottom: 0;
+          width: 0;
+          border-left: 1px dashed rgba(1, 1, 1, 0.25);
+          pointer-events: none;
+          transform: scaleY(0);
+          transform-origin: top;
+          transition: transform 1200ms cubic-bezier(0.22, 1, 0.36, 1);
+        }
+        .wk-route-in .wk-route {
+          transform: scaleY(1);
+        }
+        /* Per-row visual tag: mono type label plus a tiny glyph. */
+        .wk-tag {
+          display: block;
+          margin-top: 14px;
+          font-family: ${MONO};
+          font-size: 11px;
+          letter-spacing: 0.08em;
+          text-transform: uppercase;
+          color: ${MUTED};
+        }
+        .wk-glyph {
+          display: inline-block;
+          vertical-align: middle;
+          margin-right: 8px;
+        }
+        .wk-glyph-circle {
+          width: 10px;
+          height: 10px;
+          border-radius: 50%;
+          border: 2px solid #0859D4;
+          box-sizing: border-box;
+        }
+        .wk-glyph-square {
+          width: 10px;
+          height: 10px;
+          border: 2px solid #0859D4;
+          box-sizing: border-box;
+        }
+        .wk-glyph-diamond {
+          width: 10px;
+          height: 10px;
+          border: 2px solid #0859D4;
+          box-sizing: border-box;
+          transform: rotate(45deg);
+        }
+        .wk-glyph-triangle {
+          width: 0;
+          height: 0;
+          border-left: 6px solid transparent;
+          border-right: 6px solid transparent;
+          border-bottom: 10px solid #0859D4;
+        }
+        @media (max-width: 700px) {
+          .wk-row { padding-left: 88px !important; }
+          .wk-giant { font-size: 56px; }
+          .wk-route { left: 34px; }
+        }
         .wk-row:hover, .wk-row:focus-within { background-color: #EFF4FE; }
         .wk-row.wk-in { animation: wkRise 500ms cubic-bezier(0.22, 1, 0.36, 1) forwards; }
         .wk-index { transition: color 300ms cubic-bezier(0.22, 1, 0.36, 1); }
@@ -229,6 +363,8 @@ export default function Works() {
         }
         @media (prefers-reduced-motion: reduce) {
           .wk-row { opacity: 1 !important; animation: none !important; transform: none !important; transition: none; }
+          .wk-giant { animation: none !important; opacity: 1; transform: translateY(-50%); color: #E8E8E8; -webkit-text-stroke: 0; }
+          .wk-route { transition: none; transform: none; }
           .wk-index { transition: none; }
           .wk-arrow { transition: none; transform: none; }
           .wk-row:hover .wk-arrow, .wk-row:focus-within .wk-arrow { opacity: 1; transform: none; }
@@ -267,14 +403,19 @@ export default function Works() {
           className="wk-dotted-rule"
           style={{ margin: "0 0 56px" }}
         />
-        <ol ref={listRef} style={{ listStyle: "none", margin: 0, padding: 0 }}>
-          {rows.map((row, rowIndex) => (
+        <div style={{ position: "relative" }}>
+          <div aria-hidden="true" className="wk-route" />
+          <ol
+            ref={listRef}
+            style={{ listStyle: "none", margin: 0, padding: 0 }}
+          >
+            {rows.map((row, rowIndex) => (
             <li
               key={row.index}
               className="wk-row"
               style={{
                 borderTop: `1px solid ${HAIRLINE}`,
-                padding: "32px 0",
+                padding: "32px 0 32px 150px",
                 display: "flex",
                 flexWrap: "wrap",
                 gap: "16px 32px",
@@ -282,6 +423,13 @@ export default function Works() {
                 animationDelay: `${rowIndex * 60}ms`,
               }}
             >
+              <span
+                aria-hidden="true"
+                className="wk-giant"
+                style={{ animationDelay: `${rowIndex * 60}ms` }}
+              >
+                {row.index}
+              </span>
               <span
                 className="wk-index"
                 style={{
@@ -330,6 +478,13 @@ export default function Works() {
                 >
                   {row.line}
                 </span>
+                <span className="wk-tag" aria-hidden="true">
+                  <span
+                    aria-hidden="true"
+                    className={`wk-glyph ${glyphFor(tagFor(row.meta))}`}
+                  />
+                  {tagFor(row.meta)}
+                </span>
               </span>
               <Link
                 to={row.href}
@@ -355,7 +510,8 @@ export default function Works() {
             aria-hidden="true"
             style={{ borderTop: `1px solid ${HAIRLINE}` }}
           />
-        </ol>
+          </ol>
+        </div>
         <p
           style={{
             margin: "40px 0 0",

@@ -8,8 +8,10 @@
  *   separation padding (120px top and bottom), i.e. 100svh + 2115px.
  *   On narrow screens (max-width 1023px) the reference drops to
  *   1125px of runway + 70px padding top and bottom, i.e. 100svh + 1265px.
- * - Inner child: position sticky, top 0, 100svh tall, so the content
- *   stays pinned while the visitor scrolls through the runway.
+ * - Inner child: position sticky, top 0, min-height 100svh with
+ *   overflow visible, so the content stays pinned while the
+ *   visitor scrolls through the runway and no second scrollbar
+ *   appears (no inner scroll container anywhere in this file).
  * - The H1 claim is split into 20 word spans. Each word starts pale
  *   grey and flips to full ink as scroll progress advances, with a
  *   0.35s color transition per word. Progress maps to words over the
@@ -121,6 +123,12 @@ export default function Quote() {
   }, [reducedMotion]);
 
   const missionOpacity = progress <= 0.9 ? 0 : (progress - 0.9) / 0.1;
+
+  /* Dot-field entrance: both dot layers fade from opacity 0 to
+     full over the first 10 percent of scroll progress, then stay
+     full. The cursor-lit fade (instant on, 600ms out) is unchanged
+     and multiplies on top of this entrance factor. */
+  const dotEntrance = progress < 0.1 ? progress / 0.1 : 1;
 
   /* Dot field cursor plumbing, same geometry as Contact (14px
      pitch, 0.4px dots, 20 percent base, 44 percent lit, 350px field
@@ -317,12 +325,18 @@ export default function Quote() {
         .q-pin-sticky {
           position: sticky;
           top: 0;
-          height: 100svh;
+          /* min-height, not height, and no inner scrollbar: the
+             old height + overflow-y auto pair rendered a second
+             scrollbar beside the page scrollbar ("2 scroll") and
+             trapped wheel scrolling inside the pinned section.
+             Now the child grows past viewport height when needed
+             and only the page scrollbar exists. */
+          min-height: 100svh;
           display: flex;
           align-items: center;
           padding: 120px 24px;
           box-sizing: border-box;
-          overflow-y: auto;
+          overflow: visible;
         }
         .q-dot-base,
         .q-dot-lit {
@@ -358,17 +372,22 @@ export default function Quote() {
           .q-pin-sticky {
             position: static;
             height: auto;
+            min-height: auto;
             overflow: visible;
           }
         }
       `}</style>
       <div ref={stickyRef} className="q-pin-sticky">
-        <div aria-hidden="true" className="q-dot-base" />
+        <div
+          aria-hidden="true"
+          className="q-dot-base"
+          style={{ opacity: dotEntrance }}
+        />
         <div
           aria-hidden="true"
           className="q-dot-lit"
           style={{
-            opacity: cursorLit ? 1 : 0,
+            opacity: cursorLit ? dotEntrance : 0,
             transition: `opacity ${cursorLit ? 0 : 600}ms ease`,
           }}
         />

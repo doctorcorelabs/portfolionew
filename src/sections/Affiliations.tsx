@@ -6,6 +6,13 @@ import { useEffect, useRef } from "react";
  * fabricated, and no Onlines client logo is copied. Each wordmark carries
  * a small label stating the real relationship, so nothing reads as an
  * endorsement or a client relationship.
+ *
+ * Stamp treatment (hero selection-frame language): each affiliation
+ * is a dashed-frame badge with small square corner ticks, like the
+ * hero selection box handles. Badges pop in with the overshoot curve
+ * on reveal, in a stagger. On hover/focus-within the dashed border
+ * solidifies and the wordmark darkens; there is no lift, no shadow
+ * change, and no scale on hover, and no content depends on hover.
  */
 
 const INK = "#010101";
@@ -87,18 +94,30 @@ export default function Affiliations() {
       }}
     >
       <style>{`
-        @keyframes afFadeUp {
-          from { opacity: 0; transform: translateY(10px); }
-          to { opacity: 1; transform: translateY(0); }
+        @keyframes afPop {
+          from { opacity: 0; transform: scale(0.8) translateY(10px); }
+          to { opacity: 1; transform: scale(1) translateY(0); }
         }
-        .af-item { opacity: 0; }
-        .af-item.af-in { animation: afFadeUp 450ms ease forwards; }
-        .af-mark { color: #4a4a4a; transition: transform 250ms ease, color 250ms ease; }
-        .af-item:hover .af-mark { transform: translateY(-2px); color: #010101; }
+        .af-item {
+          opacity: 0;
+          position: relative;
+          box-sizing: border-box;
+          border: 1px dashed rgba(18, 18, 19, 0.2);
+          padding: 20px 22px;
+          transition: border-color 250ms ease;
+        }
+        .af-item.af-in { animation: afPop 500ms cubic-bezier(0.34, 1.56, 0.64, 1) forwards; }
+        .af-item:hover,
+        .af-item:focus-within {
+          border-style: solid;
+          border-color: #010101;
+        }
+        .af-mark { color: #4a4a4a; transition: color 250ms ease; }
+        .af-item:hover .af-mark,
+        .af-item:focus-within .af-mark { color: #010101; }
         @media (prefers-reduced-motion: reduce) {
-          .af-item { opacity: 1 !important; animation: none !important; transform: none !important; }
+          .af-item { opacity: 1 !important; animation: none !important; transform: none !important; transition: none; }
           .af-mark { transition: none; }
-          .af-item:hover .af-mark { transform: none; }
         }
       `}</style>
       <div style={{ maxWidth: 1160, margin: "0 auto" }}>
@@ -144,6 +163,26 @@ export default function Affiliations() {
               className="af-item"
               style={{ maxWidth: 260, animationDelay: `${entryIndex * 70}ms` }}
             >
+              {[
+                { top: -5, left: -5 },
+                { top: -5, right: -5 },
+                { bottom: -5, left: -5 },
+                { bottom: -5, right: -5 },
+              ].map((tick, tickIndex) => (
+                <span
+                  key={tickIndex}
+                  aria-hidden="true"
+                  style={{
+                    position: "absolute",
+                    width: 10,
+                    height: 10,
+                    background: "#ffffff",
+                    border: "1px solid #98989c",
+                    boxSizing: "border-box",
+                    ...tick,
+                  }}
+                />
+              ))}
               <span
                 className="af-mark"
                 style={{

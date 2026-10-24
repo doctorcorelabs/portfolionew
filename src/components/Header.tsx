@@ -19,7 +19,29 @@ export default function Header() {
   return (
     <>
       <style>{`
-        .onlines-nav a:hover { color: ${BLUE}; }
+        /* Dotted-underline hover motif (site-wide 1px square-tile
+           motif): a repeating-gradient rule under each nav link
+           that draws left-to-right over 300ms on hover and on
+           keyboard focus. The wordmark and the fixed CTA are
+           untouched; only nav links carry this treatment. */
+        .onlines-nav a.hdr-nav-link {
+          background-image: repeating-linear-gradient(to right, ${BLUE} 0 1px, transparent 1px 4px);
+          background-size: 0% 1px;
+          background-repeat: no-repeat;
+          background-position: 0 100%;
+          padding-bottom: 3px;
+          transition: background-size 300ms ease, color 300ms ease;
+        }
+        .onlines-nav a.hdr-nav-link:hover,
+        .onlines-nav a.hdr-nav-link:focus-visible {
+          background-size: 100% 1px;
+          color: ${BLUE};
+        }
+        @media (prefers-reduced-motion: reduce) {
+          .onlines-nav a.hdr-nav-link {
+            transition: none;
+          }
+        }
         @media (max-width: 720px) {
           .onlines-nav { display: none; }
           .onlines-cta-spacer { display: none; }
@@ -71,6 +93,7 @@ export default function Header() {
               <Link
                 key={link.to}
                 to={link.to}
+                className="hdr-nav-link"
                 style={{
                   fontFamily: "'Inter', -apple-system, 'Segoe UI', Roboto, sans-serif",
                   fontSize: 15,

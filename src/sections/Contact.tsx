@@ -250,6 +250,41 @@ export default function Contact() {
             display: none;
           }
         }
+        /* Decorative cursor chip: one colored arrow only, no label
+           pill, so it cannot imply a person. It sits just right of
+           the mailto pill row, below the content wrapper (z-index
+           1), so it never covers text. Entrance reuses the section
+           inView state: fade plus 10px rise over 0.6s, then static
+           (no drift, no click behavior). */
+        .contact-cursor-chip {
+          position: absolute;
+          left: 42%;
+          top: 62%;
+          z-index: 0;
+          pointer-events: none;
+          opacity: 0;
+          transform: translateY(10px);
+          transition: opacity 0.6s ease, transform 0.6s ease;
+        }
+        .contact-mv-root.is-inview .contact-cursor-chip {
+          opacity: 1;
+          transform: translateY(0);
+        }
+        @media (max-width: 1200px) {
+          .contact-cursor-chip {
+            left: 62%;
+          }
+        }
+        @media (hover: none) {
+          .contact-cursor-chip {
+            display: none;
+          }
+        }
+        @media (prefers-reduced-motion: reduce) {
+          .contact-cursor-chip {
+            display: none;
+          }
+        }
       `}</style>
       <div aria-hidden="true" className="contact-dot-base" />
       <div
@@ -263,6 +298,22 @@ export default function Contact() {
       <div aria-hidden="true" className="contact-watermark">
         DL
       </div>
+      <span aria-hidden="true" className="contact-cursor-chip">
+        <svg
+          width="16"
+          height="20"
+          viewBox="0 0 14 18"
+          aria-hidden="true"
+          style={{ display: "block" }}
+        >
+          <path
+            d="M1 1 L1 16 L4.8 12.2 L7 16.8 L9.2 15.4 L7.2 11.2 L13 11.2 Z"
+            fill="#0859D4"
+            stroke="#ffffff"
+            strokeWidth="0.75"
+          />
+        </svg>
+      </span>
       <span
         aria-hidden="true"
         className="contact-pill"

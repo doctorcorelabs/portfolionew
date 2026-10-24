@@ -83,8 +83,22 @@ export default function Footer() {
             background-size: 100% 1px;
           }
         }
+        /* Dotted motif: 1px square tiles from a repeating gradient,
+           matching the section title rules elsewhere on the site. */
+        .footer-dotted-rule {
+          width: 160px;
+          height: 1px;
+          background-image: repeating-linear-gradient(to right, rgba(1, 1, 1, 0.55) 0 1px, transparent 1px 4px);
+          background-size: 4px 1px;
+          background-repeat: repeat-x;
+        }
       `}</style>
       <div style={styles.inner}>
+        <div
+          aria-hidden="true"
+          className="footer-mv-line footer-dotted-rule"
+          style={{ margin: "0 0 24px" }}
+        />
         <p className="footer-mv-line" style={{ ...styles.line, transitionDelay: "0ms" }}>
           DaivanLabs. - Research and healthcare tools from Indonesia. Code
           for Cure.
@@ -118,6 +132,23 @@ export default function Footer() {
           </a>
           <a href={INSTAGRAM} target="_blank" rel="noreferrer" style={styles.link} className="footer-mv-link">
             Instagram
+          </a>
+          <a
+            href="#top"
+            style={styles.link}
+            className="footer-mv-link"
+            onClick={(event) => {
+              event.preventDefault();
+              const reduced = window.matchMedia(
+                "(prefers-reduced-motion: reduce)",
+              ).matches;
+              window.scrollTo({
+                top: 0,
+                behavior: reduced ? "auto" : "smooth",
+              });
+            }}
+          >
+            Back to top
           </a>
         </nav>
       </div>

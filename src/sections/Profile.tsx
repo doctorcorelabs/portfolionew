@@ -18,7 +18,15 @@
  *   edges (the right knob rides the growing bar). The period after
  *   "builds" sits outside the highlight, as in the reference.
  * - The mailto link draws its underline on hover/focus (300ms).
+ * - Portrait card, hero-style: the photo (the user's own public
+ *   photo from the old site, optimized to public/profile.webp)
+ *   sits in a card framed like the hero selection box (1px dashed
+ *   border, 4 small 10px square handles at the corners), beside
+ *   the bio on desktop and stacked above it on mobile. Floating
+ *   fact chips carry only real recorded facts, never new numbers.
  * - prefers-reduced-motion: everything is shown instantly, no motion.
+ * - Explicit colors on all text: a global h1-h6 rule forces dark
+ *   #1D1D1F, so headings and values never rely on inheritance.
  */
 
 import { useEffect, useRef } from "react";
@@ -36,6 +44,43 @@ const ANCHORS: Array<{ label: string; value: string }> = [
   { label: "Old-site publications", value: "4" },
   { label: "Certifications", value: "20+" },
   { label: "Key roles", value: "8" },
+];
+
+/* Floating fact chips: only real recorded facts, decorative
+   duplicates of facts already shown on the site (aria-hidden,
+   pointer-events none). */
+const FACT_CHIPS: Array<{
+  text: string;
+  style: React.CSSProperties;
+  duration: number;
+  delay: number;
+}> = [
+  {
+    text: "GPA 3.91 / 4.0",
+    style: { top: -14, right: 16 },
+    duration: 9,
+    delay: 0,
+  },
+  {
+    text: "Most Outstanding Student UII 2025",
+    style: { bottom: 72, left: -14 },
+    duration: 11,
+    delay: 1.2,
+  },
+  {
+    text: "Beasiswa Unggulan 2023",
+    style: { bottom: -14, right: 24 },
+    duration: 13,
+    delay: 2.4,
+  },
+];
+
+/* 4 corner handles for the portrait selection frame. */
+const FRAME_HANDLES: Array<React.CSSProperties> = [
+  { top: -5, left: -5 },
+  { top: -5, right: -5 },
+  { bottom: -5, left: -5 },
+  { bottom: -5, right: -5 },
 ];
 
 const REVEAL_CSS = `
@@ -90,6 +135,60 @@ const REVEAL_CSS = `
   transform: translateY(-50%);
   z-index: 2;
 }
+.mvP-grid {
+  display: grid;
+  grid-template-columns: 300px 1fr;
+  gap: 48px;
+  align-items: start;
+}
+@media (max-width: 900px) {
+  .mvP-grid {
+    grid-template-columns: 1fr;
+  }
+}
+.mvP-frame {
+  position: relative;
+  border: 1px dashed rgba(18, 18, 19, 0.2);
+  padding: 16px;
+  background: #FFFFFF;
+  box-sizing: border-box;
+}
+.mvP-handle {
+  position: absolute;
+  width: 10px;
+  height: 10px;
+  background: #FFFFFF;
+  border: 1px solid #98989C;
+  box-sizing: border-box;
+  z-index: 1;
+}
+.mvP-chip {
+  position: absolute;
+  pointer-events: none;
+  white-space: nowrap;
+  font-family: 'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 11px;
+  letter-spacing: 0.04em;
+  color: #1D1D1F;
+  background: #FFFFFF;
+  border: 1px solid #E0E0E0;
+  border-radius: 999px;
+  padding: 5px 10px;
+  box-shadow: 0 2px 8px rgba(1, 1, 1, 0.06);
+  z-index: 1;
+  animation-name: mvP-float;
+  animation-timing-function: ease-in-out;
+  animation-iteration-count: infinite;
+}
+@keyframes mvP-float {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-8px); }
+}
+@media (hover: none) {
+  .mvP-chip {
+    display: none;
+  }
+}
 @media (prefers-reduced-motion: reduce) {
   .mvP-armed .mvP-reveal {
     opacity: 1 !important;
@@ -102,6 +201,10 @@ const REVEAL_CSS = `
   .mvP-highlight-bar {
     animation: none;
     width: 100%;
+  }
+  .mvP-chip {
+    display: none;
+    animation: none;
   }
 }
 `;
@@ -166,6 +269,7 @@ export default function Profile() {
             lineHeight: 1.02,
             letterSpacing: "-0.02em",
             fontWeight: 700,
+            color: "#010101",
             margin: "0 0 48px",
             maxWidth: 900,
           }}
@@ -188,10 +292,58 @@ export default function Profile() {
           </span>
           .
         </h2>
-        <div style={{ maxWidth: 680 }}>
+        <div className="mvP-grid">
+          <div className="mvP-reveal">
+            <div className="mvP-frame">
+              {FRAME_HANDLES.map((position, index) => (
+                <span
+                  key={index}
+                  aria-hidden="true"
+                  className="mvP-handle"
+                  style={position}
+                />
+              ))}
+              <img
+                src="/profile.webp"
+                alt="Portrait of Daivan Febri Juan Setiya, founder of DaivanLabs"
+                style={{ display: "block", width: "100%", height: "auto" }}
+              />
+              {FACT_CHIPS.map((chip) => (
+                <span
+                  key={chip.text}
+                  aria-hidden="true"
+                  className="mvP-chip"
+                  style={{
+                    ...chip.style,
+                    animationDuration: `${chip.duration}s`,
+                    animationDelay: `${chip.delay}s`,
+                  }}
+                >
+                  {chip.text}
+                </span>
+              ))}
+            </div>
+            <p
+              style={{
+                fontFamily: MONO,
+                fontSize: 12,
+                lineHeight: 1.7,
+                color: "#666666",
+                margin: "16px 0 0",
+              }}
+            >
+              Daivan Febri Juan Setiya - Founder, DaivanLabs
+            </p>
+          </div>
+          <div style={{ maxWidth: 680 }}>
           <p
             className="mvP-reveal"
-            style={{ fontSize: 18, lineHeight: 1.65, margin: "0 0 24px" }}
+            style={{
+              fontSize: 18,
+              lineHeight: 1.65,
+              color: "#010101",
+              margin: "0 0 24px",
+            }}
           >
             I am Daivan Febri Juan Setiya, a medical student and researcher
             in Indonesia. Guided by the principle{" "}
@@ -203,6 +355,7 @@ export default function Profile() {
             style={{
               fontSize: 18,
               lineHeight: 1.65,
+              color: "#010101",
               margin: "0 0 24px",
               transitionDelay: "80ms",
             }}
@@ -217,6 +370,7 @@ export default function Profile() {
             style={{
               fontSize: 18,
               lineHeight: 1.65,
+              color: "#010101",
               margin: "0 0 24px",
               transitionDelay: "160ms",
             }}
@@ -246,6 +400,7 @@ export default function Profile() {
               daivanfebrijuansetiya@gmail.com
             </a>
           </p>
+          </div>
         </div>
         <dl style={{ margin: "64px 0 0", padding: 0 }}>
           {ANCHORS.map((row, i) => (
@@ -277,6 +432,7 @@ export default function Profile() {
                   fontSize: 18,
                   fontWeight: 700,
                   letterSpacing: "-0.01em",
+                  color: "#010101",
                   margin: 0,
                 }}
               >

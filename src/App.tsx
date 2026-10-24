@@ -1,4 +1,4 @@
-import { lazy, Suspense, useEffect, useState } from "react";
+import { lazy, Suspense, useEffect, useRef, useState } from "react";
 import type { ComponentType } from "react";
 import { Route, Routes, useLocation } from "react-router-dom";
 import Header from "./components/Header";
@@ -76,6 +76,47 @@ export default function App() {
    * before the CanvasPage early return, so hook order stays stable. */
   const location = useLocation();
 
+  /* Reading-progress hairline: a fixed 2px bar at the very top of
+   * the viewport. Its scaleX is written straight to the element by
+   * a rAF-throttled scroll listener, so no React state changes per
+   * scroll frame. Fixed positioning means it never shifts layout,
+   * and pointer-events none means it never blocks clicks. */
+  const progressRef = useRef<HTMLDivElement | null>(null);
+
+  useEffect(() => {
+    const bar = progressRef.current;
+    if (!bar) return;
+    if (
+      window.matchMedia("(prefers-reduced-motion: reduce)").matches
+    ) {
+      return;
+    }
+    let ticking = false;
+    const update = () => {
+      ticking = false;
+      const max =
+        document.documentElement.scrollHeight - window.innerHeight;
+      const p =
+        max > 0
+          ? Math.min(1, Math.max(0, window.scrollY / max))
+          : 0;
+      bar.style.transform = `scaleX(${p})`;
+    };
+    const onScroll = () => {
+      if (!ticking) {
+        ticking = true;
+        requestAnimationFrame(update);
+      }
+    };
+    update();
+    window.addEventListener("scroll", onScroll, { passive: true });
+    window.addEventListener("resize", onScroll);
+    return () => {
+      window.removeEventListener("scroll", onScroll);
+      window.removeEventListener("resize", onScroll);
+    };
+  }, []);
+
   /* (d) Header shadow: the header sits in normal flow, so its wrapper
    * carries the shadow once the page is scrolled past 24px. The
    * wrapper adds no height or padding of its own. */
@@ -134,18 +175,39 @@ export default function App() {
   /* CANVAS_ROUTE_END */
 
   return (
-    <div>
-      {/* (a) Route-change fade keyframes and (c) smooth in-page anchor
-       * scrolling. Both are disabled under prefers-reduced-motion, and
-       * neither locks scrolling nor replaces the cursor. */}
+    <div id="top">
+      <div
+        aria-hidden="true"
+        ref={progressRef}
+        className="app-read-progress"
+      />
+      {/* (a) Route-change fade plus 8px rise keyframes and (c) smooth
+       * in-page anchor scrolling. Both are disabled under
+       * prefers-reduced-motion, and neither locks scrolling nor
+       * replaces the cursor. */}
       <style>{`
+        .app-read-progress {
+          position: fixed;
+          top: 0;
+          left: 0;
+          right: 0;
+          height: 2px;
+          background: #0859D4;
+          transform: scaleX(0);
+          transform-origin: left;
+          z-index: 100;
+          pointer-events: none;
+        }
+        @media (prefers-reduced-motion: reduce) {
+          .app-read-progress { display: none; }
+        }
         @media (prefers-reduced-motion: no-preference) {
           html { scroll-behavior: smooth; }
-          .app-route-fade { animation: app-route-fade 300ms ease-out; }
+          .app-route-fade { animation: app-route-fade 400ms cubic-bezier(0.22, 1, 0.36, 1); }
         }
         @keyframes app-route-fade {
-          from { opacity: 0; }
-          to { opacity: 1; }
+          from { opacity: 0; transform: translateY(8px); }
+          to { opacity: 1; transform: none; }
         }
       `}</style>
       <div
@@ -160,8 +222,8 @@ export default function App() {
       >
         <Header />
       </div>
-      {/* (a) Keyed by pathname so each route change replays the fade.
-       * Header and Footer sit outside, so they stay stable. */}
+      {/* (a) Keyed by pathname so each route change replays the fade
+       * and rise. Header and Footer sit outside, so they stay stable. */}
       <div key={location.pathname} className="app-route-fade">
         <Routes>
           <Route path="/" element={<HomePage />} />

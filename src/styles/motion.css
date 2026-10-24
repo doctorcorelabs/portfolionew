@@ -33,15 +33,6 @@
   }
 }
 
-@keyframes mv-marquee {
-  from {
-    transform: translateX(0);
-  }
-  to {
-    transform: translateX(-50%);
-  }
-}
-
 /* Faint graph grid fades in behind the hero. */
 @keyframes mv-grid-fade {
   from {
