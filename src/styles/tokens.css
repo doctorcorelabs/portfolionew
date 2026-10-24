@@ -1,0 +1,89 @@
+/* Design tokens for the DaivanLabs rebuild, direction MANUSKRIP. */
+/* Source: research/11-arah-visual.md section 2. Palette is locked. */
+/* Do not add a seventh color without revising that document. */
+
+:root {
+  /* Palette, exact values from the MANUSKRIP spec. */
+  --ink: #0A0A0A;
+  --paper: #FFFFFF;
+  --archive: #F2F2EF;
+  --graphite: #3C3C38;
+  --margin-grey: #6F6F68;
+  --hairline: #D8D8D0;
+  --red: #C8102E;
+
+  /* Contrast notes from the spec, kept for reference. */
+  /* Ink on Paper 19.8 to 1. Graphite on Paper 11.3 to 1. */
+  /* Evidence Red on Paper 5.9 to 1, for large text and key graphics. */
+  /* Margin Grey on Paper 5.0 to 1, supporting text 13px and up only. */
+
+  /* Spacing scale, 4px base. */
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-6: 24px;
+  --space-8: 32px;
+  --space-12: 48px;
+  --space-16: 64px;
+  --space-24: 96px;
+  --space-32: 128px;
+
+  /* Radius. A manuscript has no rounded corners. */
+  --radius-0: 0;
+  --radius-none: 0;
+  --radius: 0;
+
+  /* Hairline rules. */
+  --hairline-width: 1px;
+
+  /* Typography families, self-hosted via fontsource. */
+  --font-display: "Archivo", "Helvetica Neue", Arial, sans-serif;
+  --font-body: "Archivo", "Helvetica Neue", Arial, sans-serif;
+  --font-serif-accent: "Instrument Serif", Georgia, serif;
+  --font-mono: "IBM Plex Mono", "SFMono-Regular", Menlo, monospace;
+
+  /* Typography weights. */
+  --weight-regular: 400;
+  --weight-medium: 500;
+  --weight-extrabold: 800;
+  --weight-black: 900;
+
+  /* Typography sizes. */
+  --text-hero: clamp(72px, 16vw, 210px);
+  --text-section: clamp(44px, 7vw, 96px);
+  --text-body: 18px;
+  --text-body-small: 17px;
+  --text-caption: 15px;
+  --text-label: 13px;
+  --text-fig-label: 13px;
+
+  /* Typography rhythm. */
+  --leading-display: 0.92;
+  --leading-title: 1.02;
+  --leading-body: 1.65;
+  --tracking-display: -0.03em;
+  --tracking-display-tight: -0.045em;
+  --tracking-label: 0.08em;
+  --serif-accent-scale: 1.15;
+
+  /* Layout. */
+  --content-max: 1160px;
+  --measure: 56ch;
+  --journal-content: 7fr;
+  --journal-margin: 3fr;
+
+  /* Motion, initial values before DialKit tuning. */
+  --duration-micro: 160ms;
+  --duration-hover: 220ms;
+  --duration-reveal: 600ms;
+  --duration-page: 320ms;
+  --ease-out: cubic-bezier(0.22, 1, 0.36, 1);
+
+  /* Focus. */
+  --focus-width: 2px;
+  --focus-offset: 3px;
+
+  /* Evidence Red budget: under 3 percent of a viewport. */
+  /* It marks proof only, never decoration. */
+}

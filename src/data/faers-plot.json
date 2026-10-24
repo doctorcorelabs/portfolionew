@@ -1,0 +1,55 @@
+{
+  "source": "Poster ABST-000034 final (v3), cross-checked with the abstract and the 7-minute presentation script",
+  "verifiedDate": "2026-10-24",
+  "interpretationRules": [
+    "ROR measures disproportionality of reporting in FAERS, not clinical risk, incidence, or causality. FAERS analyses are hypothesis-generating.",
+    "Aprocitentan rows are sentinel and exploratory only, cohort n = 17."
+  ],
+  "rows": [
+    {
+      "status": "verified",
+      "drug": "Finerenone",
+      "outcome": "Endocrine adverse events",
+      "ror": 1.03,
+      "ciLow": 0.54,
+      "ciHigh": 1.99,
+      "cases": null,
+      "cohortN": 258,
+      "comparator": "Global background (all other reports in the analysis set)"
+    },
+    {
+      "status": "verified",
+      "drug": "Sacubitril/valsartan (ARNI)",
+      "outcome": "Orthostatic hypotension",
+      "ror": 6.06,
+      "ciLow": 5.06,
+      "ciHigh": 7.24,
+      "cases": null,
+      "cohortN": 1061,
+      "comparator": "Global background (all other reports in the analysis set)"
+    },
+    {
+      "status": "verified",
+      "drug": "Aprocitentan",
+      "outcome": "Peripheral edema",
+      "ror": 9.0,
+      "ciLow": 3.31,
+      "ciHigh": 24.46,
+      "cases": null,
+      "cohortN": 17,
+      "comparator": "Global background (all other reports in the analysis set)"
+    }
+  ],
+  "withheld": [
+    {
+      "drug": "Finerenone",
+      "outcome": "Hyperkalemia",
+      "reason": "No 95 percent CI in the available documents; manuscript Table 2 required."
+    },
+    {
+      "drug": "Sacubitril/valsartan (ARNI)",
+      "outcome": "Hyperkalemia",
+      "reason": "Poster-only value, no corroboration in abstract, script, or QA sheet; manuscript Table 2 required."
+    }
+  ]
+}

@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://daivanlabs.com/sitemap.xml

@@ -1,0 +1,288 @@
+* {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  margin: 0;
+  padding: 0;
+  font-family:
+    Inter,
+    -apple-system,
+    "Segoe UI",
+    Roboto,
+    sans-serif;
+  color: #1f2937;
+  background: #f3f4f6;
+}
+
+.app {
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+}
+
+.app-header {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 24px;
+  padding: 16px 20px;
+  background: #ffffff;
+  border-bottom: 1px solid #e5e7eb;
+}
+
+.app-header h1 {
+  margin: 0 0 4px;
+  font-size: 20px;
+}
+
+.app-header p {
+  margin: 0;
+  font-size: 14px;
+  color: #4b5563;
+  max-width: 640px;
+}
+
+.app-header-hint {
+  text-align: right;
+  font-size: 12px;
+  color: #6b7280;
+  max-width: 280px;
+}
+
+/* Canvas */
+
+.canvas-shell {
+  position: relative;
+  flex: 1;
+  overflow: hidden;
+  outline: none;
+}
+
+.canvas-shell[data-theme="light"] {
+  background: #fafaf5;
+}
+
+.canvas-shell[data-theme="dark"] {
+  background: #111827;
+}
+
+.canvas-world {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 1px;
+  height: 1px;
+  transform-origin: 0 0;
+}
+
+.canvas-item {
+  position: absolute;
+  left: 0;
+  top: 0;
+}
+
+.canvas-item-label-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  height: 28px;
+  margin-bottom: 4px;
+}
+
+.canvas-item-label {
+  appearance: none;
+  border: none;
+  background: transparent;
+  padding: 2px 4px;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  color: inherit;
+}
+
+.canvas-shell[data-theme="dark"] .canvas-item-label {
+  color: #f9fafb;
+}
+
+.canvas-item-label:focus-visible,
+.canvas-item-handle:focus-visible,
+.canvas-controls button:focus-visible,
+.canvas-controls select:focus-visible {
+  outline: 2px solid #2563eb;
+  outline-offset: 2px;
+}
+
+.canvas-item-handle {
+  appearance: none;
+  border: 1px solid #d1d5db;
+  background: #ffffff;
+  color: #374151;
+  border-radius: 6px;
+  padding: 2px 8px;
+  font-size: 11px;
+  cursor: grab;
+  touch-action: none;
+}
+
+.canvas-item-handle:active {
+  cursor: grabbing;
+}
+
+.canvas-item-preview {
+  border: 1px solid rgba(17, 24, 39, 0.12);
+  border-radius: 8px;
+  overflow: hidden;
+  background: #ffffff;
+}
+
+.canvas-controls {
+  position: absolute;
+  left: 12px;
+  top: 12px;
+  z-index: 10;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px;
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.92);
+  border: 1px solid #e5e7eb;
+  box-shadow: 0 4px 16px rgba(15, 23, 42, 0.08);
+}
+
+.canvas-controls button,
+.canvas-controls select {
+  appearance: none;
+  border: 1px solid #d1d5db;
+  background: #ffffff;
+  border-radius: 6px;
+  padding: 4px 10px;
+  font-size: 13px;
+  cursor: pointer;
+}
+
+.canvas-controls .canvas-zoom-readout {
+  min-width: 48px;
+  text-align: center;
+  font-size: 13px;
+  font-variant-numeric: tabular-nums;
+  color: #374151;
+}
+
+.canvas-copied-toast {
+  position: absolute;
+  left: 12px;
+  bottom: 12px;
+  z-index: 10;
+  padding: 6px 12px;
+  border-radius: 8px;
+  background: #111827;
+  color: #f9fafb;
+  font-size: 13px;
+}
+
+/* Contoh kartu biasa (bukan DialKit) */
+
+.plain-card {
+  padding: 20px;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.plain-card h3 {
+  margin: 0;
+  font-size: 17px;
+}
+
+.plain-card p {
+  margin: 0;
+  font-size: 14px;
+  line-height: 1.5;
+  color: #4b5563;
+}
+
+.plain-card .plain-card-price {
+  font-size: 28px;
+  font-weight: 700;
+  color: #111827;
+}
+
+.plain-card button {
+  margin-top: auto;
+  align-self: flex-start;
+  border: none;
+  border-radius: 8px;
+  background: #2563eb;
+  color: #ffffff;
+  padding: 8px 14px;
+  font-size: 14px;
+  cursor: pointer;
+}
+
+.stat-card {
+  padding: 20px;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.stat-card .stat-value {
+  font-size: 40px;
+  font-weight: 800;
+  color: #0f766e;
+}
+
+.stat-card .stat-label {
+  font-size: 13px;
+  color: #6b7280;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+/* Kartu yang di-tune pakai DialKit */
+
+.dial-card {
+  height: 100%;
+  background: #ffffff;
+  display: flex;
+  flex-direction: column;
+}
+
+.dial-card h3 {
+  margin: 0;
+  font-size: 17px;
+}
+
+.dial-card p {
+  margin: 0;
+  font-size: 14px;
+  line-height: 1.5;
+  color: #4b5563;
+}
+
+.dial-card .dial-card-chip {
+  border-radius: 999px;
+  padding: 6px 10px;
+  font-size: 12px;
+  font-weight: 600;
+  color: #ffffff;
+}
+
+.dial-card .dial-card-values {
+  margin-top: auto;
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 11px;
+  line-height: 1.6;
+  color: #374151;
+  background: #f9fafb;
+  border: 1px dashed #d1d5db;
+  border-radius: 8px;
+  padding: 8px 10px;
+  white-space: pre-wrap;
+  word-break: break-word;
+}

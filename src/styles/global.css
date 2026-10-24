@@ -1,0 +1,183 @@
+/* Global styles for the DaivanLabs rebuild, direction MANUSKRIP. */
+/* Self-hosted fonts only. No font is loaded from an external CDN. */
+
+/* Fontsource imports must stay first in this file. */
+@import "@fontsource/archivo/400.css";
+@import "@fontsource/archivo/500.css";
+@import "@fontsource/archivo/800.css";
+@import "@fontsource/archivo/900.css";
+@import "@fontsource/instrument-serif/400.css";
+@import "@fontsource/instrument-serif/400-italic.css";
+@import "@fontsource/ibm-plex-mono/400.css";
+@import "@fontsource/ibm-plex-mono/500.css";
+@import "./tokens.css";
+
+/* Light reset. */
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  margin: 0;
+  background: var(--paper);
+  color: var(--ink);
+  font-family: var(--font-body);
+  font-size: var(--text-body);
+  font-weight: var(--weight-regular);
+  line-height: var(--leading-body);
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  margin: 0;
+  color: var(--ink);
+  font-family: var(--font-display);
+  font-weight: var(--weight-extrabold);
+  letter-spacing: var(--tracking-display);
+  line-height: var(--leading-title);
+}
+
+p {
+  margin: 0;
+  max-width: var(--measure);
+}
+
+a {
+  color: var(--ink);
+  text-decoration-color: var(--hairline);
+  text-underline-offset: 3px;
+}
+
+a:hover {
+  color: var(--red);
+  text-decoration-color: var(--red);
+}
+
+img,
+svg {
+  display: block;
+  max-width: 100%;
+}
+
+button {
+  font: inherit;
+}
+
+/* Hero title: one giant word, Archivo 900, never rounded, never shaded. */
+.hero-title {
+  font-family: var(--font-display);
+  font-size: var(--text-hero);
+  font-weight: var(--weight-black);
+  letter-spacing: var(--tracking-display);
+  line-height: var(--leading-display);
+}
+
+/* Section title, same display family at a smaller poster scale. */
+.section-title {
+  font-family: var(--font-display);
+  font-size: var(--text-section);
+  font-weight: var(--weight-black);
+  letter-spacing: var(--tracking-display);
+  line-height: var(--leading-title);
+}
+
+/* Serif accent: italic only, used for at most one phrase per giant title. */
+.serif-accent {
+  font-family: var(--font-serif-accent);
+  font-size: calc(1em * var(--serif-accent-scale));
+  font-style: italic;
+  font-weight: var(--weight-regular);
+}
+
+/* FIG label: mono, uppercase, margin grey, as in the MANUSKRIP spec. */
+.fig-label {
+  color: var(--margin-grey);
+  font-family: var(--font-mono);
+  font-size: var(--text-fig-label);
+  font-weight: var(--weight-medium);
+  letter-spacing: var(--tracking-label);
+  text-transform: uppercase;
+}
+
+/* Generic mono label for metadata, citations, axis labels, and captions. */
+.mono-label {
+  color: var(--margin-grey);
+  font-family: var(--font-mono);
+  font-size: var(--text-label);
+  font-weight: var(--weight-medium);
+  letter-spacing: var(--tracking-label);
+  text-transform: uppercase;
+}
+
+/* Margin note: mono 13px in margin grey, per the journal grid motif. */
+.margin-note {
+  color: var(--margin-grey);
+  font-family: var(--font-mono);
+  font-size: var(--text-label);
+  font-weight: var(--weight-regular);
+  line-height: 1.5;
+}
+
+/* Section divider: one full width hairline plus its label, no color band. */
+.hairline-divider {
+  border: 0;
+  border-top: var(--hairline-width) solid var(--hairline);
+  margin: 0;
+  width: 100%;
+}
+
+/* Secondary text in graphite, captions in the same family. */
+.text-secondary {
+  color: var(--graphite);
+}
+
+.caption {
+  color: var(--graphite);
+  font-size: var(--text-caption);
+}
+
+/* Archive panel: the only alternating section background allowed. */
+.archive-panel {
+  background: var(--archive);
+}
+
+/* Focus must stay visible and must use the single accent color. */
+:focus-visible {
+  outline: var(--focus-width) solid var(--red);
+  outline-offset: var(--focus-offset);
+}
+
+::selection {
+  background: var(--archive);
+  color: var(--ink);
+}
+
+/* Reduced motion: every animation and transition stops, and the */
+/* final state shows at once. No curve draw, no count up, no marquee. */
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-delay: 0ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    transition-delay: 0ms !important;
+  }
+}

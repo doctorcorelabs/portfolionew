@@ -1,0 +1,90 @@
+/* Styles owned by the routing agent: breadcrumb, research detail pages,
+   the not-found page, and the homepage loading and placeholder states.
+   Section components bring their own styles and are not restyled here. */
+
+.page-loading {
+  padding: 48px 24px;
+  font-family: var(--font-mono);
+  font-size: 13px;
+  color: var(--margin-grey);
+}
+
+.home-placeholder {
+  padding: 64px 24px;
+  border-top: 1px solid var(--hairline);
+}
+
+.home-placeholder p {
+  max-width: 56ch;
+  color: var(--graphite);
+}
+
+.breadcrumb {
+  font-family: var(--font-mono);
+  font-size: 13px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--margin-grey);
+}
+
+.breadcrumb a {
+  color: var(--margin-grey);
+  text-decoration: none;
+}
+
+.breadcrumb a:hover {
+  color: var(--red);
+}
+
+.research-detail {
+  padding: 48px 0 96px;
+}
+
+.research-detail h1 {
+  font-family: var(--font-display);
+  font-weight: 800;
+  letter-spacing: -0.03em;
+  line-height: 1.02;
+  font-size: clamp(36px, 6vw, 72px);
+  margin: 16px 0;
+}
+
+.research-detail h2 {
+  font-family: var(--font-display);
+  font-size: 28px;
+  margin: 48px 0 12px;
+  padding-top: 24px;
+  border-top: 1px solid var(--hairline);
+}
+
+.research-detail p,
+.research-detail li {
+  max-width: 62ch;
+  color: var(--graphite);
+}
+
+.research-detail ul {
+  padding-left: 20px;
+}
+
+.research-meta {
+  font-family: var(--font-mono);
+  font-size: 13px;
+  color: var(--margin-grey);
+}
+
+.research-links {
+  list-style: none;
+  padding-left: 0;
+}
+
+.not-found {
+  padding: 96px 24px;
+}
+
+.not-found h1 {
+  font-family: var(--font-display);
+  font-size: clamp(48px, 10vw, 120px);
+  line-height: 0.95;
+  margin: 0 0 16px;
+}

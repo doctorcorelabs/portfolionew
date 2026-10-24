@@ -1,0 +1,152 @@
+{
+  "name": "projects/990638472795320411",
+  "title": "DaivanLabs Portfolio Rebuild",
+  "deviceType": "DESKTOP",
+  "designTheme": {
+    "colorMode": "LIGHT",
+    "font": "NEWSREADER",
+    "customColor": "#161614",
+    "headlineFont": "NEWSREADER",
+    "bodyFont": "NEWSREADER",
+    "labelFont": "SPACE_MONO",
+    "namedColors": {
+      "primary_fixed": "#e5e2de",
+      "tertiary": "#000000",
+      "on_background": "#1b1c1a",
+      "on_tertiary_container": "#858480",
+      "on_primary_fixed": "#1c1c1a",
+      "surface_dim": "#dbdad7",
+      "tertiary_container": "#1c1c19",
+      "on_secondary_fixed_variant": "#93000f",
+      "inverse_surface": "#2f312f",
+      "inverse_primary": "#c9c6c2",
+      "on_primary_container": "#858480",
+      "tertiary_fixed_dim": "#c8c6c1",
+      "on_secondary_fixed": "#410003",
+      "on_tertiary": "#ffffff",
+      "error": "#ba1a1a",
+      "secondary_fixed": "#ffdad6",
+      "on_tertiary_fixed_variant": "#474743",
+      "on_primary_fixed_variant": "#474744",
+      "on_secondary_container": "#fffbff",
+      "surface_tint": "#5f5e5b",
+      "secondary_fixed_dim": "#ffb4ac",
+      "inverse_on_surface": "#f2f1ee",
+      "surface_bright": "#faf9f6",
+      "tertiary_fixed": "#e5e2dd",
+      "primary_container": "#1c1c1a",
+      "surface": "#faf9f6",
+      "primary": "#000000",
+      "surface_container_highest": "#e3e2df",
+      "on_error": "#ffffff",
+      "surface_container_high": "#e9e8e5",
+      "surface_container_lowest": "#ffffff",
+      "on_surface_variant": "#474741",
+      "on_secondary": "#ffffff",
+      "primary_fixed_dim": "#c9c6c2",
+      "outline": "#787770",
+      "on_error_container": "#93000a",
+      "on_surface": "#1b1c1a",
+      "surface_variant": "#e3e2df",
+      "surface_container_low": "#f4f3f0",
+      "secondary": "#b51a1e",
+      "surface_container": "#efeeeb",
+      "on_tertiary_fixed": "#1c1c19",
+      "on_primary": "#ffffff",
+      "error_container": "#ffdad6",
+      "outline_variant": "#c8c7bf",
+      "background": "#faf9f6",
+      "secondary_container": "#d93633"
+    },
+    "designMd": "---\nname: Archival Research Press\ncolors:\n  surface: '#faf9f6'\n  surface-dim: '#dbdad7'\n  surface-bright: '#faf9f6'\n  surface-container-lowest: '#ffffff'\n  surface-container-low: '#f4f3f0'\n  surface-container: '#efeeeb'\n  surface-container-high: '#e9e8e5'\n  surface-container-highest: '#e3e2df'\n  on-surface: '#1b1c1a'\n  on-surface-variant: '#474741'\n  inverse-surface: '#2f312f'\n  inverse-on-surface: '#f2f1ee'\n  outline: '#787770'\n  outline-variant: '#c8c7bf'\n  surface-tint: '#5f5e5b'\n  primary: '#000000'\n  on-primary: '#ffffff'\n  primary-container: '#1c1c1a'\n  on-primary-container: '#858480'\n  inverse-primary: '#c9c6c2'\n  secondary: '#b51a1e'\n  on-secondary: '#ffffff'\n  secondary-container: '#d93633'\n  on-secondary-container: '#fffbff'\n  tertiary: '#000000'\n  on-tertiary: '#ffffff'\n  tertiary-container: '#1c1c19'\n  on-tertiary-container: '#858480'\n  error: '#ba1a1a'\n  on-error: '#ffffff'\n  error-container: '#ffdad6'\n  on-error-container: '#93000a'\n  primary-fixed: '#e5e2de'\n  primary-fixed-dim: '#c9c6c2'\n  on-primary-fixed: '#1c1c1a'\n  on-primary-fixed-variant: '#474744'\n  secondary-fixed: '#ffdad6'\n  secondary-fixed-dim: '#ffb4ac'\n  on-secondary-fixed: '#410003'\n  on-secondary-fixed-variant: '#93000f'\n  tertiary-fixed: '#e5e2dd'\n  tertiary-fixed-dim: '#c8c6c1'\n  on-tertiary-fixed: '#1c1c19'\n  on-tertiary-fixed-variant: '#474743'\n  background: '#faf9f6'\n  on-background: '#1b1c1a'\n  surface-variant: '#e3e2df'\ntypography:\n  display-hero:\n    fontFamily: Newsreader\n    fontSize: 56px\n    fontWeight: '400'\n    lineHeight: 64px\n    letterSpacing: -0.02em\n  display-hero-mobile:\n    fontFamily: Newsreader\n    fontSize: 36px\n    fontWeight: '400'\n    lineHeight: 44px\n    letterSpacing: -0.015em\n  headline-lg:\n    fontFamily: Newsreader\n    fontSize: 32px\n    fontWeight: '400'\n    lineHeight: 40px\n    letterSpacing: -0.01em\n  headline-md:\n    fontFamily: Newsreader\n    fontSize: 24px\n    fontWeight: '500'\n    lineHeight: 32px\n    letterSpacing: -0.005em\n  body-lg:\n    fontFamily: Newsreader\n    fontSize: 19px\n    fontWeight: '400'\n    lineHeight: 30px\n  body-md:\n    fontFamily: Newsreader\n    fontSize: 16px\n    fontWeight: '400'\n    lineHeight: 26px\n  body-sm:\n    fontFamily: Newsreader\n    fontSize: 14px\n    fontWeight: '400'\n    lineHeight: 22px\n  label-lg:\n    fontFamily: Space Mono\n    fontSize: 13px\n    fontWeight: '700'\n    lineHeight: 18px\n    letterSpacing: 0.04em\n  label-md:\n    fontFamily: Space Mono\n    fontSize: 11px\n    fontWeight: '400'\n    lineHeight: 16px\n    letterSpacing: 0.05em\n  label-sm:\n    fontFamily: Space Mono\n    fontSize: 10px\n    fontWeight: '400'\n    lineHeight: 14px\n    letterSpacing: 0.06em\nspacing:\n  gutter: 2rem\n  gutter-mobile: 1rem\n  margin: 4rem\n  margin-mobile: 1.25rem\n  space-xs: 0.25rem\n  space-sm: 0.5rem\n  space-md: 1rem\n  space-lg: 1.5rem\n  space-xl: 3rem\n---\n\n## Brand & Style\n\nThis design system embodies the rigor, permanence, and intellectual weight of academic publishing houses, high-impact clinical journals, and archival research monographs. It rejects the disposable, plastic uniformity of conventional SaaS dashboards in favor of an exacting editorial posture: generous archival white margins, tactile ink-on-paper contrast, and precise mathematical documentation.\n\nThe aesthetic fuses classical literary typography with Swiss modernist information design. It evokes the feeling of reviewing an original, peer-reviewed clinical trial manuscript or an archival portfolio printed on uncoated 120gsm rag paper. Negative space functions as an active structural element, imparting clarity, authority, and calm deliberation to complex scientific visualisations.\n\n## Colors\n\nThe palette is strictly restrained, modeled on physical printing and annotation media:\n\n- **Archival Ground (Canvas & Paper Base):** Pure background surfaces use an off-white warm archival paper tone (`#FBFBFA`), transitioning to a subtle natural rag substrate (`#F6F5F2`) for quiet structural differentiation.\n- **Sumi Ink (Primary):** Typography and fundamental graphic linework utilize deep, pigment-dense sumi black ink (`#161614` down to `#111111`), delivering authoritative contrast without the harsh artificial glare of digital `#000000`.\n- **Vermilion / Crimson Evidence (Secondary):** A razor-sharp, vibrant archival red (`#C92A2A`) is deployed sparingly and deliberately. It is reserved exclusively for primary critical data paths—such as the stepped Kaplan-Meier survival curves, statistical significance flags ($p < 0.001$), active hazard markers, and crucial navigational anchors.\n- **Pencil Graphite & Muted Annotation (Tertiary):** Mid-tone graphite values (`#767571` and secondary wash `#9E9D99`) govern structural axes, grid ticks, confidence interval bands, figure captions, and marginalia.\n- **Rule Lines:** Subtle rule divisions use a pale ink wash (`#E5E3DC`) to preserve clear structure without creating visual density.\n\n## Typography\n\nTypography establishes tension between the literary elegance of scholarly prose and the unyielding technical precision of scientific instruments.\n\n- **Primary & Editorial Text (Newsreader):** Used for titles, study abstracts, continuous prose, pull quotes, and narrative discourse. It possesses optical master sizing, sculpted serifs, and high-contrast letterforms that provide exceptional legibility on pale paper substrates.\n- **Instrument & Data Text (Space Mono):** Used for data tables, axis ticks, figure indices (`FIG. 04A`), statistical confidence metrics, DOI notations, timestamps, and metadata tags. Monospaced clarity ensures numerical comparisons align with zero visual ambiguity.\n- **Italics:** Strict reserve for Latin nomenclature, volume references, and hypothesis statements. Avoid synthetic italics or decorative pseudo-calligraphy.\n\n## Layout & Spacing\n\nThe layout is grounded in classical editorial asymmetric grid systems, evoking the broadsheet layout of an archival scientific report:\n\n- **Grid Architecture:** Desktop displays utilize a 12-column asymmetric fluid grid structured around a wide reading column (columns 3–10) flanked by a dedicated marginalia/annotation gutter (columns 11–12) for footnotes, data keys, and figure callouts.\n- **Negative Space:** Space is treated as physical paper margins. Rather than crowding content into compact boxed containers, elements breathe freely with generous vertical padding between sections.\n- **Responsive Adaptations:**\n  - *Desktop (≥1024px):* Full 12-column spread with independent marginalia columns and wide side margins (`4rem`).\n  - *Tablet (768px–1023px):* 8-column layout. Marginal annotations fold immediately below primary visual figures as standard footnote rows.\n  - *Mobile (<768px):* Single-column sequential stream. Margins compress to `1.25rem`, with data figures scaling down to preserve stepped vector line fidelity without horizontal scrollbars.\n\n## Elevation & Depth\n\nThis design system deliberately omits dropshadows, blurred backdrops, and artificial layering:\n\n- **Zero Ambient Shadows:** To uphold the authentic presence of flat printed archival paper, drop shadows are strictly forbidden (`box-shadow: none`).\n- **Surface Elevation via Tone:** Depth and layering are communicated exclusively through subtle shifts in paper tone. An inset panel, interactive code block, or focal callout adopts the slightly warmer, denser background `#F6F5F2` against the canvas `#FBFBFA`.\n- **Delicate Rules & Hairlines:** Sections and figure boundaries are demarcated by single-pixel horizontal borders (`1px solid #E5E3DC` or `#767571` for primary divisions).\n- **Z-Index Hierarchy:** Floating or modal elements (such as methodology footnotes or full-screen chart expansions) present flat, opaque parchment panels with razor-thin sumi ink outer rules (`1px solid #161614`).\n\n## Shapes\n\nThe shape system is strictly architectural and paper-cut:\n\n- **Sharp Corners (`roundedness: 0`):** Every card, button, tag, table container, and chart boundary features unrounded, orthogonal 90-degree corners (`border-radius: 0px`).\n- **Precision Framing:** Borders serve as physical print registration marks and structural rules rather than soft, pill-shaped UI wrappers.\n- **Form Controls:** Checkboxes, interactive toggle buttons, and data filters adhere strictly to crisp square profiles.\n\n## Components\n\n### Buttons & Interactive Links\n- **Primary Action:** Solid Sumi black rectangle (`#161614`), crisp `0px` radius, filled with white monospaced uppercase typography (`Space Mono`, `11px`, `0.05em` letter spacing). On hover, shifts instantly to Vermilion (`#C92A2A`) without gradual transition or ease-in delays.\n- **Secondary / Archival Link:** Unfilled, accompanied by a trailing hairline glyph (`→` or superscript index `[1]`), underlined with a subtle `1px` border offset by `3px`. Hover activates the Vermilion accent.\n\n### Kaplan-Meier Survival Curves & Data Visualizations\n- **Stepped Curve Line:** Primary cohort line is rendered as a clean `2px` stepped stroke in `#C92A2A`. Secondary control cohorts are delineated with a `1.5px` stroke in graphite `#767571` or `#161614` dashed patterns.\n- **Censor Ticks:** Vertical tick marks (`1px` width, `6px` height) denoting right-censored patients, positioned directly along step horizontal lines.\n- **Axes & Grids:** Hairline strokes (`1px`, `#E5E3DC`) paired with `Space Mono` labels at tick intervals. Confidence bands appear as semi-transparent vermilion or charcoal washes (`rgba(201, 42, 42, 0.08)`).\n- **Risk Table:** Monospaced table placed directly below the time axis detailing Numbers at Risk ($N$) aligned exactly to corresponding temporal tick marks.\n\n### Figures & Cards (Non-SaaS)\n- **Archival Plates:** Replaces traditional SaaS elevated cards. Encased in a `1px solid #E5E3DC` hairline with optional paper substrate fill (`#F6F5F2`).\n- **Figure Header:** Always includes a formal academic label top-left (e.g., `FIG. 02B // OVERALL SURVIVAL`) in monospaced caps, balanced with study methodology or sample sizes top-right.\n\n### Form Inputs & Selectors\n- **Input Fields:** Crisp bottom-border-only or hairline four-sided framing (`1px solid #9E9D99`), background transparent. Focus state tightens to `1px solid #161614` with zero ambient halo rings.\n- **Checkboxes & Radios:** Sharp square indicators (`14px × 14px`), with an inner solid square indicator in `#C92A2A` when active.\n\n### Footnotes & Annotations\n- **Marginalia:** Small, hyper-legible textual annotations (`Space Mono`, `10px`, `#767571`) keyed to superscript numerals (`¹`, `²`) throughout the body text.\n- **Archival Colophon / Footer:** Clean horizontal rule separating main study findings from researcher credentials, funding grants, institutional affiliations, and publication stamps.",
+    "colorVariant": "FIDELITY",
+    "overridePrimaryColor": "#161614",
+    "overrideSecondaryColor": "#c92a2a",
+    "overrideTertiaryColor": "#767571",
+    "overrideNeutralColor": "#f6f5f2",
+    "spacingScale": 2,
+    "typography": {
+      "display-hero": {
+        "fontFamily": "Newsreader",
+        "fontSize": "56px",
+        "fontWeight": "400",
+        "lineHeight": "64px",
+        "letterSpacing": "-0.02em"
+      },
+      "headline-lg": {
+        "fontFamily": "Newsreader",
+        "fontSize": "32px",
+        "fontWeight": "400",
+        "lineHeight": "40px",
+        "letterSpacing": "-0.01em"
+      },
+      "body-md": {
+        "fontFamily": "Newsreader",
+        "fontSize": "16px",
+        "fontWeight": "400",
+        "lineHeight": "26px"
+      },
+      "label-lg": {
+        "fontFamily": "Space Mono",
+        "fontSize": "13px",
+        "fontWeight": "700",
+        "lineHeight": "18px",
+        "letterSpacing": "0.04em"
+      },
+      "display-hero-mobile": {
+        "fontFamily": "Newsreader",
+        "fontSize": "36px",
+        "fontWeight": "400",
+        "lineHeight": "44px",
+        "letterSpacing": "-0.015em"
+      },
+      "label-md": {
+        "fontFamily": "Space Mono",
+        "fontSize": "11px",
+        "fontWeight": "400",
+        "lineHeight": "16px",
+        "letterSpacing": "0.05em"
+      },
+      "body-lg": {
+        "fontFamily": "Newsreader",
+        "fontSize": "19px",
+        "fontWeight": "400",
+        "lineHeight": "30px"
+      },
+      "body-sm": {
+        "fontFamily": "Newsreader",
+        "fontSize": "14px",
+        "fontWeight": "400",
+        "lineHeight": "22px"
+      },
+      "label-sm": {
+        "fontFamily": "Space Mono",
+        "fontSize": "10px",
+        "fontWeight": "400",
+        "lineHeight": "14px",
+        "letterSpacing": "0.06em"
+      },
+      "headline-md": {
+        "fontFamily": "Newsreader",
+        "fontSize": "24px",
+        "fontWeight": "500",
+        "lineHeight": "32px",
+        "letterSpacing": "-0.005em"
+      }
+    },
+    "spacing": {
+      "gutter": "2rem",
+      "space-xl": "3rem",
+      "margin": "4rem",
+      "gutter-mobile": "1rem",
+      "space-md": "1rem",
+      "space-lg": "1.5rem",
+      "margin-mobile": "1.25rem",
+      "space-sm": "0.5rem",
+      "space-xs": "0.25rem"
+    },
+    "headlineFontFamily": "Newsreader",
+    "bodyFontFamily": "Newsreader",
+    "labelFontFamily": "Space Mono"
+  }
+}
