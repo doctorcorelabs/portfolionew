@@ -7,7 +7,7 @@
    ScienceDirect) comes from the user's own 24 Oct request, not from
    CV.md, and is framed here as search tools, not indexing claims. */
 
-import { DbChip } from "./DbChips";
+import { LogoTile } from "./LogoTiles";
 
 const DISPLAY_FONT = "'Inter Display', Inter, Arial, sans-serif";
 const MONO_FONT =
@@ -34,7 +34,7 @@ export function DbStackCard() {
     >
       <p
         style={{
-          margin: "0 0 12px",
+          margin: "0 0 8px",
           fontFamily: MONO_FONT,
           fontSize: 10,
           letterSpacing: "0.12em",
@@ -49,13 +49,13 @@ export function DbStackCard() {
           display: "flex",
           flexWrap: "wrap",
           gap: 8,
-          margin: "0 0 12px",
+          margin: "0 0 8px",
         }}
       >
-        <DbChip name="PubMed" />
-        <DbChip name="Elsevier" />
-        <DbChip name="Scopus" />
-        <DbChip name="ScienceDirect" />
+        <LogoTile brand="pubmed" />
+        <LogoTile brand="elsevier" />
+        <LogoTile brand="scopus" />
+        <LogoTile brand="sciencedirect" />
       </div>
       <p
         style={{

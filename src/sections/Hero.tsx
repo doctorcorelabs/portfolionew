@@ -49,7 +49,6 @@ import ReviewCard from "../components/hero-collage/ReviewCard";
 import PosterCard from "../components/hero-collage/PosterCard";
 import AwardsCard from "../components/hero-collage/AwardsCard";
 import StrokeCard from "../components/hero-collage/StrokeCard";
-import PhotoCard from "../components/hero-collage/PhotoCard";
 import DnaHelix from "../components/hero-collage/DnaHelix";
 import SearchWindow from "../components/hero-v8/SearchWindow";
 import PosterWindow from "../components/hero-v8/PosterWindow";
@@ -138,10 +137,10 @@ const FACT_PILLS: Array<{
   },
 ];
 
-/* Hero collage (decorative only, never content): 17 research mockups
- * scattered around the giant word at the periphery. The 9 v7 cards
- * keep their positions; 8 v8 mockups join them (2 windows, 2 photos,
- * 1 dark database card, 1 bubble, 1 chip row, 1 sticker row). All
+/* Hero collage (decorative only, never content): 15 research mockups
+ * scattered around the giant word at the periphery. The 8 v7 cards
+ * keep their positions; 7 v8 mockups join them (2 windows, 2 photos,
+ * 1 dark database card, 1 bubble, 1 sticker row). All
  * positions sit in the top and bottom bands of the hero, and never
  * over the centered label or the word center point. The faint helix
  * motif may tuck under the frame edge on mid-height stages, and the
@@ -156,7 +155,7 @@ const FACT_PILLS: Array<{
  * DOM order is paint order inside the layer: cards first, windows
  * above cards, dark cards above light cards they overlap, stickers
  * last and topmost. On narrow screens the layer drops into a static
- * stack below the word showing only FaersCard, PhotoCard,
+ * stack below the word showing only FaersCard,
  * NotifyBubble, and DbStackCard, in that order, tilts zeroed and
  * floats off. */
 const COLLAGE_ITEMS: Array<{
@@ -174,7 +173,6 @@ const COLLAGE_ITEMS: Array<{
   { id: "poster", Card: PosterCard, style: { right: "2.5%", top: "2%" }, floatDuration: 13, floatDelay: 0.2, hideClass: "mv-collage-mobile-hide mv-collage-hide-min-1400", tiltClass: "mv-tilt-card-c" },
   { id: "faers", Card: FaersCard, style: { left: "2.5%", bottom: "4%" }, floatDuration: 12, floatDelay: 1.4, hideClass: "", tiltClass: "mv-tilt-card-b" },
   { id: "gutaxis", Card: GutAxisCard, style: { left: "25%", bottom: "3%", width: 230 }, floatDuration: 16, floatDelay: 0.6, hideClass: "mv-collage-mobile-hide mv-collage-hide-1400", tiltClass: "mv-tilt-card-a" },
-  { id: "photo", Card: PhotoCard, style: { left: "calc(50% - 110px)", bottom: "3%", width: 220 }, floatDuration: 10, floatDelay: 1.0, hideClass: "", tiltClass: "mv-tilt-card-d" },
   { id: "awards", Card: AwardsCard, style: { right: "25%", bottom: "4%" }, floatDuration: 15, floatDelay: 0.3, hideClass: "mv-collage-hide-mid mv-collage-mobile-hide mv-collage-hide-min-1400", tiltClass: "mv-tilt-card-c" },
   { id: "stroke", Card: StrokeCard, style: { right: "2.5%", bottom: "5%" }, floatDuration: 9, floatDelay: 1.6, hideClass: "mv-collage-mobile-hide", tiltClass: "mv-tilt-card-b" },
   { id: "search", Card: SearchWindow, style: { left: "36%", top: "2%" }, floatDuration: 12, floatDelay: 0.6, hideClass: "mv-collage-hide-1400", tiltClass: "mv-tilt-window-b" },
