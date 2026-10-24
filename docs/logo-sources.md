@@ -1,9 +1,16 @@
-# Logo sources - v9 real database logos
+# Logo sources - real database logos
 
-All four files below are the brands' real logo artwork, downloaded from public
-sources. Nothing here was redrawn, retyped, or typeset by us. Normalization was
-limited to format conversion (JPG/SVG to PNG), resolution, and trimming of
-transparent padding on the Elsevier file. Colors and proportions are unchanged.
+The four files currently shipped below are the brands' real logo artwork,
+downloaded from public sources. Nothing here was redrawn, retyped, or
+typeset by us. Normalization was limited to format conversion (JPG/SVG to
+PNG), resolution, and trimming of transparent padding on the Elsevier file.
+Colors and proportions are unchanged.
+
+Note on history: the v9 and v10 hero docs (docs/hero-v9/, docs/hero-v10/)
+describe the earlier arrangement, which shipped ScienceDirect instead of
+Cochrane. Those docs are historical records and were deliberately not
+rewritten. This file is the current provenance record: Cochrane is shipped,
+ScienceDirect is removed.
 
 ## PubMed
 
@@ -48,57 +55,52 @@ transparent padding on the Elsevier file. Colors and proportions are unchanged.
   SVG, not a downloadable image file. The library-hosted vector of the
   official artwork was therefore used, and its content was verified visually.
 
-## ScienceDirect
+## Cochrane
 
-- File: `public/logos/sciencedirect.png` (729 x 90, RGB on white, 38 KB)
-- Source: Elsevier's own ScienceDirect toolkit page
-  https://www.elsevier.com/en-au/librarian/promote-library-resources/toolkit-sciencedirect,
-  whose Logo download resolves to
-  https://images.ctfassets.net/o78em1y1w4i4/GWC8bFpqraM97YtVIXsIy/9b7d32d7210a3927c6585b82d8c19fe9/ScienceDirect-Librarian-Promo-Toolkit_Logo.jpg
-- Verified: viewed after download. Orange "ScienceDirect" wordmark with
-  registered mark, the current logo. Converted from JPG to PNG with no pixel
-  changes (white background kept).
-- Note: Wikipedia's ScienceDirect article carries no logo. A WikiMD mirror
-  references a "ScienceDirect_logo_2020" image but exposes no downloadable
-  file URL, and its file page timed out from the sandbox. The official
-  toolkit file supersedes those routes.
+- File: `public/logos/cochrane.png` (361 x 466, RGB, portrait lockup)
+- Source: the embedded PNG inside Wikimedia Commons file `Cclogo.svg`
+  (https://commons.wikimedia.org/wiki/File:Cclogo.svg), current revision
+  22 January 2020, described as "Updated to the new version with permission
+  from Cochrane", author Cochrane Collaboration. Extracted as-is from the
+  embedded raster inside the SVG wrapper, with no pixel changes.
+- Verified: navy forest-plot C mark above the navy "Cochrane" wordmark on
+  white. This is a portrait lockup (taller than wide), unlike the horizontal
+  wordmarks of the other three logos, and it is the current Cochrane
+  lockup, not a redraw.
+- Trademark note: the Commons file is marked public-domain-as-textlogo,
+  but the Cochrane name and mark are trademarked. That public-domain mark
+  covers copyright only and grants no trademark rights. On this site the
+  logo is used nominatively only, to identify a search tool the author
+  uses, with no endorsement, affiliation, indexing, or partnership claim,
+  same framing as the other database logos.
+- Deliberately not used: cochrane.org's own header logo
+  (themes/custom/cochrane_hs/img/logo.png, 400 x 83), because it is a white
+  logo on a navy background made for dark headers, wrong for our white
+  tiles.
+- Swap note: Cochrane replaced ScienceDirect on user direction,
+  24 Oct 2026.
 
-## ScienceDirect (compact icon, for the 90 px tile)
+## ScienceDirect (wordmark) - REMOVED, not shipped
 
-- File: `public/logos/sciencedirect-icon.png` (32 x 32, RGBA, 504 bytes)
-- Source: ScienceDirect's own static assets CDN,
-  https://sdfestaticassets-us-east-1.sciencedirectassets.com/shared-assets/103/images/favSD.ico,
-  the site icon referenced by sciencedirect.com pages. Downloaded copy is
-  byte-identical to https://www.sciencedirect.com/favicon.ico (same MD5).
-- Verified: viewed after extraction (32 px entry taken as-is, converted
-  from ICO to PNG with no pixel changes). Orange abstract SD favicon mark
-  on a transparent background. This is ScienceDirect's own compact mark,
-  not a redraw and not a crop of the horizontal wordmark.
-- Caveats, stated plainly: 32 px is the largest size ScienceDirect
-  publishes for this mark, below the 200 px bar used for the other logos.
-  The tile displays it at 20 px tall, so it renders as a downscale and
-  stays sharp. At 20 px it reads as a small orange mark, not a wordmark,
-  so a casual viewer identifies it mainly from context (the card label,
-  the neighboring wordmarks, and the alt text "ScienceDirect logo"). If
-  that reads too weak in the visual re-check, the fallback is the visual
-  QA alternative (hide the card on short stages) or keeping the taller
-  card, not inventing a new mark.
-- Dead ends checked for a larger compact asset: Wikimedia Commons holds
-  only horizontal ScienceDirect wordmarks (683 x 88 and 1038 x 165);
-  Elsevier's toolkit page offers only the horizontal wordmark download;
-  the ScienceDirect mobile app is delisted from both app stores (no icon
-  retrievable from iTunes Search or Play listings); logo libraries
-  (logotyp.us, seeklogo, brandfetch, worldvectorlogo) carry only the
-  horizontal wordmark; the Internet Archive CDX API was temporarily
-  offline; the Facebook Graph picture endpoint returned 400 without a
-  token; Clearbit's logo endpoint did not connect from the sandbox.
+- REMOVED 24 Oct 2026 in the Cochrane swap (user direction: replace
+  ScienceDirect with Cochrane). History: `public/logos/sciencedirect.png`
+  was the 729 x 90 horizontal wordmark from Elsevier's ScienceDirect
+  toolkit page.
+
+## ScienceDirect (compact icon) - REMOVED, not shipped
+
+- REMOVED 24 Oct 2026 in the Cochrane swap. History:
+  `public/logos/sciencedirect-icon.png` was the 32 x 32 SD favicon monogram
+  from ScienceDirect's own CDN, used in the small tiles because the
+  horizontal wordmark did not fit.
 
 ## Trademark note
 
 All four marks belong to their owners: PubMed to the U.S. National Library
-of Medicine; Elsevier, Scopus, and ScienceDirect to Elsevier / RELX. On this
-site they are used nominatively only, to identify the search tools the author
-uses. Nothing on the site claims endorsement, affiliation, partnership, or
-indexing. Site copy must never say "indexed in", "affiliated", "partner", or
-"endorsed" in connection with these logos. If a rights holder objects, remove
-the logo.
+of Medicine; Elsevier and Scopus to Elsevier / RELX; Cochrane to the
+Cochrane Collaboration (trademarked; the Commons public-domain-as-textlogo
+mark covers copyright only). On this site they are used nominatively only,
+to identify the search tools the author uses. Nothing on the site claims
+endorsement, affiliation, partnership, or indexing. Site copy must never say
+"indexed in", "affiliated", "partner", or "endorsed" in connection with
+these logos. If a rights holder objects, remove the logo.

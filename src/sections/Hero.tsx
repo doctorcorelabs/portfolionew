@@ -142,10 +142,11 @@ const FACT_PILLS: Array<{
  * on desktop. The 8 v7 cards keep their positions; 6 v8 mockups join
  * them (2 windows, 2 photos, 1 bubble, 1 sticker row); the v9 dark
  * database card is gone, replaced in v10 by 4 free-floating database
- * logo tiles (2 visible at every desktop width at normal heights,
- * 2 more above 1400px; on short viewports at or below 700px height
- * the ScienceDirect icon hides via hide-short, leaving 3 above
- * 1400px and 1 at 720-1400px) plus 1 mobile-only logo row. All
+ * logo tiles (1 visible at 720-1400px, PubMed only, all heights;
+ * 4 above 1400px at viewport heights above 750px: PubMed,
+ * Cochrane, Elsevier, Scopus; 3 above 1400px on viewports at or
+ * below 750px height, where Cochrane hides via hide-750) plus 1
+ * mobile-only logo row. All
  * positions sit in the top and bottom bands of the hero, and never
  * over the centered label or the word center point. The faint helix
  * motif may tuck under the frame edge on mid-height stages, and the
@@ -169,7 +170,7 @@ const FACT_PILLS: Array<{
 const DbPubmedFloat = () => <DbLogoFloat brand="pubmed" />;
 const DbElsevierFloat = () => <DbLogoFloat brand="elsevier" />;
 const DbScopusFloat = () => <DbLogoFloat brand="scopus" />;
-const DbSciencedirectFloat = () => <DbLogoFloat brand="sciencedirect" />;
+const DbCochraneFloat = () => <DbLogoFloat brand="cochrane" />;
 const COLLAGE_ITEMS: Array<{
   id: string;
   Card: React.ComponentType;
@@ -195,7 +196,29 @@ const COLLAGE_ITEMS: Array<{
   { id: "db-pubmed", Card: DbPubmedFloat, style: { left: "43%", bottom: "5%" }, floatDuration: 13, floatDelay: 0.5, hideClass: "mv-collage-mobile-hide", tiltClass: "mv-tilt-card-b" },
   { id: "db-elsevier", Card: DbElsevierFloat, style: { left: "70%", bottom: "5%" }, floatDuration: 11, floatDelay: 1.3, hideClass: "mv-collage-mobile-hide mv-collage-hide-1400", tiltClass: "mv-tilt-card-a" },
   { id: "db-scopus", Card: DbScopusFloat, style: { left: "20%", top: "3%" }, floatDuration: 15, floatDelay: 0.9, hideClass: "mv-collage-mobile-hide mv-collage-hide-1400", tiltClass: "mv-tilt-card-c" },
-  { id: "db-sciencedirect", Card: DbSciencedirectFloat, style: { left: "43%", bottom: "19%" }, floatDuration: 12, floatDelay: 1.7, hideClass: "mv-collage-mobile-hide mv-collage-hide-short", tiltClass: "mv-tilt-card-e" },
+  /* Cochrane lockup is portrait (361x466), so its tile is 69x82.
+     It stacks under Scopus in the same left column (left 20%):
+     Scopus tile is 100 wide, Cochrane 69 wide, both left-anchored,
+     so the column reads aligned. Top 15% puts Cochrane 24px-plus
+     below the Scopus tile at rest at taller stages (34px at stage
+     700, 46px at stage 800) with at least 10px even at worst float
+     phase (tilt-adjusted). The tile clears the helix
+     box by 29px and helix ink by 47px at the tightest width
+     (1401px), clears the docking card by 15px there (near-miss,
+     full clearance above about 1470px), and stays at least 64px
+     clear of glyphs even at float peaks (frame clearance at least
+     36px at peaks) at every shown stage, per visual re-QA 05
+     recomputed from source; the earlier comment figures were
+     conservative in the same direction.
+     It hides on viewports at or below 750px height (hide-750),
+     because below stage 651 the Scopus gap would close and the
+     tile would graze glyphs; the plain hide-short threshold
+     (700px) is not enough for this taller tile. Tilt card-d
+     (+1deg) alternates with Scopus card-c (-1deg) above it.
+     Earlier slots failed and were rejected: left 29% sat inside
+     the helix box covering about 85% of helix ink, and left 66%
+     sat inside the review card span (right 27%). */
+  { id: "db-cochrane", Card: DbCochraneFloat, style: { left: "20%", top: "15%" }, floatDuration: 14, floatDelay: 2.1, hideClass: "mv-collage-mobile-hide mv-collage-hide-1400 mv-collage-hide-750", tiltClass: "mv-tilt-card-d" },
   { id: "db-row", Card: DbLogoRow, style: {}, floatDuration: 12, floatDelay: 0, hideClass: "mv-collage-hide-min-720", tiltClass: "" },
   { id: "stickers", Card: Stickers, style: { left: "2.5%", top: "32%" }, floatDuration: 12, floatDelay: 1.8, hideClass: "mv-collage-hide-mid", tiltClass: "mv-tilt-sticker-b" },
 ];
@@ -711,6 +734,11 @@ export default function Hero() {
         }
         @media (max-height: 700px) {
           .mv-collage-hide-short {
+            display: none;
+          }
+        }
+        @media (max-height: 750px) {
+          .mv-collage-hide-750 {
             display: none;
           }
         }
