@@ -51,6 +51,13 @@ import AwardsCard from "../components/hero-collage/AwardsCard";
 import StrokeCard from "../components/hero-collage/StrokeCard";
 import PhotoCard from "../components/hero-collage/PhotoCard";
 import DnaHelix from "../components/hero-collage/DnaHelix";
+import SearchWindow from "../components/hero-v8/SearchWindow";
+import PosterWindow from "../components/hero-v8/PosterWindow";
+import MicroscopeCard from "../components/hero-v8/MicroscopeCard";
+import DeskCard from "../components/hero-v8/DeskCard";
+import NotifyBubble from "../components/hero-v8/NotifyBubble";
+import DbStackCard from "../components/hero-v8/DbStackCard";
+import Stickers from "../components/hero-v8/Stickers";
 
 const INK = "#010101";
 const GRID_LINE = "rgba(18, 18, 19, 0.06)";
@@ -131,17 +138,27 @@ const FACT_PILLS: Array<{
   },
 ];
 
-/* Hero collage (decorative only, never content): 9 research cards
- * built by sibling agents, scattered around the giant word at the
- * periphery. All positions sit in the top and bottom bands of the
- * hero, and never over the centered label. The faint helix motif
- * may tuck under the frame edge on mid-height stages, but it never
- * covers the word itself (the frame paints above it, and it hides
- * entirely on short stages). The layer sits between the grid and the
- * word/frame (z-index 0 vs frame 1, diorama 2), is pointer-dead so
- * drag still works, and is aria-hidden. Float durations are
- * desynced 9-16s. On narrow screens the layer drops into a static
- * stack below the word showing only FaersCard and PhotoCard. */
+/* Hero collage (decorative only, never content): 17 research mockups
+ * scattered around the giant word at the periphery. The 9 v7 cards
+ * keep their positions; 8 v8 mockups join them (2 windows, 2 photos,
+ * 1 dark database card, 1 bubble, 1 chip row, 1 sticker row). All
+ * positions sit in the top and bottom bands of the hero, and never
+ * over the centered label or the word center point. The faint helix
+ * motif may tuck under the frame edge on mid-height stages, and the
+ * tall poster window tucks further on short stages, but neither
+ * covers the word itself (the frame paints above the collage, and
+ * the helix hides entirely on short stages). The layer sits between
+ * the grid and the word/frame (z-index 0 vs frame 1, diorama 2), is
+ * pointer-dead so drag still works, and is aria-hidden. Float lives
+ * on the outer item wrapper (translateY only, desynced 9-16s); tilt
+ * lives on an inner wrapper per docs/hero-v8/02-visual-system.md
+ * (stylesheet classes only, so the mobile stack can zero them).
+ * DOM order is paint order inside the layer: cards first, windows
+ * above cards, dark cards above light cards they overlap, stickers
+ * last and topmost. On narrow screens the layer drops into a static
+ * stack below the word showing only FaersCard, PhotoCard,
+ * NotifyBubble, and DbStackCard, in that order, tilts zeroed and
+ * floats off. */
 const COLLAGE_ITEMS: Array<{
   id: string;
   Card: React.ComponentType;
@@ -149,16 +166,24 @@ const COLLAGE_ITEMS: Array<{
   floatDuration: number;
   floatDelay: number;
   hideClass: string;
+  tiltClass: string;
 }> = [
-  { id: "docking", Card: DockingCard, style: { left: "2.5%", top: "3%" }, floatDuration: 11, floatDelay: 0.4, hideClass: "mv-collage-mobile-hide" },
-  { id: "helix", Card: DnaHelix, style: { left: "27%", top: "2%", width: 100 }, floatDuration: 14, floatDelay: 1.1, hideClass: "mv-collage-hide-mid mv-collage-mobile-hide mv-collage-hide-short" },
-  { id: "review", Card: ReviewCard, style: { right: "27%", top: "3%" }, floatDuration: 9, floatDelay: 0.8, hideClass: "mv-collage-mobile-hide mv-collage-hide-1000" },
-  { id: "poster", Card: PosterCard, style: { right: "2.5%", top: "2%" }, floatDuration: 13, floatDelay: 0.2, hideClass: "mv-collage-mobile-hide" },
-  { id: "faers", Card: FaersCard, style: { left: "2.5%", bottom: "4%" }, floatDuration: 12, floatDelay: 1.4, hideClass: "" },
-  { id: "gutaxis", Card: GutAxisCard, style: { left: "25%", bottom: "3%", width: 230 }, floatDuration: 16, floatDelay: 0.6, hideClass: "mv-collage-mobile-hide mv-collage-hide-1400" },
-  { id: "photo", Card: PhotoCard, style: { left: "calc(50% - 110px)", bottom: "3%", width: 220 }, floatDuration: 10, floatDelay: 1.0, hideClass: "" },
-  { id: "awards", Card: AwardsCard, style: { right: "25%", bottom: "4%" }, floatDuration: 15, floatDelay: 0.3, hideClass: "mv-collage-hide-mid mv-collage-mobile-hide" },
-  { id: "stroke", Card: StrokeCard, style: { right: "2.5%", bottom: "5%" }, floatDuration: 9, floatDelay: 1.6, hideClass: "mv-collage-mobile-hide" },
+  { id: "docking", Card: DockingCard, style: { left: "2.5%", top: "3%" }, floatDuration: 11, floatDelay: 0.4, hideClass: "mv-collage-mobile-hide", tiltClass: "mv-tilt-card-a" },
+  { id: "helix", Card: DnaHelix, style: { left: "27%", top: "2%", width: 100 }, floatDuration: 14, floatDelay: 1.1, hideClass: "mv-collage-hide-mid mv-collage-mobile-hide mv-collage-hide-short", tiltClass: "" },
+  { id: "review", Card: ReviewCard, style: { right: "27%", top: "3%" }, floatDuration: 9, floatDelay: 0.8, hideClass: "mv-collage-mobile-hide mv-collage-hide-1000", tiltClass: "mv-tilt-card-b" },
+  { id: "poster", Card: PosterCard, style: { right: "2.5%", top: "2%" }, floatDuration: 13, floatDelay: 0.2, hideClass: "mv-collage-mobile-hide mv-collage-hide-min-1400", tiltClass: "mv-tilt-card-c" },
+  { id: "faers", Card: FaersCard, style: { left: "2.5%", bottom: "4%" }, floatDuration: 12, floatDelay: 1.4, hideClass: "", tiltClass: "mv-tilt-card-b" },
+  { id: "gutaxis", Card: GutAxisCard, style: { left: "25%", bottom: "3%", width: 230 }, floatDuration: 16, floatDelay: 0.6, hideClass: "mv-collage-mobile-hide mv-collage-hide-1400", tiltClass: "mv-tilt-card-a" },
+  { id: "photo", Card: PhotoCard, style: { left: "calc(50% - 110px)", bottom: "3%", width: 220 }, floatDuration: 10, floatDelay: 1.0, hideClass: "", tiltClass: "mv-tilt-card-d" },
+  { id: "awards", Card: AwardsCard, style: { right: "25%", bottom: "4%" }, floatDuration: 15, floatDelay: 0.3, hideClass: "mv-collage-hide-mid mv-collage-mobile-hide mv-collage-hide-min-1400", tiltClass: "mv-tilt-card-c" },
+  { id: "stroke", Card: StrokeCard, style: { right: "2.5%", bottom: "5%" }, floatDuration: 9, floatDelay: 1.6, hideClass: "mv-collage-mobile-hide", tiltClass: "mv-tilt-card-b" },
+  { id: "search", Card: SearchWindow, style: { left: "36%", top: "2%" }, floatDuration: 12, floatDelay: 0.6, hideClass: "mv-collage-hide-1400", tiltClass: "mv-tilt-window-b" },
+  { id: "posterwindow", Card: PosterWindow, style: { right: "2.5%", top: "11%" }, floatDuration: 14, floatDelay: 1.2, hideClass: "mv-collage-hide-1400", tiltClass: "mv-tilt-window-a" },
+  { id: "microscope", Card: MicroscopeCard, style: { left: "2.5%", bottom: "39%", width: 210 }, floatDuration: 13, floatDelay: 0.9, hideClass: "mv-collage-hide-mid", tiltClass: "mv-tilt-card-c" },
+  { id: "desk", Card: DeskCard, style: { left: "53%", bottom: "3%" }, floatDuration: 11, floatDelay: 1.5, hideClass: "mv-collage-hide-1400", tiltClass: "mv-tilt-card-c" },
+  { id: "notify", Card: NotifyBubble, style: { left: "2.5%", bottom: "25%" }, floatDuration: 9, floatDelay: 1.1, hideClass: "mv-collage-hide-720-1160", tiltClass: "mv-tilt-sticker-b" },
+  { id: "dbstack", Card: DbStackCard, style: { right: "22%", bottom: "5%" }, floatDuration: 15, floatDelay: 0.7, hideClass: "mv-collage-hide-720-1400", tiltClass: "mv-tilt-card-d" },
+  { id: "stickers", Card: Stickers, style: { left: "2.5%", top: "32%" }, floatDuration: 12, floatDelay: 1.8, hideClass: "mv-collage-hide-mid", tiltClass: "mv-tilt-sticker-b" },
 ];
 
 export default function Hero() {
@@ -618,6 +643,23 @@ export default function Hero() {
           from { opacity: 0; }
           to { opacity: 1; }
         }
+        /* v8 tilt classes (docs/hero-v8/02-visual-system.md section 4):
+           static transforms on the inner wrapper only. The float
+           keyframes own the outer wrapper's transform, so the two
+           never fight. No animation is ever attached to a tilt
+           class, and no wrapper carries box-shadow (card roots own
+           their shadows). */
+        .mv-tilt-card-a { transform: rotate(-3deg); }
+        .mv-tilt-card-b { transform: rotate(2deg); }
+        .mv-tilt-card-c { transform: rotate(-1deg); }
+        .mv-tilt-card-d { transform: rotate(1deg); }
+        .mv-tilt-card-e { transform: rotate(3deg); }
+        .mv-tilt-window-a { transform: rotate(0deg); }
+        .mv-tilt-window-b { transform: rotate(1deg); }
+        .mv-tilt-window-c { transform: rotate(2deg); }
+        .mv-tilt-chip { transform: rotate(0deg); }
+        .mv-tilt-sticker-a { transform: rotate(-5deg); }
+        .mv-tilt-sticker-b { transform: rotate(4deg); }
         @media (max-width: 1160px) {
           .mv-collage-hide-mid {
             display: none;
@@ -625,6 +667,21 @@ export default function Hero() {
         }
         @media (max-width: 1400px) {
           .mv-collage-hide-1400 {
+            display: none;
+          }
+        }
+        @media (min-width: 720px) and (max-width: 1400px) {
+          .mv-collage-hide-720-1400 {
+            display: none;
+          }
+        }
+        @media (min-width: 1400px) {
+          .mv-collage-hide-min-1400 {
+            display: none;
+          }
+        }
+        @media (min-width: 720px) and (max-width: 1160px) {
+          .mv-collage-hide-720-1160 {
             display: none;
           }
         }
@@ -654,9 +711,16 @@ export default function Hero() {
           }
           .mv-collage-item {
             position: static;
+            max-width: 100%;
           }
           .mv-collage-float {
             animation: none;
+          }
+          .mv-tilt-card-a, .mv-tilt-card-b, .mv-tilt-card-c,
+          .mv-tilt-card-d, .mv-tilt-card-e, .mv-tilt-window-a,
+          .mv-tilt-window-b, .mv-tilt-window-c, .mv-tilt-chip,
+          .mv-tilt-sticker-a, .mv-tilt-sticker-b {
+            transform: none;
           }
           .mv-collage-mobile-hide {
             display: none;
@@ -876,7 +940,9 @@ export default function Hero() {
               animationDelay: `${item.floatDelay}s`,
             }}
           >
-            <item.Card />
+            <div className={item.tiltClass}>
+              <item.Card />
+            </div>
           </div>
         ))}
       </div>
