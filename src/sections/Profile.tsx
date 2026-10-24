@@ -11,6 +11,12 @@
  *   once it enters the viewport, then unobserves. Elements are only
  *   hidden after the effect arms the section (mvP-armed), so content
  *   never stays invisible if the observer cannot run.
+ * - The title highlight is the reference team highlight, measured
+ *   in docs/deep/06: a light-blue bar grows from width 0 to full
+ *   over 2000ms ease-out when the title reveals, with a 4px blue
+ *   bar at its left edge and 16px round blue knobs tracking both
+ *   edges (the right knob rides the growing bar). The period after
+ *   "builds" sits outside the highlight, as in the reference.
  * - The mailto link draws its underline on hover/focus (300ms).
  * - prefers-reduced-motion: everything is shown instantly, no motion.
  */
@@ -55,6 +61,35 @@ const REVEAL_CSS = `
 .mvP-mailto:focus-visible {
   background-size: 100% 1px;
 }
+.mvP-highlight {
+  position: relative;
+  padding: 0 10px 0 8px;
+}
+.mvP-highlight-bar {
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  width: 0;
+  background: #DCE9FD;
+  border-left: 4px solid #0859D4;
+}
+.mvP-armed.mvP-in .mvP-highlight-bar {
+  animation: mvP-grow 2000ms ease-out forwards;
+}
+@keyframes mvP-grow {
+  to { width: 100%; }
+}
+.mvP-knob {
+  position: absolute;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: #0859D4;
+  top: 50%;
+  transform: translateY(-50%);
+  z-index: 2;
+}
 @media (prefers-reduced-motion: reduce) {
   .mvP-armed .mvP-reveal {
     opacity: 1 !important;
@@ -63,6 +98,10 @@ const REVEAL_CSS = `
   }
   .mvP-mailto {
     transition: none;
+  }
+  .mvP-highlight-bar {
+    animation: none;
+    width: 100%;
   }
 }
 `;
@@ -132,17 +171,22 @@ export default function Profile() {
           }}
         >
           A researcher who{" "}
-          <span
-            style={{
-              background: "#DCE9FD",
-              borderLeft: "4px solid #0859D4",
-              padding: "0 10px 0 8px",
-              boxDecorationBreak: "clone",
-              WebkitBoxDecorationBreak: "clone",
-            }}
-          >
-            builds.
+          <span className="mvP-highlight">
+            <span aria-hidden="true" className="mvP-highlight-bar">
+              <span
+                aria-hidden="true"
+                className="mvP-knob"
+                style={{ right: -8 }}
+              />
+            </span>
+            <span
+              aria-hidden="true"
+              className="mvP-knob"
+              style={{ left: -8 }}
+            />
+            <span style={{ position: "relative", zIndex: 1 }}>builds</span>
           </span>
+          .
         </h2>
         <div style={{ maxWidth: 680 }}>
           <p

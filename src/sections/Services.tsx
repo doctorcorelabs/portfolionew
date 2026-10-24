@@ -5,19 +5,27 @@
  * site and CV only: no Onlines service copy, no client names, no
  * invented DOI, journal, or numbers.
  *
- * Card treatment: each column is a tall blue gradient card (white
- * text, rounded corners, dotted rule under the heading, soft gradient
- * texture). A white outline pill button sits at the card bottom-left
- * and stays invisible until its card is hovered or focused; the
- * hovered/focused card's pill renders bright and solid while the
- * other cards' pills stay invisible. There is no card lift and no
- * shadow change on hover. Pill destinations are existing internal
- * pages only: Research to /research, Tools to
- * /research/strokesense-ai-lab, Teaching and mentoring to /experience.
+ * Card treatment (measured from the reference, docs/deep/03):
+ * each column is a tall FLAT accent-blue card (#0859D4, radius
+ * 10px) with a CSS halftone dot layer at 50 percent opacity in
+ * multiply blend mode over the flat fill - not a gradient, and the
+ * texture is static (the earlier 18s highlight drift was a v2
+ * interpretation and has been removed). A dotted rule of 1px
+ * square tiles sits under each title line (repeating gradient on
+ * an inline title span). A transparent white-outline pill button
+ * sits at the card bottom-left and stays invisible until its card
+ * is hovered or focused; on reveal only its opacity/visibility
+ * changes over 0.3s, its fill never changes. There is no card lift
+ * and no shadow change on hover. Pill destinations are existing
+ * internal pages only: Research to /research, Tools to
+ * /research/strokesense-ai-lab, Teaching and mentoring to
+ * /experience.
  *
  * Motion (scoped to this file, scroll-triggered, runs once):
- * the three cards stagger-reveal on scroll, each top hairline draws
- * left-to-right, then the card title and lines fade up in sequence.
+ * the three cards stagger-reveal on scroll (0.6s rise from 40px),
+ * each top hairline draws left-to-right, then the card title and
+ * lines fade up in sequence. Fully static under
+ * prefers-reduced-motion.
  */
 
 import { useEffect, useRef, useState } from "react";
@@ -110,38 +118,68 @@ export default function Services() {
         .svc-grid {
           display: grid;
           grid-template-columns: repeat(3, 1fr);
-          gap: 24px;
+          gap: 20px;
           align-items: stretch;
         }
-        @media (max-width: 900px) {
+        @media (max-width: 1400px) {
+          .svc-card {
+            min-height: 470px;
+          }
+        }
+        @media (max-width: 1023px) {
           .svc-grid {
             grid-template-columns: 1fr;
-            gap: 24px;
+            gap: 45px;
+          }
+          .svc-card {
+            min-height: 350px;
+          }
+          .svc-card-title {
+            font-size: 28px;
           }
         }
         .svc-card {
           display: flex;
           flex-direction: column;
-          min-height: 480px;
+          min-height: 520px;
           height: 100%;
           box-sizing: border-box;
           padding: 32px 32px 36px;
-          border-radius: 16px;
+          border-radius: 10px;
           color: #FFFFFF;
-          background:
-            radial-gradient(120% 60% at 15% 0%, rgba(255, 255, 255, 0.22) 0%, rgba(255, 255, 255, 0) 55%),
-            radial-gradient(90% 50% at 100% 100%, rgba(255, 255, 255, 0.10) 0%, rgba(255, 255, 255, 0) 60%),
-            linear-gradient(160deg, #0B63E5 0%, #0859D4 52%, #0649A8 100%);
+          background: #0859D4;
         }
-        @media (max-width: 900px) {
-          .svc-card {
-            min-height: 0;
-          }
+        /* Halftone texture over the flat fill: 1px dots on a 6px
+           tile, 50 percent opacity, multiply blend. It sits above
+           the background but below the text (children are raised
+           with z-index), so the text stays clean. */
+        .svc-card::after {
+          content: "";
+          position: absolute;
+          inset: 0;
+          border-radius: 10px;
+          background-image: radial-gradient(circle, #000000 1px, transparent 1.5px);
+          background-size: 6px 6px;
+          opacity: 0.5;
+          mix-blend-mode: multiply;
+          pointer-events: none;
         }
-        .svc-dotted-rule {
-          border: 0;
-          border-top: 1px dotted rgba(255, 255, 255, 0.55);
-          margin: 0 0 24px;
+        .svc-card > * {
+          position: relative;
+          z-index: 1;
+        }
+        /* Dotted title rule: 1px square tiles from a repeating
+           gradient, applied to an inline span so a wrapped title
+           gets one rule per line. */
+        .svc-card-title {
+          font-size: 36px;
+        }
+        .svc-dotted-title {
+          background-image: repeating-linear-gradient(to right, rgba(255, 255, 255, 0.9) 0 1px, transparent 1px 4px);
+          background-size: 4px 1px;
+          background-repeat: repeat-x;
+          background-position: 0 100%;
+          padding-bottom: 6px;
         }
         .svc-pill {
           align-self: flex-start;
@@ -149,7 +187,7 @@ export default function Services() {
           padding-top: 48px;
           opacity: 0;
           visibility: hidden;
-          transition: opacity 0.25s ease, visibility 0.25s ease;
+          transition: opacity 0.3s ease, visibility 0.3s ease;
         }
         .svc-pill a {
           display: inline-block;
@@ -163,32 +201,25 @@ export default function Services() {
           letter-spacing: 0.08em;
           text-transform: uppercase;
           text-decoration: none;
-          transition: background-color 0.25s ease, color 0.25s ease;
         }
         .svc-card:hover .svc-pill,
         .svc-card:focus-within .svc-pill {
           opacity: 1;
           visibility: visible;
         }
-        .svc-card:hover .svc-pill a,
-        .svc-card:focus-within .svc-pill a {
-          background: #FFFFFF;
-          border-color: #FFFFFF;
-          color: #0859D4;
-        }
         .svc-pill a:focus-visible {
           outline: 2px solid #FFFFFF;
           outline-offset: 3px;
         }
         .svc-anim .svc-head { opacity: 0; transform: translateY(20px); }
-        .svc-anim .svc-col { opacity: 0; transform: translateY(20px); }
+        .svc-anim .svc-col { opacity: 0; transform: translateY(40px); }
         .svc-anim .svc-title { opacity: 0; transform: translateY(14px); }
         .svc-anim .svc-line { opacity: 0; transform: translateY(14px); }
         .svc-anim.svc-visible .svc-head {
           animation: svc-rise 0.7s cubic-bezier(0.22, 1, 0.36, 1) 0s forwards;
         }
         .svc-anim.svc-visible .svc-col {
-          animation: svc-rise 0.7s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+          animation: svc-rise 0.6s cubic-bezier(0.22, 1, 0.36, 1) forwards;
         }
         .svc-anim.svc-visible .svc-title {
           animation: svc-rise 0.6s cubic-bezier(0.22, 1, 0.36, 1) forwards;
@@ -226,8 +257,7 @@ export default function Services() {
             width: 100%;
             animation: none;
           }
-          .svc-pill,
-          .svc-pill a {
+          .svc-pill {
             transition: none;
           }
         }
@@ -300,9 +330,8 @@ export default function Services() {
                   {column.number} / {column.title}
                 </p>
                 <h3
-                  className="svc-title"
+                  className="svc-title svc-card-title"
                   style={{
-                    fontSize: "clamp(28px, 3vw, 42px)",
                     lineHeight: 1.1,
                     letterSpacing: "-0.02em",
                     fontWeight: 700,
@@ -310,9 +339,8 @@ export default function Services() {
                     animationDelay: `${base + 0.15}s`,
                   }}
                 >
-                  {column.title}
+                  <span className="svc-dotted-title">{column.title}</span>
                 </h3>
-                <hr aria-hidden="true" className="svc-dotted-rule" />
                 {column.lines.map((line, lineIndex) => (
                   <p
                     key={line}
@@ -320,7 +348,7 @@ export default function Services() {
                     style={{
                       fontSize: 17,
                       lineHeight: 1.65,
-                      color: "rgba(255, 255, 255, 0.9)",
+                      color: "rgba(255, 255, 255, 0.8)",
                       margin: "0 0 16px",
                       animationDelay: `${base + 0.3 + lineIndex * 0.1}s`,
                     }}

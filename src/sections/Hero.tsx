@@ -8,7 +8,7 @@
  * section that follows, not here.
  *
  * Entrance sequence (Onlines feel: calm, editorial, no bounce):
- *   1. Graph grid fades in (0s, 1.4s)
+ *   1. Graph grid fades in (0s, 0.8s, matching the measured reference)
  *   2. Giant word fades and rises 24px (0.15s, 0.9s)
  *   3. Dashed selection box fades in (0.5s delay, 1s ease-in-out),
  *      matching the reference frame fade. It stays pointer-dead until
@@ -67,9 +67,67 @@ const HANDLES: Array<React.CSSProperties> = [
 const HANDLE_STAGGER_START = 0.95;
 const HANDLE_STAGGER_STEP = 0.07;
 
+/* Ambient hero diorama (decorative only, never content):
+ * 4 cursor chips with topic/project labels only (never person
+ * names or invented team members), and 3 floating pills that
+ * repeat real site facts already shown elsewhere on the site.
+ * Chips drift on slow closed loops driven per frame by
+ * requestAnimationFrame (no CSS transition on their transform, as
+ * in the reference), and converge toward the nearest edge of the
+ * giant word while it is hovered, easing back when the pointer
+ * leaves. The chip layer sits above the word/frame layer so chips
+ * stay visible while converged; it never intercepts pointer events
+ * (pointer-events none everywhere), and it is hidden on touch
+ * devices, below 900px (pills), and under prefers-reduced-motion.
+ * Anchors are fractions of the stage size; radii and durations are
+ * the deep-analysis spec ranges (docs/deep/01-hero-cursors.md). */
+const CURSOR_CHIPS: Array<{
+  label: string;
+  color: string;
+  anchorX: number;
+  anchorY: number;
+  radius: number;
+  duration: number;
+  phase: number;
+}> = [
+  { label: "FAERS", color: "#0859D4", anchorX: 0.04, anchorY: 0.16, radius: 40, duration: 18, phase: 0 },
+  { label: "StrokeSense", color: "#177245", anchorX: 0.96, anchorY: 0.2, radius: 56, duration: 22, phase: 0.3 },
+  { label: "Code for Cure", color: "#A63A2E", anchorX: 0.05, anchorY: 0.82, radius: 32, duration: 16, phase: 0.55 },
+  { label: "Seoul 2026", color: "#7A5A00", anchorX: 0.95, anchorY: 0.76, radius: 48, duration: 24, phase: 0.8 },
+];
+
+const FACT_PILLS: Array<{
+  text: string;
+  style: React.CSSProperties;
+  duration: number;
+  delay: number;
+}> = [
+  {
+    text: "Hypertension Seoul 2026",
+    style: { top: "30%", right: "10%" },
+    duration: 10,
+    delay: 0.5,
+  },
+  {
+    text: "Code for Cure",
+    style: { bottom: "30%", right: "14%" },
+    duration: 8,
+    delay: 1.2,
+  },
+  {
+    text: "FAERS N = 6,601",
+    style: { top: "64%", left: "7%" },
+    duration: 12,
+    delay: 0,
+  },
+];
+
 export default function Hero() {
   const sectionRef = useRef<HTMLElement | null>(null);
   const frameRef = useRef<HTMLDivElement | null>(null);
+  const wordRef = useRef<HTMLHeadingElement | null>(null);
+  const chipRefs = useRef<Array<HTMLSpanElement | null>>([]);
+  const wordHoveredRef = useRef(false);
   const [visible, setVisible] = useState(false);
   /* Selected/active state: lands only once the 1s frame fade ends. */
   const [frameActive, setFrameActive] = useState(false);
@@ -124,6 +182,109 @@ export default function Hero() {
     setCanDrag(
       window.matchMedia("(hover: hover) and (pointer: fine)").matches,
     );
+  }, []);
+
+  /* The rAF loop reads hover through a ref so the frame callback
+     never goes stale when React state changes. */
+  useEffect(() => {
+    wordHoveredRef.current = wordHovered;
+  }, [wordHovered]);
+
+  /* Cursor drift + converge loop. Runs only on hover-capable
+     fine-pointer devices without reduced motion (the chips are
+     display:none otherwise, so this is belt and braces). Positions
+     are written straight to each chip's transform every frame; no
+     React state changes per frame. The loop pauses its DOM writes
+     while the hero is offscreen; rAF itself pauses when the tab is
+     hidden. Scroll modulates the loop phase by up to a quarter loop
+     (forward on scroll down, back on scroll up). */
+  useEffect(() => {
+    if (
+      typeof window === "undefined" ||
+      !window.matchMedia("(hover: hover) and (pointer: fine)").matches ||
+      window.matchMedia("(prefers-reduced-motion: reduce)").matches
+    ) {
+      return;
+    }
+    const section = sectionRef.current;
+    const word = wordRef.current;
+    if (!section || !word) return;
+    const blends = CURSOR_CHIPS.map(() => 0);
+    let raf = 0;
+    let last = performance.now();
+    const start = last;
+    const clamp = (v: number, lo: number, hi: number) =>
+      Math.min(hi, Math.max(lo, v));
+    const tick = (now: number) => {
+      raf = requestAnimationFrame(tick);
+      const dt = Math.min(0.05, (now - last) / 1000);
+      last = now;
+      const stageRect = section.getBoundingClientRect();
+      if (
+        stageRect.bottom < 0 ||
+        stageRect.top > window.innerHeight ||
+        stageRect.width === 0
+      ) {
+        return;
+      }
+      const elapsed = (now - start) / 1000;
+      const scrollPhase = clamp(
+        -stageRect.top / Math.max(1, stageRect.height),
+        0,
+        1,
+      ) * 0.25;
+      const wordRect = word.getBoundingClientRect();
+      const wordLeft = wordRect.left - stageRect.left - 20;
+      const wordRight = wordRect.right - stageRect.left + 20;
+      const wordTop = wordRect.top - stageRect.top - 20;
+      const wordBottom = wordRect.bottom - stageRect.top + 20;
+      const hovering = wordHoveredRef.current;
+      CURSOR_CHIPS.forEach((chip, i) => {
+        const el = chipRefs.current[i];
+        if (!el) return;
+        const chipW0 = el.offsetWidth;
+        const anchorX =
+          chip.anchorX > 0.5
+            ? chip.anchorX * stageRect.width - chipW0
+            : chip.anchorX * stageRect.width;
+        const anchorY = chip.anchorY * stageRect.height;
+        const angle =
+          2 * Math.PI * (elapsed / chip.duration + chip.phase + scrollPhase);
+        const driftX = chip.radius * Math.cos(angle);
+        const driftY = chip.radius * 0.7 * Math.sin(angle);
+        const chipW = el.offsetWidth;
+        const chipH = el.offsetHeight;
+        /* Nearest point on the expanded word rect to the chip's
+           drifting center; if the center is already inside, push to
+           the nearest edge instead of collapsing onto the word. */
+        const cx = anchorX + chipW / 2 + driftX;
+        const cy = anchorY + chipH / 2 + driftY;
+        let nx = clamp(cx, wordLeft, wordRight);
+        let ny = clamp(cy, wordTop, wordBottom);
+        if (cx > wordLeft && cx < wordRight && cy > wordTop && cy < wordBottom) {
+          const dLeft = cx - wordLeft;
+          const dRight = wordRight - cx;
+          const dTop = cy - wordTop;
+          const dBottom = wordBottom - cy;
+          const min = Math.min(dLeft, dRight, dTop, dBottom);
+          if (min === dLeft) nx = wordLeft;
+          else if (min === dRight) nx = wordRight;
+          else if (min === dTop) ny = wordTop;
+          else ny = wordBottom;
+        }
+        const convergeX = nx - chipW / 2 - anchorX;
+        const convergeY = ny - chipH / 2 - anchorY;
+        const target = hovering ? 1 : 0;
+        blends[i] += (target - blends[i]) * (1 - Math.exp(-dt / 0.3));
+        const b = blends[i];
+        const eased = b * b * (3 - 2 * b);
+        const fx = driftX + (convergeX - driftX) * eased;
+        const fy = driftY + (convergeY - driftY) * eased;
+        el.style.transform = `translate(${fx.toFixed(1)}px, ${fy.toFixed(1)}px)`;
+      });
+    };
+    raf = requestAnimationFrame(tick);
+    return () => cancelAnimationFrame(raf);
   }, []);
 
   /* The frame fade is 1s at a 0.5s delay, so the active state lands
@@ -219,7 +380,7 @@ export default function Hero() {
       <style>{`
         .mv-hero .mv-grid {
           opacity: 0;
-          transition: opacity 1.4s ease-out 0s;
+          transition: opacity 0.8s ease-out 0s;
         }
         .mv-hero.is-visible .mv-grid {
           opacity: 1;
@@ -265,6 +426,47 @@ export default function Hero() {
         .mv-hero.is-visible .mv-label {
           opacity: 1;
         }
+        /* Ambient diorama layer: above the grid and above the
+           word/frame layer, so converging chips stay visible. It
+           never intercepts pointer events, so drag still works. */
+        .mv-diorama {
+          position: absolute;
+          inset: 0;
+          z-index: 2;
+          pointer-events: none;
+          overflow: hidden;
+        }
+        .mv-diorama-chip {
+          position: absolute;
+          display: flex;
+          align-items: center;
+          gap: 6px;
+          pointer-events: none;
+        }
+        .mv-diorama-pill {
+          position: absolute;
+          pointer-events: none;
+          white-space: nowrap;
+        }
+        @keyframes mv-float {
+          0% { transform: translateY(0); }
+          50% { transform: translateY(-10px); }
+          100% { transform: translateY(0); }
+        }
+        @keyframes mv-diorama-in {
+          from { opacity: 0; }
+          to { opacity: 1; }
+        }
+        @media (hover: none) {
+          .mv-diorama {
+            display: none;
+          }
+        }
+        @media (max-width: 900px) {
+          .mv-diorama-pill {
+            display: none;
+          }
+        }
         @media (prefers-reduced-motion: reduce) {
           .mv-hero .mv-grid,
           .mv-hero .mv-word,
@@ -275,6 +477,11 @@ export default function Hero() {
             transform: none !important;
             scale: 1 !important;
             transition: none !important;
+          }
+        }
+        @media (prefers-reduced-motion: reduce) {
+          .mv-diorama {
+            display: none;
           }
         }
       `}</style>
@@ -289,6 +496,86 @@ export default function Hero() {
           backgroundSize: "40px 40px",
         }}
       />
+      <div
+        aria-hidden="true"
+        className="mv-diorama"
+        style={{ position: "absolute", inset: 0, zIndex: 2, pointerEvents: "none", overflow: "hidden" }}
+      >
+        {CURSOR_CHIPS.map((chip, chipIndex) => (
+          <span
+            key={chip.label}
+            ref={(el) => {
+              chipRefs.current[chipIndex] = el;
+            }}
+            className="mv-diorama-chip"
+            style={{
+              /* Right-anchored chips hang from the right edge so
+                 they are never clipped by the stage edge. */
+              ...(chip.anchorX > 0.5
+                ? { right: `${(1 - chip.anchorX) * 100}%` }
+                : { left: `${chip.anchorX * 100}%` }),
+              top: `${chip.anchorY * 100}%`,
+              pointerEvents: "none",
+              /* Transform is written per frame by the rAF loop;
+                 only the entrance fade is a CSS animation. */
+              animation: "mv-diorama-in 0.8s ease 2.2s both",
+            }}
+          >
+            <svg
+              width="14"
+              height="17"
+              viewBox="0 0 14 18"
+              aria-hidden="true"
+              style={{ display: "block", flexShrink: 0 }}
+            >
+              <path
+                d="M1 1 L1 16 L4.8 12.2 L7 16.8 L9.2 15.4 L7.2 11.2 L13 11.2 Z"
+                fill={chip.color}
+                stroke="#ffffff"
+                strokeWidth="0.75"
+              />
+            </svg>
+            <span
+              style={{
+                fontFamily: MONO_FONT,
+                fontSize: 11,
+                letterSpacing: "0.04em",
+                color: "#1D1D1F",
+                background: "#ffffff",
+                border: "1px solid #E0E0E0",
+                borderRadius: 999,
+                padding: "3px 8px",
+                whiteSpace: "nowrap",
+                boxShadow: "0 2px 8px rgba(1, 1, 1, 0.06)",
+              }}
+            >
+              {chip.label}
+            </span>
+          </span>
+        ))}
+        {FACT_PILLS.map((pill) => (
+          <span
+            key={pill.text}
+            className="mv-diorama-pill"
+            style={{
+              ...pill.style,
+              pointerEvents: "none",
+              fontFamily: MONO_FONT,
+              fontSize: 11,
+              letterSpacing: "0.04em",
+              color: "rgba(66, 66, 66, 0.75)",
+              background: "#ffffff",
+              border: "1px solid #E0E0E0",
+              borderRadius: 999,
+              padding: "5px 10px",
+              boxShadow: "0 2px 8px rgba(1, 1, 1, 0.06)",
+              animation: `mv-float ${pill.duration}s ease-in-out ${pill.delay}s infinite, mv-diorama-in 0.8s ease 2.4s both`,
+            }}
+          >
+            {pill.text}
+          </span>
+        ))}
+      </div>
       <p
         className="mv-label"
         style={{
@@ -368,6 +655,7 @@ export default function Hero() {
           />
         ))}
         <h1
+          ref={wordRef}
           className="mv-word"
           onMouseEnter={() => setWordHovered(true)}
           onMouseLeave={() => setWordHovered(false)}

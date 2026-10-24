@@ -94,6 +94,10 @@
   --duration-hover: 400ms;
   --duration-fade: 800ms;
   --ease-out: cubic-bezier(0.22, 1, 0.36, 1);
+  /* Reserve token for theme changes (reference theme family,
+     docs/deep/08): unused until a real dark mode exists, so no
+     future theme switch accidentally reuses the reveal easing. */
+  --ease-theme: cubic-bezier(0.4, 0, 0.2, 1);
 
   /* Focus. */
   --focus-width: 2px;

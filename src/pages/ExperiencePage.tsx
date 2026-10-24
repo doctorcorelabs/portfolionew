@@ -31,7 +31,6 @@ const MV_CSS = `
   opacity: 0;
   transform: translateY(14px);
   transition: opacity 600ms ease, transform 600ms cubic-bezier(0.22, 1, 0.36, 1);
-  will-change: opacity, transform;
 }
 .mv-rv.mv-in {
   opacity: 1;

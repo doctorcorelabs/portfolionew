@@ -55,11 +55,26 @@ const REVEAL_CSS = `
   opacity: 1;
   transform: translateY(0);
 }
+.mvM-drift {
+  animation: mvM-drift 22s ease-in-out infinite alternate;
+  will-change: transform;
+}
+@keyframes mvM-drift {
+  from {
+    transform: translate3d(0, 0, 0);
+  }
+  to {
+    transform: translate3d(-120px, 60px, 0);
+  }
+}
 @media (prefers-reduced-motion: reduce) {
   .mvM-armed .mvM-reveal {
     opacity: 1 !important;
     transform: none !important;
     transition: none !important;
+  }
+  .mvM-drift {
+    animation: none !important;
   }
 }
 `;
@@ -96,6 +111,8 @@ export default function Manifesto() {
       ref={sectionRef}
       aria-labelledby="manifesto-heading"
       style={{
+        position: "relative",
+        overflow: "hidden",
         background: "#111111",
         color: "#FAFAFA",
         fontFamily: DISPLAY,
@@ -103,7 +120,24 @@ export default function Manifesto() {
       }}
     >
       <style>{REVEAL_CSS}</style>
-      <div style={{ maxWidth: 1160, margin: "0 auto" }}>
+      <div
+        aria-hidden="true"
+        className="mvM-drift"
+        style={{
+          position: "absolute",
+          top: "-10%",
+          right: "-8%",
+          width: 900,
+          height: 900,
+          borderRadius: "50%",
+          pointerEvents: "none",
+          zIndex: 0,
+          background:
+            "radial-gradient(circle, rgba(8, 89, 212, 0.22) 0%, rgba(255, 255, 255, 0.08) 45%, rgba(255, 255, 255, 0) 70%)",
+          filter: "blur(80px)",
+        }}
+      />
+      <div style={{ position: "relative", zIndex: 1, maxWidth: 1160, margin: "0 auto" }}>
         <p
           style={{
             fontFamily: MONO,

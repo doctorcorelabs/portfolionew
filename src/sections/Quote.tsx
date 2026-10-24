@@ -72,6 +72,8 @@ function clamp01(value: number): number {
 
 export default function Quote() {
   const wrapperRef = useRef<HTMLElement | null>(null);
+  const stickyRef = useRef<HTMLDivElement | null>(null);
+  const [cursorLit, setCursorLit] = useState(false);
   const [progress, setProgress] = useState(0);
   const [reducedMotion, setReducedMotion] = useState(
     () =>
@@ -120,6 +122,25 @@ export default function Quote() {
 
   const missionOpacity = progress <= 0.9 ? 0 : (progress - 0.9) / 0.1;
 
+  /* Dot field cursor plumbing, same geometry as Contact (14px
+     pitch, 0.4px dots, 20 percent base, 44 percent lit, 350px field
+     mask, 50px lit halo, 600ms fade-out). Coordinates are relative
+     to the sticky child, which is the layer the dots live in. */
+  const handleMouseMove = (event: React.MouseEvent<HTMLElement>) => {
+    if (
+      typeof window !== "undefined" &&
+      window.matchMedia("(prefers-reduced-motion: reduce)").matches
+    ) {
+      return;
+    }
+    const node = stickyRef.current;
+    if (!node) return;
+    const rect = node.getBoundingClientRect();
+    node.style.setProperty("--qdot-x", `${event.clientX - rect.left}px`);
+    node.style.setProperty("--qdot-y", `${event.clientY - rect.top}px`);
+    setCursorLit(true);
+  };
+
   const claim = (
     <h1
       id="quote-heading"
@@ -140,6 +161,12 @@ export default function Quote() {
             <span
               style={{
                 color: painted ? INK : PALE,
+                /* Inactive words carry a light outline stroke, as
+                   in the reference; the exact stroke color is
+                   UNVERIFIED, so this is a subtle reading of it. */
+                WebkitTextStroke: painted
+                  ? undefined
+                  : "1px rgba(1, 1, 1, 0.15)",
                 fontWeight: word.bold ? 700 : undefined,
                 transition: reducedMotion ? undefined : "color 0.35s",
               }}
@@ -223,7 +250,15 @@ export default function Quote() {
   );
 
   const body = (drawn: number) => (
-    <div style={{ maxWidth: 1160, margin: "0 auto", width: "100%" }}>
+    <div
+      style={{
+        maxWidth: 1160,
+        margin: "0 auto",
+        width: "100%",
+        position: "relative",
+        zIndex: 1,
+      }}
+    >
       <div style={{ position: "relative", paddingLeft: 32 }}>
         {rule(drawn)}
         <p
@@ -267,6 +302,8 @@ export default function Quote() {
       ref={wrapperRef}
       aria-labelledby="quote-heading"
       className="q-pin-wrap"
+      onMouseMove={handleMouseMove}
+      onMouseLeave={() => setCursorLit(false)}
       style={{
         background: "#FFFFFF",
         color: INK,
@@ -287,6 +324,25 @@ export default function Quote() {
           box-sizing: border-box;
           overflow-y: auto;
         }
+        .q-dot-base,
+        .q-dot-lit {
+          position: absolute;
+          inset: 0;
+          pointer-events: none;
+          background-size: 14px 14px;
+          background-repeat: repeat;
+          z-index: 0;
+        }
+        .q-dot-base {
+          background-image: radial-gradient(circle, rgba(0, 0, 0, 0.2) 0.4px, transparent 0.5px);
+          -webkit-mask-image: radial-gradient(circle 350px at var(--qdot-x, 50%) var(--qdot-y, 50%), rgba(0, 0, 0, 1) 0%, rgba(0, 0, 0, 1) 60%, rgba(0, 0, 0, 0) 100%);
+          mask-image: radial-gradient(circle 350px at var(--qdot-x, 50%) var(--qdot-y, 50%), rgba(0, 0, 0, 1) 0%, rgba(0, 0, 0, 1) 60%, rgba(0, 0, 0, 0) 100%);
+        }
+        .q-dot-lit {
+          background-image: radial-gradient(circle, rgba(0, 0, 0, 0.44) 0.4px, transparent 0.5px);
+          -webkit-mask-image: radial-gradient(circle 50px at var(--qdot-x, 50%) var(--qdot-y, 50%), rgba(0, 0, 0, 0.65) 0%, rgba(0, 0, 0, 0) 100%);
+          mask-image: radial-gradient(circle 50px at var(--qdot-x, 50%) var(--qdot-y, 50%), rgba(0, 0, 0, 0.65) 0%, rgba(0, 0, 0, 0) 100%);
+        }
         @media (max-width: 1023px) {
           .q-pin-wrap {
             height: calc(100svh + 1125px + 140px);
@@ -306,7 +362,18 @@ export default function Quote() {
           }
         }
       `}</style>
-      <div className="q-pin-sticky">{body(progress)}</div>
+      <div ref={stickyRef} className="q-pin-sticky">
+        <div aria-hidden="true" className="q-dot-base" />
+        <div
+          aria-hidden="true"
+          className="q-dot-lit"
+          style={{
+            opacity: cursorLit ? 1 : 0,
+            transition: `opacity ${cursorLit ? 0 : 600}ms ease`,
+          }}
+        />
+        {body(progress)}
+      </div>
     </section>
   );
 }

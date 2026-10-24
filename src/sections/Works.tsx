@@ -187,9 +187,33 @@ export default function Works() {
           from { opacity: 0; transform: translateY(14px); }
           to { opacity: 1; transform: translateY(0); }
         }
-        .wk-row { opacity: 0; }
+        .wk-row { opacity: 0; transition: background-color 300ms cubic-bezier(0.22, 1, 0.36, 1); }
+        .wk-row:hover, .wk-row:focus-within { background-color: #EFF4FE; }
         .wk-row.wk-in { animation: wkRise 500ms cubic-bezier(0.22, 1, 0.36, 1) forwards; }
+        .wk-index { transition: color 300ms cubic-bezier(0.22, 1, 0.36, 1); }
+        .wk-row:hover .wk-index, .wk-row:focus-within .wk-index { color: #0859D4; }
+        .wk-arrow {
+          display: inline-block;
+          margin-left: 6px;
+          color: #0859D4;
+          opacity: 0;
+          transform: translateX(8px);
+          transition: opacity 300ms cubic-bezier(0.22, 1, 0.36, 1), transform 300ms cubic-bezier(0.22, 1, 0.36, 1);
+        }
+        .wk-row:hover .wk-arrow, .wk-row:focus-within .wk-arrow, .wk-link:hover .wk-arrow, .wk-link:focus-visible .wk-arrow {
+          opacity: 1;
+          transform: translateX(0);
+        }
         .wk-title { transition: transform 300ms cubic-bezier(0.22, 1, 0.36, 1); }
+        /* Site-wide dotted motif (docs/deep/05): 1px square tiles
+           from a repeating gradient under the section title. */
+        .wk-dotted-rule {
+          width: 160px;
+          height: 1px;
+          background-image: repeating-linear-gradient(to right, rgba(1, 1, 1, 0.55) 0 1px, transparent 1px 4px);
+          background-size: 4px 1px;
+          background-repeat: repeat-x;
+        }
         .wk-row:hover .wk-title { transform: translateX(4px); }
         .wk-link {
           text-decoration: none;
@@ -204,7 +228,10 @@ export default function Works() {
           color: #0859d4;
         }
         @media (prefers-reduced-motion: reduce) {
-          .wk-row { opacity: 1 !important; animation: none !important; transform: none !important; }
+          .wk-row { opacity: 1 !important; animation: none !important; transform: none !important; transition: none; }
+          .wk-index { transition: none; }
+          .wk-arrow { transition: none; transform: none; }
+          .wk-row:hover .wk-arrow, .wk-row:focus-within .wk-arrow { opacity: 1; transform: none; }
           .wk-title { transition: none; }
           .wk-row:hover .wk-title { transform: none; }
           .wk-link { transition: none; background-size: 100% 1px; }
@@ -226,7 +253,7 @@ export default function Works() {
         <h2
           id="works-heading"
           style={{
-            margin: "0 0 80px",
+            margin: "0 0 24px",
             fontSize: "clamp(48px, 8vw, 96px)",
             lineHeight: 0.95,
             letterSpacing: "-0.02em",
@@ -235,6 +262,11 @@ export default function Works() {
         >
           Selected works.
         </h2>
+        <div
+          aria-hidden="true"
+          className="wk-dotted-rule"
+          style={{ margin: "0 0 56px" }}
+        />
         <ol ref={listRef} style={{ listStyle: "none", margin: 0, padding: 0 }}>
           {rows.map((row, rowIndex) => (
             <li
@@ -251,6 +283,7 @@ export default function Works() {
               }}
             >
               <span
+                className="wk-index"
                 style={{
                   fontFamily: MONO,
                   fontSize: 13,
@@ -311,7 +344,10 @@ export default function Works() {
                   paddingBottom: 3,
                 }}
               >
-                {row.linkLabel} -&gt;
+                {row.linkLabel}{" "}
+                <span className="wk-arrow" aria-hidden="true">
+                  →
+                </span>
               </Link>
             </li>
           ))}
