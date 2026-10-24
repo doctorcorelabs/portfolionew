@@ -9,6 +9,66 @@
  * listed on /research, not repeated here.
  */
 
+import { useEffect } from "react";
+
+function useMvReveal() {
+  useEffect(() => {
+    const els = Array.from(document.querySelectorAll<HTMLElement>(".mv-rv"));
+    if (els.length === 0) return;
+    if (typeof IntersectionObserver === "undefined") {
+      els.forEach((el) => el.classList.add("mv-in"));
+      return;
+    }
+    const io = new IntersectionObserver(
+      (entries) => {
+        for (const entry of entries) {
+          if (entry.isIntersecting) {
+            (entry.target as HTMLElement).classList.add("mv-in");
+            io.unobserve(entry.target);
+          }
+        }
+      },
+      { threshold: 0.15, rootMargin: "0px 0px -4% 0px" },
+    );
+    els.forEach((el) => io.observe(el));
+    return () => io.disconnect();
+  }, []);
+}
+
+const MV_CSS = `
+.mv-rv {
+  opacity: 0;
+  transform: translateY(14px);
+  transition: opacity 600ms ease, transform 600ms cubic-bezier(0.22, 1, 0.36, 1);
+  will-change: opacity, transform;
+}
+.mv-rv.mv-in {
+  opacity: 1;
+  transform: none;
+}
+.mv-link {
+  background-image: linear-gradient(currentColor, currentColor);
+  background-size: 0% 1px;
+  background-repeat: no-repeat;
+  background-position: 0 100%;
+  transition: background-size 350ms ease;
+  text-decoration: none;
+}
+.mv-link:hover, .mv-link:focus-visible {
+  background-size: 100% 1px;
+}
+@media (prefers-reduced-motion: reduce) {
+  .mv-rv {
+    opacity: 1;
+    transform: none;
+    transition: none;
+  }
+  .mv-link {
+    transition: none;
+  }
+}
+`;
+
 const INK = "#010101";
 const GRAPHITE = "#1D1D1F";
 const MUTED = "#666666";
@@ -167,10 +227,12 @@ const INTERNATIONAL: AwardItem[] = [
 function AwardList({ items }: { items: AwardItem[] }) {
   return (
     <div>
-      {items.map((item) => (
+      {items.map((item, i) => (
         <div
           key={item.title}
+          data-mv
           style={{
+            transitionDelay: `${Math.min(i, 11) * 80}ms`,
             display: "flex",
             flexWrap: "wrap",
             gap: "8px 32px",
@@ -220,6 +282,7 @@ function AwardList({ items }: { items: AwardItem[] }) {
 }
 
 export default function AwardsPage() {
+  useMvReveal();
   return (
     <main
       style={{
@@ -228,6 +291,7 @@ export default function AwardsPage() {
         fontFamily: DISPLAY,
       }}
     >
+      <style>{MV_CSS}</style>
       <div
         style={{
           maxWidth: 1160,
@@ -248,6 +312,7 @@ export default function AwardsPage() {
           Archive / Awards
         </p>
         <h1
+          data-mv
           style={{
             fontSize: "clamp(48px, 7vw, 96px)",
             lineHeight: 0.95,
@@ -273,6 +338,7 @@ export default function AwardsPage() {
 
         <section style={{ marginBottom: 130 }}>
           <h2
+            data-mv
             style={{
               fontSize: "clamp(32px, 4vw, 56px)",
               lineHeight: 1.02,
@@ -300,6 +366,7 @@ export default function AwardsPage() {
 
         <section style={{ marginBottom: 130 }}>
           <h2
+            data-mv
             style={{
               fontSize: "clamp(32px, 4vw, 56px)",
               lineHeight: 1.02,
@@ -348,7 +415,8 @@ export default function AwardsPage() {
             and English versions. Publications themselves are listed on{" "}
             <a
               href="/research"
-              style={{ color: BLUE, textDecoration: "underline" }}
+              className="mv-link"
+              style={{ color: BLUE }}
             >
               /research
             </a>

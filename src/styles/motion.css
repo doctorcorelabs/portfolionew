@@ -1,0 +1,119 @@
+/* Motion foundation for the v2 portfolio, Onlines tokens only.
+ * Ink #010101, blue accent #0859D4. No scroll lock, no custom cursor.
+ * All motion is opt-out safe: prefers-reduced-motion forces everything
+ * visible and static. */
+
+@keyframes mv-fade-up {
+  from {
+    opacity: 0;
+    transform: translateY(24px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes mv-fade-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+/* Hairlines and dashed rules draw in from the left. */
+@keyframes mv-draw-line {
+  from {
+    transform: scaleX(0);
+  }
+  to {
+    transform: scaleX(1);
+  }
+}
+
+@keyframes mv-marquee {
+  from {
+    transform: translateX(0);
+  }
+  to {
+    transform: translateX(-50%);
+  }
+}
+
+/* Faint graph grid fades in behind the hero. */
+@keyframes mv-grid-fade {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+/* Selection-box handles pop in once, staggered by delay classes. */
+@keyframes mv-pop {
+  0% {
+    opacity: 0;
+    transform: scale(0.5);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+/* Scroll reveal: hidden until useReveal flips .is-visible on. */
+.mv-reveal {
+  opacity: 0;
+  transform: translateY(24px);
+  transition:
+    opacity 0.8s cubic-bezier(0.22, 1, 0.36, 1),
+    transform 0.8s cubic-bezier(0.22, 1, 0.36, 1);
+  will-change: opacity, transform;
+}
+
+.mv-reveal.is-visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.mv-reveal-delay-1 {
+  transition-delay: 80ms;
+}
+
+.mv-reveal-delay-2 {
+  transition-delay: 160ms;
+}
+
+.mv-reveal-delay-3 {
+  transition-delay: 240ms;
+}
+
+/* Route change fade-in. */
+.mv-page {
+  animation: mv-fade-in 0.3s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .mv-reveal,
+  .mv-reveal.is-visible {
+    opacity: 1;
+    transform: none;
+    transition: none;
+    animation: none;
+  }
+
+  .mv-page {
+    animation: none;
+  }
+
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}

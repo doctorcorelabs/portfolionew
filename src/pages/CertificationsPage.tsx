@@ -11,6 +11,66 @@
  * Every record is dated 2024 as recorded.
  */
 
+import { useEffect } from "react";
+
+function useMvReveal() {
+  useEffect(() => {
+    const els = Array.from(document.querySelectorAll<HTMLElement>(".mv-rv"));
+    if (els.length === 0) return;
+    if (typeof IntersectionObserver === "undefined") {
+      els.forEach((el) => el.classList.add("mv-in"));
+      return;
+    }
+    const io = new IntersectionObserver(
+      (entries) => {
+        for (const entry of entries) {
+          if (entry.isIntersecting) {
+            (entry.target as HTMLElement).classList.add("mv-in");
+            io.unobserve(entry.target);
+          }
+        }
+      },
+      { threshold: 0.15, rootMargin: "0px 0px -4% 0px" },
+    );
+    els.forEach((el) => io.observe(el));
+    return () => io.disconnect();
+  }, []);
+}
+
+const MV_CSS = `
+.mv-rv {
+  opacity: 0;
+  transform: translateY(14px);
+  transition: opacity 600ms ease, transform 600ms cubic-bezier(0.22, 1, 0.36, 1);
+  will-change: opacity, transform;
+}
+.mv-rv.mv-in {
+  opacity: 1;
+  transform: none;
+}
+.mv-link {
+  background-image: linear-gradient(currentColor, currentColor);
+  background-size: 0% 1px;
+  background-repeat: no-repeat;
+  background-position: 0 100%;
+  transition: background-size 350ms ease;
+  text-decoration: none;
+}
+.mv-link:hover, .mv-link:focus-visible {
+  background-size: 100% 1px;
+}
+@media (prefers-reduced-motion: reduce) {
+  .mv-rv {
+    opacity: 1;
+    transform: none;
+    transition: none;
+  }
+  .mv-link {
+    transition: none;
+  }
+}
+`;
+
 type CertGroup = {
   provider: string;
   note?: string;
@@ -111,6 +171,7 @@ const MONO =
   "'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, monospace";
 
 export default function CertificationsPage() {
+  useMvReveal();
   return (
     <main
       style={{
@@ -120,6 +181,7 @@ export default function CertificationsPage() {
         padding: "80px 24px 130px",
       }}
     >
+      <style>{MV_CSS}</style>
       <div style={{ maxWidth: 1160, margin: "0 auto" }}>
         <p
           style={{
@@ -134,6 +196,7 @@ export default function CertificationsPage() {
           Archive / Certifications
         </p>
         <h1
+          data-mv
           style={{
             fontSize: "clamp(56px, 9vw, 96px)",
             lineHeight: 0.95,
@@ -173,12 +236,14 @@ export default function CertificationsPage() {
         {GROUPS.map((group) => (
           <section
             key={group.provider}
+            data-mv
             style={{
               borderTop: `1px solid ${HAIRLINE}`,
               padding: "32px 0",
             }}
           >
             <p
+              data-mv
               style={{
                 fontFamily: MONO,
                 fontSize: 12,
@@ -192,10 +257,12 @@ export default function CertificationsPage() {
               {group.note ? ` - ${group.note}` : ""}
             </p>
             <ul style={{ listStyle: "none", margin: 0, padding: 0 }}>
-              {group.titles.map((title) => (
+              {group.titles.map((title, ti) => (
                 <li
                   key={title}
+                  data-mv
                   style={{
+                    transitionDelay: `${Math.min(ti, 11) * 80}ms`,
                     display: "flex",
                     flexWrap: "wrap",
                     gap: "16px 32px",
@@ -251,13 +318,13 @@ export default function CertificationsPage() {
         <p style={{ margin: "32px 0 0" }}>
           <a
             href="/"
+            className="mv-link"
             style={{
               fontFamily: MONO,
               fontSize: 13,
               letterSpacing: "0.08em",
               textTransform: "uppercase",
               color: BLUE,
-              textDecoration: "none",
             }}
           >
             Back to home

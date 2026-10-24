@@ -4,7 +4,18 @@
  * Inter for display, JetBrains Mono for labels, blue #0859D4 only
  * for the tiny step numbers. One idea per section, plain numbered
  * rows, no cards, no rounded corners.
+ *
+ * Motion (self-contained, no shared motion file):
+ * - Title reveals on scroll; the 4 method rows stagger in at 80ms
+ *   steps; the closing margin note fades last.
+ * - A tiny local IntersectionObserver adds mvM-in to the section
+ *   once it enters the viewport, then unobserves. Elements are only
+ *   hidden after the effect arms the section (mvM-armed), so content
+ *   never stays invisible if the observer cannot run.
+ * - prefers-reduced-motion: everything is shown instantly, no motion.
  */
+
+import { useEffect, useRef } from "react";
 
 const DISPLAY =
   "Inter, -apple-system, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif";
@@ -34,10 +45,55 @@ const STEPS: Array<{ num: string; title: string; body: string }> = [
   },
 ];
 
+const REVEAL_CSS = `
+.mvM-armed .mvM-reveal {
+  opacity: 0;
+  transform: translateY(18px);
+  transition: opacity 600ms ease, transform 600ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+.mvM-armed.mvM-in .mvM-reveal {
+  opacity: 1;
+  transform: translateY(0);
+}
+@media (prefers-reduced-motion: reduce) {
+  .mvM-armed .mvM-reveal {
+    opacity: 1 !important;
+    transform: none !important;
+    transition: none !important;
+  }
+}
+`;
+
 export default function Manifesto() {
+  const sectionRef = useRef<HTMLElement | null>(null);
+
+  useEffect(() => {
+    const section = sectionRef.current;
+    if (!section) return;
+    section.classList.add("mvM-armed");
+    if (typeof IntersectionObserver === "undefined") {
+      section.classList.add("mvM-in");
+      return;
+    }
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            section.classList.add("mvM-in");
+            observer.disconnect();
+          }
+        });
+      },
+      { threshold: 0.15 },
+    );
+    observer.observe(section);
+    return () => observer.disconnect();
+  }, []);
+
   return (
     <section
       id="manifesto"
+      ref={sectionRef}
       aria-labelledby="manifesto-heading"
       style={{
         background: "#111111",
@@ -46,6 +102,7 @@ export default function Manifesto() {
         padding: "130px 24px",
       }}
     >
+      <style>{REVEAL_CSS}</style>
       <div style={{ maxWidth: 1160, margin: "0 auto" }}>
         <p
           style={{
@@ -61,6 +118,7 @@ export default function Manifesto() {
         </p>
         <h2
           id="manifesto-heading"
+          className="mvM-reveal"
           style={{
             fontSize: "clamp(48px, 7vw, 72px)",
             lineHeight: 1.02,
@@ -73,9 +131,10 @@ export default function Manifesto() {
           From question to tool.
         </h2>
         <ol style={{ listStyle: "none", margin: 0, padding: 0 }}>
-          {STEPS.map((step) => (
+          {STEPS.map((step, i) => (
             <li
               key={step.num}
+              className="mvM-reveal"
               style={{
                 borderTop: "1px solid rgba(255, 255, 255, 0.15)",
                 padding: "32px 0",
@@ -83,6 +142,7 @@ export default function Manifesto() {
                 flexWrap: "wrap",
                 gap: "16px 48px",
                 alignItems: "baseline",
+                transitionDelay: `${i * 80}ms`,
               }}
             >
               <span
@@ -119,6 +179,7 @@ export default function Manifesto() {
           ))}
         </ol>
         <p
+          className="mvM-reveal"
           style={{
             fontFamily: MONO,
             fontSize: 13,
@@ -126,6 +187,7 @@ export default function Manifesto() {
             color: "#98989C",
             maxWidth: 640,
             margin: "48px 0 0",
+            transitionDelay: "400ms",
           }}
         >
           [1] The order is fixed. No step is skipped to reach a tool faster.

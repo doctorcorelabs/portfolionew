@@ -1,5 +1,65 @@
 import { Link } from "react-router-dom";
 
+import { useEffect } from "react";
+
+function useMvReveal() {
+  useEffect(() => {
+    const els = Array.from(document.querySelectorAll<HTMLElement>(".mv-rv"));
+    if (els.length === 0) return;
+    if (typeof IntersectionObserver === "undefined") {
+      els.forEach((el) => el.classList.add("mv-in"));
+      return;
+    }
+    const io = new IntersectionObserver(
+      (entries) => {
+        for (const entry of entries) {
+          if (entry.isIntersecting) {
+            (entry.target as HTMLElement).classList.add("mv-in");
+            io.unobserve(entry.target);
+          }
+        }
+      },
+      { threshold: 0.15, rootMargin: "0px 0px -4% 0px" },
+    );
+    els.forEach((el) => io.observe(el));
+    return () => io.disconnect();
+  }, []);
+}
+
+const MV_CSS = `
+.mv-rv {
+  opacity: 0;
+  transform: translateY(14px);
+  transition: opacity 600ms ease, transform 600ms cubic-bezier(0.22, 1, 0.36, 1);
+  will-change: opacity, transform;
+}
+.mv-rv.mv-in {
+  opacity: 1;
+  transform: none;
+}
+.mv-link {
+  background-image: linear-gradient(currentColor, currentColor);
+  background-size: 0% 1px;
+  background-repeat: no-repeat;
+  background-position: 0 100%;
+  transition: background-size 350ms ease;
+  text-decoration: none;
+}
+.mv-link:hover, .mv-link:focus-visible {
+  background-size: 100% 1px;
+}
+@media (prefers-reduced-motion: reduce) {
+  .mv-rv {
+    opacity: 1;
+    transform: none;
+    transition: none;
+  }
+  .mv-link {
+    transition: none;
+  }
+}
+`;
+
 /**
  * Experience page, ONLINES styling: container 1160px, Inter display type,
  * JetBrains Mono year labels, hairline separators, blue only for links.
@@ -139,6 +199,7 @@ const ALSO_RECORDED: string[] = [
 ];
 
 export default function ExperiencePage() {
+  useMvReveal();
   return (
     <main
       style={{
@@ -148,6 +209,7 @@ export default function ExperiencePage() {
         padding: "80px 24px 130px",
       }}
     >
+      <style>{MV_CSS}</style>
       <div style={{ maxWidth: 1160, margin: "0 auto" }}>
         <p
           style={{
@@ -162,6 +224,7 @@ export default function ExperiencePage() {
           Experience
         </p>
         <h1
+          data-mv
           style={{
             fontSize: "clamp(56px, 9vw, 96px)",
             lineHeight: 1,
@@ -186,10 +249,12 @@ export default function ExperiencePage() {
         </p>
 
         <div style={{ borderTop: `1px solid ${HAIRLINE}` }}>
-          {ROLES.map((item) => (
+          {ROLES.map((item, i) => (
             <article
               key={`${item.role}-${item.org}`}
+              data-mv
               style={{
+                transitionDelay: `${Math.min(i, 11) * 80}ms`,
                 borderBottom: `1px solid ${HAIRLINE}`,
                 padding: "32px 0",
                 display: "grid",
@@ -261,6 +326,7 @@ export default function ExperiencePage() {
 
         <section style={{ marginTop: 80 }}>
           <h2
+            data-mv
             style={{
               fontSize: 32,
               letterSpacing: "-0.02em",
@@ -290,10 +356,12 @@ export default function ExperiencePage() {
               borderTop: `1px solid ${HAIRLINE}`,
             }}
           >
-            {ALSO_RECORDED.map((item) => (
+            {ALSO_RECORDED.map((item, i) => (
               <li
                 key={item}
+                data-mv
                 style={{
+                  transitionDelay: `${Math.min(i, 11) * 80}ms`,
                   borderBottom: `1px solid ${HAIRLINE}`,
                   padding: "16px 0",
                   fontSize: 17,
@@ -307,11 +375,11 @@ export default function ExperiencePage() {
         </section>
 
         <p style={{ marginTop: 80, fontSize: 15, lineHeight: 1.65 }}>
-          <Link to="/" style={{ color: BLUE }}>
+          <Link to="/" className="mv-link" style={{ color: BLUE }}>
             Back to the homepage
           </Link>
           {" | "}
-          <Link to="/education" style={{ color: BLUE }}>
+          <Link to="/education" className="mv-link" style={{ color: BLUE }}>
             Education
           </Link>
         </p>

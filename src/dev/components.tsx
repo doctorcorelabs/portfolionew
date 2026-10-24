@@ -24,6 +24,8 @@ import {
   forestPlotSintetis,
   karyaSintetis,
 } from "./synthetic-data";
+import { MotionStyle, motionClassName } from "./motion";
+import type { MotionKind } from "./motion";
 
 const INK = "#010101";
 const GRAPHITE = "#1D1D1F";
@@ -59,8 +61,9 @@ export const heroDefaults: HeroValues = {
   aksen: ACCENT_DEFAULT,
 };
 
-export function HeroEditorialRaksasa(props: Partial<HeroValues> = {}) {
-  const v: HeroValues = { ...heroDefaults, ...props };
+export function HeroEditorialRaksasa(props: Partial<HeroValues> & { motion?: MotionKind } = {}) {
+  const { motion, ...valueProps } = props;
+  const v: HeroValues = { ...heroDefaults, ...valueProps };
   const sectionStyle: CSSProperties = {
     background: PAPER,
     backgroundImage:
@@ -84,7 +87,9 @@ export function HeroEditorialRaksasa(props: Partial<HeroValues> = {}) {
     boxSizing: "border-box",
   };
   return (
-    <section style={sectionStyle}>
+    <>
+      {motion ? <MotionStyle /> : null}
+      <section style={sectionStyle} className={motionClassName(motion)}>
       <p
         style={{
           margin: 0,
@@ -164,6 +169,7 @@ export function HeroEditorialRaksasa(props: Partial<HeroValues> = {}) {
         Lab Contoh - Sejak 2025 - Data sintetis
       </p>
     </section>
+    </>
   );
 }
 
@@ -185,9 +191,12 @@ export const manifestoDefaults: ManifestoValues = {
   aksen: ACCENT_DEFAULT,
 };
 
-export function HeroManifestoDuaKolom(props: Partial<ManifestoValues> = {}) {
-  const v: ManifestoValues = { ...manifestoDefaults, ...props };
+export function HeroManifestoDuaKolom(props: Partial<ManifestoValues> & { motion?: MotionKind } = {}) {
+  const { motion, ...valueProps } = props;
+  const v: ManifestoValues = { ...manifestoDefaults, ...valueProps };
   return (
+    <>
+      {motion ? <MotionStyle /> : null}
     <section
       style={{
         background: PAPER,
@@ -197,8 +206,12 @@ export function HeroManifestoDuaKolom(props: Partial<ManifestoValues> = {}) {
         height: "100%",
         boxSizing: "border-box",
       }}
+      className={motionClassName(motion)}
     >
-      <div style={{ display: "grid", gridTemplateColumns: "1.2fr 1fr", gap: 64 }}>
+      <div
+          className={motion === "reveal" ? "onlines-motion-reveal" : undefined}
+          style={{ display: "grid", gridTemplateColumns: "1.2fr 1fr", gap: 64 }}
+        >
         <h2
           style={{
             margin: 0,
@@ -212,7 +225,10 @@ export function HeroManifestoDuaKolom(props: Partial<ManifestoValues> = {}) {
           <br />
           bukan yang diklaim.
         </h2>
-        <div style={{ display: "flex", flexDirection: "column", gap: v.heroGap }}>
+        <div
+            className={motion === "reveal" ? "onlines-motion-reveal" : undefined}
+            style={{ display: "flex", flexDirection: "column", gap: v.heroGap }}
+          >
           <p style={{ margin: 0, fontSize: 18, lineHeight: 1.65, color: GRAPHITE }}>
             Manifesto kandidat: dari pertanyaan klinis ke data, dari data ke
             visualisasi, dari visualisasi ke alat yang bisa dipakai belajar.
@@ -236,6 +252,7 @@ export function HeroManifestoDuaKolom(props: Partial<ManifestoValues> = {}) {
         </div>
       </div>
     </section>
+    </>
   );
 }
 
@@ -259,9 +276,12 @@ export const kartuDefaults: KartuValues = {
   hoverShiftX: 6,
 };
 
-export function KartuRisetIndeksBaris(props: Partial<KartuValues> = {}) {
-  const v: KartuValues = { ...kartuDefaults, ...props };
+export function KartuRisetIndeksBaris(props: Partial<KartuValues> & { motion?: MotionKind } = {}) {
+  const { motion, ...valueProps } = props;
+  const v: KartuValues = { ...kartuDefaults, ...valueProps };
   return (
+    <>
+      {motion ? <MotionStyle /> : null}
     <section
       style={{
         background: PAPER,
@@ -272,6 +292,7 @@ export function KartuRisetIndeksBaris(props: Partial<KartuValues> = {}) {
         boxSizing: "border-box",
         overflow: "hidden",
       }}
+      className={motionClassName(motion)}
     >
       <p
         style={{
@@ -285,7 +306,7 @@ export function KartuRisetIndeksBaris(props: Partial<KartuValues> = {}) {
       >
         Fig. 01 - Indeks karya, data sintetis
       </p>
-      <div>
+      <div className={motion === "reveal" ? "onlines-motion-reveal" : undefined}>
         {karyaSintetis.map((karya) => (
           <article
             key={karya.id}
@@ -337,6 +358,7 @@ export function KartuRisetIndeksBaris(props: Partial<KartuValues> = {}) {
         ))}
       </div>
     </section>
+    </>
   );
 }
 
@@ -375,13 +397,16 @@ function logX(value: number, plotLeft: number, plotWidth: number): number {
   return plotLeft + t * plotWidth;
 }
 
-export function VizForestPlot(props: Partial<VizValues> = {}) {
-  const v: VizValues = { ...vizDefaults, ...props };
+export function VizForestPlot(props: Partial<VizValues> & { motion?: MotionKind } = {}) {
+  const { motion, ...valueProps } = props;
+  const v: VizValues = { ...vizDefaults, ...valueProps };
   const plotLeft = 200;
   const plotWidth = 640;
   const plotRight = plotLeft + plotWidth;
   const height = forestPlotSintetis.length * v.rowHeight + 80;
   return (
+    <>
+      {motion ? <MotionStyle /> : null}
     <section
       style={{
         background: ARCHIVE,
@@ -392,6 +417,7 @@ export function VizForestPlot(props: Partial<VizValues> = {}) {
         boxSizing: "border-box",
         overflow: "hidden",
       }}
+      className={motionClassName(motion)}
     >
       <p
         style={{
@@ -409,6 +435,7 @@ export function VizForestPlot(props: Partial<VizValues> = {}) {
         Estimasi efek, lima studi contoh
       </h3>
       <svg
+        className={motion === "reveal" ? "onlines-motion-reveal" : undefined}
         width="100%"
         height={height}
         viewBox={`0 0 1084 ${height}`}
@@ -481,6 +508,7 @@ export function VizForestPlot(props: Partial<VizValues> = {}) {
         sebagai kasus tepi. Ini data contoh, bukan hasil riset.
       </p>
     </section>
+    </>
   );
 }
 
@@ -504,9 +532,12 @@ export const footerDefaults: FooterValues = {
   borderWidth: 1,
 };
 
-export function FooterCtaRaksasa(props: Partial<FooterValues> = {}) {
-  const v: FooterValues = { ...footerDefaults, ...props };
+export function FooterCtaRaksasa(props: Partial<FooterValues> & { motion?: MotionKind } = {}) {
+  const { motion, ...valueProps } = props;
+  const v: FooterValues = { ...footerDefaults, ...valueProps };
   return (
+    <>
+      {motion ? <MotionStyle /> : null}
     <footer
       style={{
         background: PAPER,
@@ -517,6 +548,7 @@ export function FooterCtaRaksasa(props: Partial<FooterValues> = {}) {
         height: "100%",
         boxSizing: "border-box",
       }}
+      className={motionClassName(motion)}
     >
       <h2
         style={{
@@ -555,5 +587,6 @@ export function FooterCtaRaksasa(props: Partial<FooterValues> = {}) {
         Lab Contoh - 2026 - Halaman contoh canvas, bukan situs produksi.
       </p>
     </footer>
+    </>
   );
 }

@@ -19,6 +19,8 @@
  *   them before passing them in.
  */
 
+import { useState } from "react";
+
 export type ForestRow = {
   id: string;
   drug: string;
@@ -77,6 +79,10 @@ function formatNumber(value: number): string {
 }
 
 export default function ForestPlot({ rows, studyLabel }: ForestPlotProps) {
+  /* Hovered row id, shared by the plot rows and the companion table rows:
+     hovering either highlights both. The table stays complete without
+     hover; highlight is only an emphasis aid. */
+  const [hoveredId, setHoveredId] = useState<string | null>(null);
   const plotted = [...rows]
     .filter((row) => row.cases === null || row.cases >= 3)
     .sort((a, b) => b.ror - a.ror);
@@ -87,6 +93,21 @@ export default function ForestPlot({ rows, studyLabel }: ForestPlotProps) {
 
   return (
     <figure style={{ margin: 0, width: "100%" }}>
+      {/* Draw-in on mount. Base state is the final state, so with
+         prefers-reduced-motion the plot renders fully and statically:
+         motion.css collapses these animations and the override below
+         removes them outright. */}
+      <style>{`
+        .fp-plot .fp-ref { animation: fp-fade 0.6s ease 0.1s both; }
+        .fp-plot .fp-ci { animation: fp-grow 0.7s cubic-bezier(0.22, 1, 0.36, 1) both; }
+        .fp-plot .fp-point { animation: fp-pop 0.45s cubic-bezier(0.22, 1, 0.36, 1) both; }
+        @keyframes fp-fade { from { opacity: 0; } to { opacity: 1; } }
+        @keyframes fp-grow { from { transform: scaleX(0); } to { transform: scaleX(1); } }
+        @keyframes fp-pop { 0% { opacity: 0; transform: scale(0.5); } 100% { opacity: 1; transform: scale(1); } }
+        @media (prefers-reduced-motion: reduce) {
+          .fp-plot .fp-ref, .fp-plot .fp-ci, .fp-plot .fp-point { animation: none; }
+        }
+      `}</style>
       {studyLabel ? (
         <figcaption
           style={{
@@ -102,6 +123,7 @@ export default function ForestPlot({ rows, studyLabel }: ForestPlotProps) {
         </figcaption>
       ) : null}
       <svg
+        className="fp-plot"
         viewBox={`0 0 ${WIDTH} ${height}`}
         width="100%"
         role="img"
@@ -162,6 +184,7 @@ export default function ForestPlot({ rows, studyLabel }: ForestPlotProps) {
           />
         ))}
         <line
+          className="fp-ref"
           x1={logX(1)}
           y1={HEADER_HEIGHT}
           x2={logX(1)}
@@ -190,7 +213,15 @@ export default function ForestPlot({ rows, studyLabel }: ForestPlotProps) {
           const high = logX(row.ciHigh);
           const label = `${row.drug}: ${row.event}. ROR ${formatNumber(row.ror)}, 95% CI ${formatNumber(row.ciLow)} to ${formatNumber(row.ciHigh)}, ${row.cases === null ? "event-case count not verified" : row.cases + " cases"}.`;
           return (
-            <g key={row.id} tabIndex={0} aria-label={label}>
+            <g
+              key={row.id}
+              tabIndex={0}
+              aria-label={label}
+              onMouseEnter={() => setHoveredId(row.id)}
+              onMouseLeave={() => setHoveredId(null)}
+              onFocus={() => setHoveredId(row.id)}
+              onBlur={() => setHoveredId(null)}
+            >
               <title>{label}</title>
               {index % 2 === 0 ? (
                 <rect
@@ -200,6 +231,16 @@ export default function ForestPlot({ rows, studyLabel }: ForestPlotProps) {
                   height={ROW_HEIGHT}
                   fill={ARCHIVE}
                   opacity={0.45}
+                />
+              ) : null}
+              {hoveredId === row.id ? (
+                <rect
+                  x={0}
+                  y={HEADER_HEIGHT + index * ROW_HEIGHT}
+                  width={WIDTH}
+                  height={ROW_HEIGHT}
+                  fill={ACCENT}
+                  opacity={0.08}
                 />
               ) : null}
               <text
@@ -215,27 +256,54 @@ export default function ForestPlot({ rows, studyLabel }: ForestPlotProps) {
               <text x={LABEL_X} y={y + 15} fontFamily={MONO} fontSize={11} fill={GRAPHITE}>
                 {row.event}
               </text>
-              <line x1={low} y1={y} x2={high} y2={y} stroke={INK} strokeWidth={1.5} />
-              <line x1={low} y1={y - 5} x2={low} y2={y + 5} stroke={INK} strokeWidth={1.5} />
-              <line x1={high} y1={y - 5} x2={high} y2={y + 5} stroke={INK} strokeWidth={1.5} />
-              {row.featured ? (
-                <rect
-                  x={center - size / 2}
-                  y={y - size / 2}
-                  width={size}
-                  height={size}
-                  fill={ACCENT}
-                  transform={`rotate(45 ${center} ${y})`}
-                />
-              ) : (
-                <rect
-                  x={center - size / 2}
-                  y={y - size / 2}
-                  width={size}
-                  height={size}
-                  fill={INK}
-                />
-              )}
+              {/* CI bar grows outward from the point estimate: the group
+                 scales on X around the point's own coordinates. */}
+              <g
+                className="fp-ci"
+                style={{
+                  transformBox: "view-box",
+                  transformOrigin: `${center}px ${y}px`,
+                  animationDelay: `${0.25 + index * 0.12}s`,
+                }}
+              >
+                <line x1={low} y1={y} x2={high} y2={y} stroke={INK} strokeWidth={1.5} />
+                <line x1={low} y1={y - 5} x2={low} y2={y + 5} stroke={INK} strokeWidth={1.5} />
+                <line x1={high} y1={y - 5} x2={high} y2={y + 5} stroke={INK} strokeWidth={1.5} />
+              </g>
+              {/* Point marker pops in with a per-row stagger. The pop lives
+                 on a wrapper group so the featured diamond keeps its
+                 rotate attribute on the rect itself. */}
+              <g
+                className="fp-point"
+                style={{
+                  transformBox: "fill-box",
+                  transformOrigin: "center",
+                  animationDelay: `${0.55 + index * 0.12}s`,
+                }}
+              >
+                {row.featured ? (
+                  <rect
+                    x={center - size / 2}
+                    y={y - size / 2}
+                    width={size}
+                    height={size}
+                    fill={ACCENT}
+                    transform={`rotate(45 ${center} ${y})`}
+                    stroke={hoveredId === row.id ? ACCENT : undefined}
+                    strokeWidth={hoveredId === row.id ? 2 : undefined}
+                  />
+                ) : (
+                  <rect
+                    x={center - size / 2}
+                    y={y - size / 2}
+                    width={size}
+                    height={size}
+                    fill={INK}
+                    stroke={hoveredId === row.id ? ACCENT : undefined}
+                    strokeWidth={hoveredId === row.id ? 2 : undefined}
+                  />
+                )}
+              </g>
               <text x={VALUE_X} y={y + 4} fontFamily={MONO} fontSize={12} fill={INK}>
                 {formatNumber(row.ror)} [{formatNumber(row.ciLow)} - {formatNumber(row.ciHigh)}]
                 {"  "}
@@ -261,7 +329,8 @@ export default function ForestPlot({ rows, studyLabel }: ForestPlotProps) {
         ))}
       </svg>
 
-      {/* Static companion table: the plot stays complete without hover. */}
+      {/* Companion table: complete without hover; hovering a table row
+         highlights the matching plot row, and vice versa. */}
       <table
         style={{
           width: "100%",
@@ -285,7 +354,16 @@ export default function ForestPlot({ rows, studyLabel }: ForestPlotProps) {
           {[...rows]
             .sort((a, b) => b.ror - a.ror)
             .map((row) => (
-              <tr key={row.id} style={{ borderBottom: `1px solid ${HAIRLINE}` }}>
+              <tr
+                key={row.id}
+                onMouseEnter={() => setHoveredId(row.id)}
+                onMouseLeave={() => setHoveredId(null)}
+                style={{
+                  borderBottom: `1px solid ${HAIRLINE}`,
+                  backgroundColor: hoveredId === row.id ? "#EFF4FE" : "transparent",
+                  transition: "background-color 0.15s ease",
+                }}
+              >
                 <td style={{ padding: "8px 8px 8px 0", color: INK }}>{row.drug}</td>
                 <td style={{ padding: 8, color: GRAPHITE }}>{row.event}</td>
                 <td style={{ padding: 8, color: INK }}>{formatNumber(row.ror)}</td>

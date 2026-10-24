@@ -1,3 +1,5 @@
+import { useEffect, useRef, useState } from "react";
+
 const EMAIL = "daivanfebrijuansetiya@gmail.com";
 const LINKEDIN = "https://www.linkedin.com/in/daivan-febri-juan-setiya/";
 const ORCID = "https://orcid.org/0009-0000-2528-8459";
@@ -13,26 +15,93 @@ const pageLinks = [
 ];
 
 export default function Footer() {
+  const [inView, setInView] = useState(false);
+  const rootRef = useRef<HTMLElement | null>(null);
+
+  useEffect(() => {
+    const node = rootRef.current;
+    if (!node) return;
+    if (typeof IntersectionObserver === "undefined") {
+      setInView(true);
+      return;
+    }
+    const observer = new IntersectionObserver(
+      (entries) => {
+        if (entries[0].isIntersecting) {
+          setInView(true);
+          observer.disconnect();
+        }
+      },
+      { threshold: 0.2 },
+    );
+    observer.observe(node);
+    return () => observer.disconnect();
+  }, []);
+
   return (
-    <footer style={styles.footer}>
+    <footer
+      style={styles.footer}
+      ref={rootRef}
+      className={`footer-mv-root${inView ? " is-inview" : ""}`}
+    >
+      <style>{`
+        .footer-mv-root .footer-mv-line {
+          opacity: 0;
+          transform: translateY(10px);
+          transition: opacity 700ms ease, transform 700ms ease;
+        }
+        .footer-mv-root.is-inview .footer-mv-line {
+          opacity: 1;
+          transform: translateY(0);
+        }
+        .footer-mv-root .footer-mv-nav {
+          opacity: 0;
+          transform: translateY(10px);
+          transition: opacity 700ms ease 270ms, transform 700ms ease 270ms;
+        }
+        .footer-mv-root.is-inview .footer-mv-nav {
+          opacity: 1;
+          transform: translateY(0);
+        }
+        .footer-mv-root .footer-mv-link {
+          background-image: linear-gradient(currentColor, currentColor);
+          background-repeat: no-repeat;
+          background-position: 0 100%;
+          background-size: 0% 1px;
+          transition: background-size 350ms ease;
+        }
+        .footer-mv-root .footer-mv-link:hover {
+          background-size: 100% 1px;
+        }
+        @media (prefers-reduced-motion: reduce) {
+          .footer-mv-root .footer-mv-line,
+          .footer-mv-root .footer-mv-nav,
+          .footer-mv-root .footer-mv-link {
+            transition: none !important;
+            opacity: 1 !important;
+            transform: none !important;
+            background-size: 100% 1px;
+          }
+        }
+      `}</style>
       <div style={styles.inner}>
-        <p style={styles.line}>
+        <p className="footer-mv-line" style={{ ...styles.line, transitionDelay: "0ms" }}>
           DaivanLabs. - Research and healthcare tools from Indonesia. Code
           for Cure.
         </p>
-        <p style={styles.line}>
+        <p className="footer-mv-line" style={{ ...styles.line, transitionDelay: "90ms" }}>
           &copy; 2026 Daivan Febri Juan Setiya
         </p>
-        <p style={styles.line}>
+        <p className="footer-mv-line" style={{ ...styles.line, transitionDelay: "180ms" }}>
           Faculty of Medicine, Universitas Islam Indonesia
         </p>
-        <nav aria-label="Footer" style={styles.nav}>
+        <nav aria-label="Footer" style={styles.nav} className="footer-mv-nav">
           {pageLinks.map((link) => (
-            <a key={link.label} href={link.href} style={styles.link}>
+            <a key={link.label} href={link.href} style={styles.link} className="footer-mv-link">
               {link.label}
             </a>
           ))}
-          <a href={`mailto:${EMAIL}`} style={styles.link}>
+          <a href={`mailto:${EMAIL}`} style={styles.link} className="footer-mv-link">
             {EMAIL}
           </a>
           <a
@@ -40,13 +109,14 @@ export default function Footer() {
             target="_blank"
             rel="noreferrer"
             style={styles.link}
+            className="footer-mv-link"
           >
             LinkedIn
           </a>
-          <a href={ORCID} target="_blank" rel="noreferrer" style={styles.link}>
+          <a href={ORCID} target="_blank" rel="noreferrer" style={styles.link} className="footer-mv-link">
             ORCID
           </a>
-          <a href={INSTAGRAM} target="_blank" rel="noreferrer" style={styles.link}>
+          <a href={INSTAGRAM} target="_blank" rel="noreferrer" style={styles.link} className="footer-mv-link">
             Instagram
           </a>
         </nav>

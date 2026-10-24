@@ -43,3 +43,19 @@ dan alasannya, nilai mentah hasil Copy dari panel DialKit, tanggal.
 - Data canvas 100 persen sintetis. Tidak ada angka riset asli, data
   pasien, data pengguna asli, atau kredensial di file ini maupun di
   registry.
+
+## Motion v2 - Onlines (task 14/15)
+
+- Token motion: entrance dan reveal 0.8s, hover 0.3s, easing
+  cubic-bezier(0.22,1,0.36,1), naik entrance 24px, angkat hover
+  -4px, langkah stagger reveal 0.08s. File: motion.tsx (token,
+  keyframes, class), components.tsx (prop motion di 5 komponen),
+  motion-wrappers.tsx (15 varian), registry.tsx (15 entri baru
+  dengan id stabil, baris baru di bawah kartu dasar).
+- Tiap varian dasar mendapat 3 varian motion: entrance (fade +
+  rise), hover (lift halus), reveal (anak muncul berurutan).
+  Varian motion memakai nilai bawaan komponen, bukan slider
+  DialKit, supaya tidak tabrakan id persist dengan varian dasar.
+- Status: motion variants ADDED, NONE SELECTED yet. Nilai produksi
+  masih harus dikunci sebagai token eksplisit di source setelah
+  tuning, mengikuti aturan penguncian di atas.

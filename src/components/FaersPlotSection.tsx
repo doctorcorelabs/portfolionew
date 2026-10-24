@@ -20,6 +20,7 @@
  *   out), the honest "Forest plot pending" panel renders instead of a plot.
  */
 
+import React from "react";
 import ForestPlot, { type ForestRow } from "./ForestPlot";
 
 const INK = "#010101";
@@ -127,6 +128,11 @@ function loadPlotData(): PlotData | null {
 
 export default function FaersPlotSection() {
   const data = loadPlotData();
+  const [mounted, setMounted] = React.useState(false);
+  React.useEffect(() => {
+    const raf = requestAnimationFrame(() => setMounted(true));
+    return () => cancelAnimationFrame(raf);
+  }, []);
 
   if (!data) {
     return (
@@ -183,7 +189,10 @@ export default function FaersPlotSection() {
   }
 
   return (
-    <div style={{ margin: "24px 0" }}>
+    <div
+      className={`mv-reveal${mounted ? " is-visible" : ""}`}
+      style={{ margin: "24px 0" }}
+    >
       <ForestPlot
         rows={data.rows}
         studyLabel="Forest plot - reporting odds ratios"

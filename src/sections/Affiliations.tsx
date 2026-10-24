@@ -1,3 +1,5 @@
+import { useEffect, useRef } from "react";
+
 /**
  * Affiliations: the Onlines monochrome logo wall, translated honestly.
  * Institutions are shown as TEXT wordmarks only. No institution logo is
@@ -48,6 +50,31 @@ const affiliations = [
 ];
 
 export default function Affiliations() {
+  const stripRef = useRef<HTMLUListElement | null>(null);
+
+  useEffect(() => {
+    const strip = stripRef.current;
+    if (!strip) return;
+    const items = Array.from(strip.querySelectorAll(".af-item"));
+    if (typeof IntersectionObserver === "undefined") {
+      items.forEach((item) => item.classList.add("af-in"));
+      return;
+    }
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            entry.target.classList.add("af-in");
+            observer.unobserve(entry.target);
+          }
+        });
+      },
+      { threshold: 0.15, rootMargin: "0px 0px -8% 0px" },
+    );
+    items.forEach((item) => observer.observe(item));
+    return () => observer.disconnect();
+  }, []);
+
   return (
     <section
       aria-label="Study and affiliation"
@@ -59,6 +86,21 @@ export default function Affiliations() {
         borderTop: `1px solid ${HAIRLINE}`,
       }}
     >
+      <style>{`
+        @keyframes afFadeUp {
+          from { opacity: 0; transform: translateY(10px); }
+          to { opacity: 1; transform: translateY(0); }
+        }
+        .af-item { opacity: 0; }
+        .af-item.af-in { animation: afFadeUp 450ms ease forwards; }
+        .af-mark { color: #4a4a4a; transition: transform 250ms ease, color 250ms ease; }
+        .af-item:hover .af-mark { transform: translateY(-2px); color: #010101; }
+        @media (prefers-reduced-motion: reduce) {
+          .af-item { opacity: 1 !important; animation: none !important; transform: none !important; }
+          .af-mark { transition: none; }
+          .af-item:hover .af-mark { transform: none; }
+        }
+      `}</style>
       <div style={{ maxWidth: 1160, margin: "0 auto" }}>
         <p
           style={{
@@ -85,6 +127,7 @@ export default function Affiliations() {
           are not presented as clients anywhere on this site.
         </p>
         <ul
+          ref={stripRef}
           style={{
             listStyle: "none",
             margin: 0,
@@ -95,9 +138,14 @@ export default function Affiliations() {
             alignItems: "flex-start",
           }}
         >
-          {affiliations.map((entry) => (
-            <li key={entry.name} style={{ maxWidth: 260 }}>
+          {affiliations.map((entry, entryIndex) => (
+            <li
+              key={entry.name}
+              className="af-item"
+              style={{ maxWidth: 260, animationDelay: `${entryIndex * 70}ms` }}
+            >
               <span
+                className="af-mark"
                 style={{
                   display: "block",
                   fontFamily: MONO,

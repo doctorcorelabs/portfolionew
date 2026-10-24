@@ -1,3 +1,4 @@
+import { useEffect, useRef } from "react";
 import { Link } from "react-router-dom";
 import { researchItems } from "../data/content";
 
@@ -25,7 +26,6 @@ const GRAPHITE = "#1d1d1f";
 const MUTED = "#98989c";
 const HAIRLINE = "#e0e0e0";
 const PAPER = "#ffffff";
-const BLUE = "#0859d4";
 
 const DISPLAY =
   "'Inter Display', Inter, -apple-system, 'Segoe UI', Roboto, sans-serif";
@@ -147,6 +147,31 @@ const archiveRows: WorkRow[] = [
 const rows: WorkRow[] = [...featuredRows, ...archiveRows];
 
 export default function Works() {
+  const listRef = useRef<HTMLOListElement | null>(null);
+
+  useEffect(() => {
+    const list = listRef.current;
+    if (!list) return;
+    const rows = Array.from(list.querySelectorAll(".wk-row"));
+    if (typeof IntersectionObserver === "undefined") {
+      rows.forEach((row) => row.classList.add("wk-in"));
+      return;
+    }
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            entry.target.classList.add("wk-in");
+            observer.unobserve(entry.target);
+          }
+        });
+      },
+      { threshold: 0.15, rootMargin: "0px 0px -8% 0px" },
+    );
+    rows.forEach((row) => observer.observe(row));
+    return () => observer.disconnect();
+  }, []);
+
   return (
     <section
       aria-labelledby="works-heading"
@@ -157,6 +182,34 @@ export default function Works() {
         padding: "80px 24px 200px",
       }}
     >
+      <style>{`
+        @keyframes wkRise {
+          from { opacity: 0; transform: translateY(14px); }
+          to { opacity: 1; transform: translateY(0); }
+        }
+        .wk-row { opacity: 0; }
+        .wk-row.wk-in { animation: wkRise 500ms cubic-bezier(0.22, 1, 0.36, 1) forwards; }
+        .wk-title { transition: transform 300ms cubic-bezier(0.22, 1, 0.36, 1); }
+        .wk-row:hover .wk-title { transform: translateX(4px); }
+        .wk-link {
+          text-decoration: none;
+          background-image: linear-gradient(#0859d4, #0859d4);
+          background-size: 0% 1px;
+          background-repeat: no-repeat;
+          background-position: 0 100%;
+          transition: background-size 300ms cubic-bezier(0.22, 1, 0.36, 1), color 300ms cubic-bezier(0.22, 1, 0.36, 1);
+        }
+        .wk-row:hover .wk-link, .wk-link:hover {
+          background-size: 100% 1px;
+          color: #0859d4;
+        }
+        @media (prefers-reduced-motion: reduce) {
+          .wk-row { opacity: 1 !important; animation: none !important; transform: none !important; }
+          .wk-title { transition: none; }
+          .wk-row:hover .wk-title { transform: none; }
+          .wk-link { transition: none; background-size: 100% 1px; }
+        }
+      `}</style>
       <div style={{ maxWidth: 1160, margin: "0 auto" }}>
         <p
           style={{
@@ -182,10 +235,11 @@ export default function Works() {
         >
           Selected works.
         </h2>
-        <ol style={{ listStyle: "none", margin: 0, padding: 0 }}>
-          {rows.map((row) => (
+        <ol ref={listRef} style={{ listStyle: "none", margin: 0, padding: 0 }}>
+          {rows.map((row, rowIndex) => (
             <li
               key={row.index}
+              className="wk-row"
               style={{
                 borderTop: `1px solid ${HAIRLINE}`,
                 padding: "32px 0",
@@ -193,6 +247,7 @@ export default function Works() {
                 flexWrap: "wrap",
                 gap: "16px 32px",
                 alignItems: "baseline",
+                animationDelay: `${rowIndex * 60}ms`,
               }}
             >
               <span
@@ -219,6 +274,7 @@ export default function Works() {
               </span>
               <span style={{ flex: "1 1 320px", minWidth: 0 }}>
                 <span
+                  className="wk-title"
                   style={{
                     display: "block",
                     fontSize: 28,
@@ -244,21 +300,15 @@ export default function Works() {
               </span>
               <Link
                 to={row.href}
+                className="wk-link"
                 style={{
                   fontFamily: MONO,
                   fontSize: 13,
                   letterSpacing: "0.08em",
                   textTransform: "uppercase",
                   color: INK,
-                  textDecoration: "underline",
-                  textUnderlineOffset: 4,
                   whiteSpace: "nowrap",
-                }}
-                onMouseEnter={(event) => {
-                  (event.target as HTMLAnchorElement).style.color = BLUE;
-                }}
-                onMouseLeave={(event) => {
-                  (event.target as HTMLAnchorElement).style.color = INK;
+                  paddingBottom: 3,
                 }}
               >
                 {row.linkLabel} -&gt;

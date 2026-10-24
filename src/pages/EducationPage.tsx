@@ -1,5 +1,65 @@
 import { Link } from "react-router-dom";
 
+import { useEffect } from "react";
+
+function useMvReveal() {
+  useEffect(() => {
+    const els = Array.from(document.querySelectorAll<HTMLElement>(".mv-rv"));
+    if (els.length === 0) return;
+    if (typeof IntersectionObserver === "undefined") {
+      els.forEach((el) => el.classList.add("mv-in"));
+      return;
+    }
+    const io = new IntersectionObserver(
+      (entries) => {
+        for (const entry of entries) {
+          if (entry.isIntersecting) {
+            (entry.target as HTMLElement).classList.add("mv-in");
+            io.unobserve(entry.target);
+          }
+        }
+      },
+      { threshold: 0.15, rootMargin: "0px 0px -4% 0px" },
+    );
+    els.forEach((el) => io.observe(el));
+    return () => io.disconnect();
+  }, []);
+}
+
+const MV_CSS = `
+.mv-rv {
+  opacity: 0;
+  transform: translateY(14px);
+  transition: opacity 600ms ease, transform 600ms cubic-bezier(0.22, 1, 0.36, 1);
+  will-change: opacity, transform;
+}
+.mv-rv.mv-in {
+  opacity: 1;
+  transform: none;
+}
+.mv-link {
+  background-image: linear-gradient(currentColor, currentColor);
+  background-size: 0% 1px;
+  background-repeat: no-repeat;
+  background-position: 0 100%;
+  transition: background-size 350ms ease;
+  text-decoration: none;
+}
+.mv-link:hover, .mv-link:focus-visible {
+  background-size: 100% 1px;
+}
+@media (prefers-reduced-motion: reduce) {
+  .mv-rv {
+    opacity: 1;
+    transform: none;
+    transition: none;
+  }
+  .mv-link {
+    transition: none;
+  }
+}
+`;
+
 /**
  * Education page, ONLINES styling: container 1160px, Inter display type,
  * JetBrains Mono year labels, hairline separators, blue only for links.
@@ -69,6 +129,7 @@ const KNOWLEDGE_MAP: string[] = [
 ];
 
 export default function EducationPage() {
+  useMvReveal();
   return (
     <main
       style={{
@@ -78,6 +139,7 @@ export default function EducationPage() {
         padding: "80px 24px 130px",
       }}
     >
+      <style>{MV_CSS}</style>
       <div style={{ maxWidth: 1160, margin: "0 auto" }}>
         <p
           style={{
@@ -92,6 +154,7 @@ export default function EducationPage() {
           Education
         </p>
         <h1
+          data-mv
           style={{
             fontSize: "clamp(56px, 9vw, 96px)",
             lineHeight: 1,
@@ -134,10 +197,12 @@ export default function EducationPage() {
         </p>
 
         <div style={{ borderTop: `1px solid ${HAIRLINE}` }}>
-          {ENTRIES.map((entry) => (
+          {ENTRIES.map((entry, i) => (
             <article
               key={entry.institution}
+              data-mv
               style={{
+                transitionDelay: `${Math.min(i, 11) * 80}ms`,
                 borderBottom: `1px solid ${HAIRLINE}`,
                 padding: "32px 0",
                 display: "grid",
@@ -208,6 +273,7 @@ export default function EducationPage() {
 
         <section style={{ marginTop: 80 }}>
           <h2
+            data-mv
             style={{
               fontSize: 32,
               letterSpacing: "-0.02em",
@@ -237,10 +303,12 @@ export default function EducationPage() {
               borderTop: `1px solid ${HAIRLINE}`,
             }}
           >
-            {KNOWLEDGE_MAP.map((provider) => (
+            {KNOWLEDGE_MAP.map((provider, i) => (
               <li
                 key={provider}
+                data-mv
                 style={{
+                  transitionDelay: `${Math.min(i, 11) * 80}ms`,
                   borderBottom: `1px solid ${HAIRLINE}`,
                   padding: "16px 0",
                   fontSize: 17,
@@ -252,11 +320,12 @@ export default function EducationPage() {
             ))}
           </ul>
           <p style={{ marginTop: 24, fontSize: 15, lineHeight: 1.65 }}>
-            <Link to="/certifications" style={{ color: BLUE }}>
+            <Link to="/certifications" className="mv-link" style={{ color: BLUE }}>
               See all certifications
             </Link>
           </p>
           <h3
+            data-mv
             style={{
               fontSize: 22,
               fontWeight: 700,
@@ -274,10 +343,12 @@ export default function EducationPage() {
               borderTop: `1px solid ${HAIRLINE}`,
             }}
           >
-            {SKILL_LEVELS.map((entry) => (
+            {SKILL_LEVELS.map((entry, i) => (
               <li
                 key={entry.skill}
+                data-mv
                 style={{
+                  transitionDelay: `${Math.min(i, 11) * 80}ms`,
                   borderBottom: `1px solid ${HAIRLINE}`,
                   padding: "16px 0",
                   fontSize: 17,
@@ -295,11 +366,11 @@ export default function EducationPage() {
         </section>
 
         <p style={{ marginTop: 80, fontSize: 15, lineHeight: 1.65 }}>
-          <Link to="/" style={{ color: BLUE }}>
+          <Link to="/" className="mv-link" style={{ color: BLUE }}>
             Back to the homepage
           </Link>
           {" | "}
-          <Link to="/experience" style={{ color: BLUE }}>
+          <Link to="/experience" className="mv-link" style={{ color: BLUE }}>
             Experience
           </Link>
         </p>

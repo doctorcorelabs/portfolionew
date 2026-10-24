@@ -18,6 +18,7 @@
  *   on this page.
  */
 
+import React from "react";
 import { Link } from "react-router-dom";
 import { researchItems, researchFocus, methodologies } from "../data/content";
 
@@ -102,6 +103,50 @@ const oldPublications: OldPublication[] = [
   },
 ];
 
+
+/* Local scroll-reveal wrapper. Pairs with .mv-reveal in motion.css:
+   hidden until the element is 15 percent in view, then stays visible.
+   Falls back to visible immediately when IntersectionObserver is absent,
+   and prefers-reduced-motion forces everything visible via motion.css. */
+function Reveal({
+  children,
+  delay = 0,
+}: {
+  children: React.ReactNode;
+  delay?: number;
+}) {
+  const ref = React.useRef<HTMLDivElement>(null);
+  const [visible, setVisible] = React.useState(false);
+  React.useEffect(() => {
+    const node = ref.current;
+    if (!node) return;
+    if (typeof IntersectionObserver === "undefined") {
+      setVisible(true);
+      return;
+    }
+    const observer = new IntersectionObserver(
+      (entries) => {
+        if (entries.some((entry) => entry.isIntersecting)) {
+          setVisible(true);
+          observer.disconnect();
+        }
+      },
+      { threshold: 0.15 },
+    );
+    observer.observe(node);
+    return () => observer.disconnect();
+  }, []);
+  return (
+    <div
+      ref={ref}
+      className={`mv-reveal${visible ? " is-visible" : ""}`}
+      style={delay ? { transitionDelay: `${delay}ms` } : undefined}
+    >
+      {children}
+    </div>
+  );
+}
+
 const rowStyle: React.CSSProperties = {
   borderTop: `1px solid ${HAIRLINE}`,
   padding: "20px 0",
@@ -146,6 +191,7 @@ export default function ResearchIndex() {
       }}
     >
       <div style={{ maxWidth: 960, margin: "0 auto" }}>
+        <Reveal>
         <nav
           aria-label="Breadcrumb"
           style={{
@@ -186,7 +232,9 @@ export default function ResearchIndex() {
           first, then the key projects and publications recorded on the old
           site. Entries link to a detail page only where one exists.
         </p>
+        </Reveal>
 
+        <Reveal>
         <h2
           style={{
             fontSize: 28,
@@ -198,8 +246,9 @@ export default function ResearchIndex() {
           Featured research
         </h2>
         <div style={{ marginBottom: 56 }}>
-          {researchItems.map((item) => (
-            <article key={item.id} style={rowStyle}>
+          {researchItems.map((item, itemIndex) => (
+            <Reveal key={item.id} delay={(itemIndex % 4) * 90}>
+            <article style={rowStyle}>
               <p style={metaStyle}>
                 {item.kicker} | {item.status} | {item.year ?? "Year not recorded"}
               </p>
@@ -223,9 +272,12 @@ export default function ResearchIndex() {
                 {item.venue} | {item.role}
               </p>
             </article>
+            </Reveal>
           ))}
         </div>
+        </Reveal>
 
+        <Reveal>
         <h2
           style={{
             fontSize: 28,
@@ -237,15 +289,19 @@ export default function ResearchIndex() {
           Key projects from the old site
         </h2>
         <div style={{ marginBottom: 56 }}>
-          {keyProjects.map((project) => (
-            <article key={project.title} style={rowStyle}>
+          {keyProjects.map((project, projectIndex) => (
+            <Reveal key={project.title} delay={(projectIndex % 4) * 90}>
+            <article style={rowStyle}>
               <p style={metaStyle}>{project.role}</p>
               <h3 style={titleStyle}>{project.title}</h3>
               <p style={bodyStyle}>{project.detail}</p>
             </article>
+            </Reveal>
           ))}
         </div>
+        </Reveal>
 
+        <Reveal>
         <h2
           style={{
             fontSize: 28,
@@ -268,17 +324,21 @@ export default function ResearchIndex() {
           recorded in that source.
         </p>
         <div style={{ marginBottom: 24 }}>
-          {oldPublications.map((pub) => (
-            <article key={pub.title} style={rowStyle}>
+          {oldPublications.map((pub, pubIndex) => (
+            <Reveal key={pub.title} delay={(pubIndex % 4) * 90}>
+            <article style={rowStyle}>
               <p style={metaStyle}>
                 {pub.type} | {pub.year}
               </p>
               <h3 style={titleStyle}>{pub.title}</h3>
               {pub.note ? <p style={bodyStyle}>{pub.note}</p> : null}
             </article>
+            </Reveal>
           ))}
         </div>
+        </Reveal>
 
+        <Reveal>
         <h2
           style={{
             fontSize: 28,
@@ -294,19 +354,24 @@ export default function ResearchIndex() {
           site.
         </p>
         <div style={{ marginBottom: 24 }}>
-          {researchFocus.map((focus) => (
-            <article key={focus.name} style={rowStyle}>
+          {researchFocus.map((focus, focusIndex) => (
+            <Reveal key={focus.name} delay={(focusIndex % 4) * 90}>
+            <article style={rowStyle}>
               <p style={metaStyle}>Focus</p>
               <h3 style={titleStyle}>{focus.name}</h3>
               <p style={bodyStyle}>{focus.topics}</p>
             </article>
+            </Reveal>
           ))}
-          <article style={rowStyle}>
+          <Reveal>
+            <article style={rowStyle}>
             <p style={metaStyle}>Methodologies</p>
             <h3 style={titleStyle}>How the work is done</h3>
             <p style={bodyStyle}>{methodologies.join(", ")}.</p>
           </article>
+          </Reveal>
         </div>
+        </Reveal>
 
         <p style={{ borderTop: `1px solid ${HAIRLINE}`, paddingTop: 20 }}>
           <Link to="/" style={{ color: INK }}>
