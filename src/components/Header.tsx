@@ -41,6 +41,25 @@ export default function Header() {
           .onlines-nav a.hdr-nav-link {
             transition: none;
           }
+          .hdr-cta-pulse {
+            animation: none;
+          }
+        }
+        /* Soft glow pulse for the fixed CTA pill only: the shadow
+           breathes from transparent to a soft blue glow over 5s,
+           ease-in-out, infinite alternate. Slow enough to read as
+           breathing, never flashing. Wordmark and nav links get no
+           pulse. */
+        @keyframes hdr-cta-glow {
+          from {
+            box-shadow: 0 0 0 rgba(8, 89, 212, 0);
+          }
+          to {
+            box-shadow: 0 0 24px rgba(8, 89, 212, 0.45);
+          }
+        }
+        .hdr-cta-pulse {
+          animation: hdr-cta-glow 5s ease-in-out infinite alternate;
         }
         @media (max-width: 720px) {
           .onlines-nav { display: none; }
@@ -114,6 +133,7 @@ export default function Header() {
       </header>
       <a
         href={`mailto:${EMAIL}`}
+        className="hdr-cta-pulse"
         style={{
           position: "fixed",
           top: 14,

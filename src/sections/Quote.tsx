@@ -357,6 +357,18 @@ export default function Quote() {
           -webkit-mask-image: radial-gradient(circle 50px at var(--qdot-x, 50%) var(--qdot-y, 50%), rgba(0, 0, 0, 0.65) 0%, rgba(0, 0, 0, 0) 100%);
           mask-image: radial-gradient(circle 50px at var(--qdot-x, 50%) var(--qdot-y, 50%), rgba(0, 0, 0, 0.65) 0%, rgba(0, 0, 0, 0) 100%);
         }
+        /* Active layer: slow breathe on the dot-field base only
+           (opacity 0.85 to 1, 8s ease-in-out infinite alternate).
+           Words are untouched; the lit layer keeps its cursor-only
+           behavior. The wrapper above carries the entrance fade,
+           so this animation never fights it. */
+        .q-dot-breathe {
+          animation: q-dot-breathe 8s ease-in-out infinite alternate;
+        }
+        @keyframes q-dot-breathe {
+          from { opacity: 0.85; }
+          to { opacity: 1; }
+        }
         @media (max-width: 1023px) {
           .q-pin-wrap {
             height: calc(100svh + 1125px + 140px);
@@ -375,14 +387,27 @@ export default function Quote() {
             min-height: auto;
             overflow: visible;
           }
+          .q-dot-breathe {
+            animation: none;
+          }
         }
       `}</style>
       <div ref={stickyRef} className="q-pin-sticky">
+        {/* Entrance opacity lives on the wrapper so the breathe
+            animation on the inner dot layer never overrides it:
+            animations beat inline opacity on the same element. */}
         <div
           aria-hidden="true"
-          className="q-dot-base"
-          style={{ opacity: dotEntrance }}
-        />
+          style={{
+            position: "absolute",
+            inset: 0,
+            pointerEvents: "none",
+            zIndex: 0,
+            opacity: dotEntrance,
+          }}
+        >
+          <div aria-hidden="true" className="q-dot-base q-dot-breathe" />
+        </div>
         <div
           aria-hidden="true"
           className="q-dot-lit"

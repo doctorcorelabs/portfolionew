@@ -9,8 +9,11 @@
  * each column is a tall FLAT accent-blue card (#0859D4, radius
  * 10px) with a CSS halftone dot layer at 50 percent opacity in
  * multiply blend mode over the flat fill - not a gradient, and the
- * texture is static (the earlier 18s highlight drift was a v2
- * interpretation and has been removed). Four 10px white corner
+ * texture is a slow seamless pan: the halftone layer shifts one
+ * full 6px tile over 24s on a linear infinite loop, so the loop
+ * restarts invisibly. This background-position animation is the
+ * one allowed exception to the no-background-animation rule, and
+ * it is off under prefers-reduced-motion. Four 10px white corner
  * ticks echo the hero selection handles: faint at rest, full
  * opacity on card hover/focus. A dotted rule of 1px
  * square tiles sits under each title line (repeating gradient on
@@ -154,7 +157,10 @@ export default function Services() {
         /* Halftone texture over the flat fill: 1px dots on a 6px
            tile, 50 percent opacity, multiply blend. It sits above
            the background but below the text (children are raised
-           with z-index), so the text stays clean. */
+           with z-index), so the text stays clean. Active motion:
+           the layer pans exactly one full tile (0 0 to 6px 6px)
+           over 24s linear infinite, so the loop is seamless.
+           This is the one allowed background-position exception. */
         .svc-card::after {
           content: "";
           position: absolute;
@@ -165,6 +171,7 @@ export default function Services() {
           opacity: 0.5;
           mix-blend-mode: multiply;
           pointer-events: none;
+          animation: svc-pan 24s linear infinite;
         }
         .svc-card > * {
           position: relative;
@@ -272,6 +279,10 @@ export default function Services() {
         @keyframes svc-rise {
           to { opacity: 1; transform: translateY(0); }
         }
+        @keyframes svc-pan {
+          from { background-position: 0 0; }
+          to { background-position: 6px 6px; }
+        }
         @keyframes svc-draw {
           to { width: 100%; }
         }
@@ -295,9 +306,13 @@ export default function Services() {
             opacity: 1;
             transition: none;
           }
+          .svc-card::after {
+            animation: none;
+          }
         }
       `}</style>
       <div style={{ maxWidth: 1160, margin: "0 auto" }}>
+        <div className={visible ? "sec-slide from-left in" : "sec-slide from-left"}>
         <p
           className="svc-head"
           style={{
@@ -338,6 +353,7 @@ export default function Services() {
         >
           Three ways of working.
         </h2>
+        </div>
         <div className="svc-grid">
           {COLUMNS.map((column, columnIndex) => {
             const base = 0.1 + columnIndex * 0.15;

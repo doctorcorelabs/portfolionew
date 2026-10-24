@@ -82,10 +82,20 @@ export default function Contact() {
           transform: translateY(0);
         }
         /* Mailto pill: solid blue, 50px-class height, brightens
-           to a lighter blue over 0.4s on hover/focus. */
+           to a lighter blue over 0.4s on hover/focus, plus a soft
+           breathing glow pulse (5s, subtle, never flashing). */
         .contact-mv-root .contact-mv-pill {
           background-color: #0859D4;
           transition: background-color 400ms ease;
+          animation: contact-pill-glow 5s ease-in-out infinite alternate;
+        }
+        @keyframes contact-pill-glow {
+          from {
+            box-shadow: 0 0 0 rgba(8, 89, 212, 0);
+          }
+          to {
+            box-shadow: 0 0 24px rgba(8, 89, 212, 0.35);
+          }
         }
         .contact-mv-root .contact-mv-pill:hover,
         .contact-mv-root .contact-mv-pill:focus-visible {
@@ -162,6 +172,8 @@ export default function Contact() {
           }
           .contact-mv-root .contact-mv-pill {
             background-color: #0859D4;
+            animation: none;
+            box-shadow: none;
           }
           .contact-mv-social a {
             transition: none !important;
@@ -215,11 +227,11 @@ export default function Contact() {
           }
         }
         @keyframes contact-pill-float {
-          0%, 100% {
-            transform: translateY(0);
+          from {
+            transform: translateY(-6px);
           }
-          50% {
-            transform: translateY(-8px);
+          to {
+            transform: translateY(6px);
           }
         }
         .contact-pill {
@@ -239,6 +251,7 @@ export default function Contact() {
           animation-name: contact-pill-float;
           animation-timing-function: ease-in-out;
           animation-iteration-count: infinite;
+          animation-direction: alternate;
         }
         @media (hover: none) {
           .contact-pill {
@@ -254,8 +267,22 @@ export default function Contact() {
            pill, so it cannot imply a person. It sits just right of
            the mailto pill row, below the content wrapper (z-index
            1), so it never covers text. Entrance reuses the section
-           inView state: fade plus 10px rise over 0.6s, then static
-           (no drift, no click behavior). */
+           inView state: fade plus 10px rise over 0.6s. After
+           entrance the arrow itself bobs gently (inner span, so
+           the entrance transition on the outer span is untouched).
+           No click behavior. */
+        .contact-cursor-bob {
+          display: block;
+          animation: contact-cursor-bob 6s ease-in-out infinite alternate;
+        }
+        @keyframes contact-cursor-bob {
+          from {
+            transform: translateY(-4px);
+          }
+          to {
+            transform: translateY(4px);
+          }
+        }
         .contact-cursor-chip {
           position: absolute;
           left: 42%;
@@ -284,6 +311,9 @@ export default function Contact() {
           .contact-cursor-chip {
             display: none;
           }
+          .contact-cursor-bob {
+            animation: none;
+          }
         }
       `}</style>
       <div aria-hidden="true" className="contact-dot-base" />
@@ -299,6 +329,7 @@ export default function Contact() {
         DL
       </div>
       <span aria-hidden="true" className="contact-cursor-chip">
+        <span className="contact-cursor-bob">
         <svg
           width="16"
           height="20"
@@ -313,29 +344,31 @@ export default function Contact() {
             strokeWidth="0.75"
           />
         </svg>
+        </span>
       </span>
       <span
         aria-hidden="true"
         className="contact-pill"
-        style={{ top: 44, left: "6%", animationDuration: "9s", animationDelay: "0s" }}
+        style={{ top: 44, left: "6%", animationDuration: "10s", animationDelay: "0s" }}
       >
         Seoul 2026
       </span>
       <span
         aria-hidden="true"
         className="contact-pill"
-        style={{ top: 44, right: "6%", animationDuration: "11s", animationDelay: "1.2s" }}
+        style={{ top: 44, right: "6%", animationDuration: "13s", animationDelay: "1.2s" }}
       >
         UII
       </span>
       <span
         aria-hidden="true"
         className="contact-pill"
-        style={{ bottom: 64, right: "6%", animationDuration: "13s", animationDelay: "2.4s" }}
+        style={{ bottom: 64, right: "6%", animationDuration: "16s", animationDelay: "2.4s" }}
       >
         Code for Cure
       </span>
       <div style={styles.inner}>
+        <div className={`sec-slide from-right${inView ? " in" : ""}`}>
         <h2 id="contact-heading" style={styles.giant}>
           <span className="contact-mv-line">
             <span className="contact-mv-line-inner" style={{ transitionDelay: "0ms" }}>
@@ -358,6 +391,7 @@ export default function Contact() {
           className="contact-mv-fade contact-dotted-rule"
           style={{ transitionDelay: "250ms", margin: "0 0 24px" }}
         />
+        </div>
         <p className="contact-mv-fade" style={{ ...styles.body, transitionDelay: "350ms" }}>
           Collaboration, supervision conversations, and project discussions
           are welcome. Send one email describing the work, who it is for,

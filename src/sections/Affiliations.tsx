@@ -1,4 +1,4 @@
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 
 /**
  * Affiliations: the Onlines monochrome logo wall, translated honestly.
@@ -58,6 +58,30 @@ const affiliations = [
 
 export default function Affiliations() {
   const stripRef = useRef<HTMLUListElement | null>(null);
+  const headerRef = useRef<HTMLDivElement | null>(null);
+  const [headerIn, setHeaderIn] = useState(false);
+
+  useEffect(() => {
+    const header = headerRef.current;
+    if (!header) return;
+    if (typeof IntersectionObserver === "undefined") {
+      setHeaderIn(true);
+      return;
+    }
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            setHeaderIn(true);
+            observer.unobserve(entry.target);
+          }
+        });
+      },
+      { threshold: 0.15 },
+    );
+    observer.observe(header);
+    return () => observer.disconnect();
+  }, []);
 
   useEffect(() => {
     const strip = stripRef.current;
@@ -98,6 +122,18 @@ export default function Affiliations() {
           from { opacity: 0; transform: scale(0.8) translateY(10px); }
           to { opacity: 1; transform: scale(1) translateY(0); }
         }
+        @keyframes afFloat {
+          from { transform: translateY(0); }
+          to { transform: translateY(-3px); }
+        }
+        /* Gentle float on the badge TEXT only. The corner ticks stay
+           direct children of the badge so their corner placement is
+           unchanged, and the pop entrance stays on the outer badge,
+           so the two transforms never fight. */
+        .af-float {
+          display: block;
+          animation: afFloat 11s ease-in-out infinite alternate;
+        }
         .af-item {
           opacity: 0;
           position: relative;
@@ -118,9 +154,16 @@ export default function Affiliations() {
         @media (prefers-reduced-motion: reduce) {
           .af-item { opacity: 1 !important; animation: none !important; transform: none !important; transition: none; }
           .af-mark { transition: none; }
+          .af-float { animation: none !important; transform: none; }
         }
       `}</style>
       <div style={{ maxWidth: 1160, margin: "0 auto" }}>
+        {/* Slide classes are owned by src/styles/section-slide.css;
+            this wrapper adds no margin or padding of its own. */}
+        <div
+          ref={headerRef}
+          className={headerIn ? "sec-slide from-left in" : "sec-slide from-left"}
+        >
         <p
           style={{
             margin: "0 0 24px",
@@ -145,6 +188,7 @@ export default function Affiliations() {
           These are places of study and affiliation, not clients, and they
           are not presented as clients anywhere on this site.
         </p>
+        </div>
         <ul
           ref={stripRef}
           style={{
@@ -184,6 +228,13 @@ export default function Affiliations() {
                 />
               ))}
               <span
+                className="af-float"
+                style={{
+                  display: "block",
+                  animationDuration: `${[9, 11, 13][entryIndex % 3]}s`,
+                }}
+              >
+              <span
                 className="af-mark"
                 style={{
                   display: "block",
@@ -210,6 +261,7 @@ export default function Affiliations() {
                 }}
               >
                 {entry.relation}
+              </span>
               </span>
             </li>
           ))}

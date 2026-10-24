@@ -24,12 +24,21 @@
  *   border, 4 small 10px square handles at the corners), beside
  *   the bio on desktop and stacked above it on mobile. Floating
  *   fact chips carry only real recorded facts, never new numbers.
+ * - The frame border is drawn by an SVG rect overlay (marching
+ *   ants: 1px dashed stroke in the frame grey, dashoffset animated
+ *   12s linear infinite), not by a CSS border, so there is exactly
+ *   one dash pattern and it crawls. The CSS border is transparent
+ *   only to keep the card's box size identical. Under
+ *   prefers-reduced-motion the dashes render static.
+ * - The header block (kicker + title) sits in a "sec-slide
+ *   from-left" wrapper that gains " in" when the section enters
+ *   view; the slide CSS itself lives in section-slide.css.
  * - prefers-reduced-motion: everything is shown instantly, no motion.
  * - Explicit colors on all text: a global h1-h6 rule forces dark
  *   #1D1D1F, so headings and values never rely on inheritance.
  */
 
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 
 const DISPLAY =
   "Inter, -apple-system, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif";
@@ -148,10 +157,33 @@ const REVEAL_CSS = `
 }
 .mvP-frame {
   position: relative;
-  border: 1px dashed rgba(18, 18, 19, 0.2);
+  /* Transparent: the visible dashed frame is the SVG rect below,
+     so the crawl has a single dash pattern. Size unchanged. */
+  border: 1px solid transparent;
   padding: 16px;
   background: #FFFFFF;
   box-sizing: border-box;
+}
+/* Marching ants overlay: same rect as the old dashed frame,
+   1px dashed stroke in the frame grey, crawling slowly. The
+   -40 offset is a whole number of 10px dash periods, so the
+   12s loop restarts with no visible jump. */
+.mvP-ants {
+  position: absolute;
+  inset: -1px;
+  overflow: visible;
+  pointer-events: none;
+  z-index: 1;
+}
+.mvP-ants rect {
+  fill: none;
+  stroke: rgba(18, 18, 19, 0.2);
+  stroke-width: 1;
+  stroke-dasharray: 5 5;
+  animation: mvP-ants 12s linear infinite;
+}
+@keyframes mvP-ants {
+  to { stroke-dashoffset: -40; }
 }
 .mvP-handle {
   position: absolute;
@@ -160,7 +192,8 @@ const REVEAL_CSS = `
   background: #FFFFFF;
   border: 1px solid #98989C;
   box-sizing: border-box;
-  z-index: 1;
+  /* Above the marching-ants SVG (z-index 1) so dashes never cross the handles. */
+  z-index: 2;
 }
 .mvP-chip {
   position: absolute;
@@ -206,11 +239,15 @@ const REVEAL_CSS = `
     display: none;
     animation: none;
   }
+  .mvP-ants rect {
+    animation: none;
+  }
 }
 `;
 
 export default function Profile() {
   const sectionRef = useRef<HTMLElement | null>(null);
+  const [inView, setInView] = useState(false);
 
   useEffect(() => {
     const section = sectionRef.current;
@@ -218,6 +255,7 @@ export default function Profile() {
     section.classList.add("mvP-armed");
     if (typeof IntersectionObserver === "undefined") {
       section.classList.add("mvP-in");
+      setInView(true);
       return;
     }
     const observer = new IntersectionObserver(
@@ -225,6 +263,7 @@ export default function Profile() {
         entries.forEach((entry) => {
           if (entry.isIntersecting) {
             section.classList.add("mvP-in");
+            setInView(true);
             observer.disconnect();
           }
         });
@@ -249,6 +288,7 @@ export default function Profile() {
     >
       <style>{REVEAL_CSS}</style>
       <div style={{ maxWidth: 1160, margin: "0 auto" }}>
+        <div className={inView ? "sec-slide from-left in" : "sec-slide from-left"}>
         <p
           style={{
             fontFamily: MONO,
@@ -292,9 +332,13 @@ export default function Profile() {
           </span>
           .
         </h2>
+        </div>
         <div className="mvP-grid">
           <div className="mvP-reveal">
             <div className="mvP-frame">
+              <svg aria-hidden="true" className="mvP-ants">
+                <rect x="0" y="0" width="100%" height="100%" />
+              </svg>
               {FRAME_HANDLES.map((position, index) => (
                 <span
                   key={index}

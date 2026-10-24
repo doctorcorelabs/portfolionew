@@ -385,6 +385,16 @@ export default function Hero() {
         .mv-hero.is-visible .mv-grid {
           opacity: 1;
         }
+        /* Slow ambient grid pan: one tile (40px) over 24s, easing
+           in and out and alternating back, so the grid never
+           visibly jumps. Background-position only, no layout cost. */
+        .mv-hero.is-visible .mv-grid {
+          animation: mv-grid-pan 24s ease-in-out infinite alternate;
+        }
+        @keyframes mv-grid-pan {
+          from { background-position: 0 0; }
+          to { background-position: 40px 40px; }
+        }
         .mv-hero .mv-word {
           opacity: 0;
           transform: translateY(24px);
@@ -477,6 +487,7 @@ export default function Hero() {
             transform: none !important;
             scale: 1 !important;
             transition: none !important;
+            animation: none !important;
           }
         }
         @media (prefers-reduced-motion: reduce) {

@@ -10,6 +10,7 @@ import AwardsPage from "./pages/AwardsPage";
 import ExperiencePage from "./pages/ExperiencePage";
 import EducationPage from "./pages/EducationPage";
 import CertificationsPage from "./pages/CertificationsPage";
+import "./styles/section-slide.css";
 
 /**
  * Homepage section order, Onlines anatomy: hero giant word, quote claim,
@@ -117,6 +118,67 @@ export default function App() {
     };
   }, []);
 
+  /* Boundary sweep: a fixed 3px bar at the bottom edge of the
+   * viewport slides left to right over 700ms whenever the user
+   * enters a new section. Sections are the direct section children
+   * of <main> (only 3 of 8 homepage sections carry an id, so an
+   * id selector would miss most of them; archive pages render no
+   * <main>, so the sweep disables itself there). The observer band
+   * sits at the upper third of the viewport, and a MutationObserver
+   * picks up sections that arrive later via lazy loading. Under
+   * reduced motion the sweep never runs. It never blocks clicks,
+   * never shifts layout, and never touches scrolling. */
+  const sweepRef = useRef<HTMLDivElement | null>(null);
+
+  useEffect(() => {
+    const bar = sweepRef.current;
+    if (!bar) return;
+    if (
+      window.matchMedia("(prefers-reduced-motion: reduce)").matches
+    ) {
+      return;
+    }
+    const main = document.querySelector("main");
+    if (!main) return;
+    let lastIndex = -1;
+    const observed = new Set<Element>();
+    const fire = (index: number) => {
+      if (index === lastIndex) return;
+      lastIndex = index;
+      bar.classList.remove("app-sweep-run");
+      void bar.offsetWidth;
+      bar.classList.add("app-sweep-run");
+    };
+    const io = new IntersectionObserver(
+      (entries) => {
+        for (const entry of entries) {
+          if (!entry.isIntersecting) continue;
+          const sections = Array.from(
+            main.querySelectorAll(":scope > section"),
+          );
+          const index = sections.indexOf(entry.target);
+          if (index >= 0) fire(index);
+        }
+      },
+      { root: null, rootMargin: "-33% 0px -66% 0px", threshold: 0 },
+    );
+    const observeNew = () => {
+      main.querySelectorAll(":scope > section").forEach((s) => {
+        if (!observed.has(s)) {
+          observed.add(s);
+          io.observe(s);
+        }
+      });
+    };
+    observeNew();
+    const mo = new MutationObserver(observeNew);
+    mo.observe(main, { childList: true });
+    return () => {
+      io.disconnect();
+      mo.disconnect();
+    };
+  }, [location.pathname]);
+
   /* (d) Header shadow: the header sits in normal flow, so its wrapper
    * carries the shadow once the page is scrolled past 24px. The
    * wrapper adds no height or padding of its own. */
@@ -181,6 +243,11 @@ export default function App() {
         ref={progressRef}
         className="app-read-progress"
       />
+      <div
+        aria-hidden="true"
+        ref={sweepRef}
+        className="app-section-sweep"
+      />
       {/* (a) Route-change fade plus 8px rise keyframes and (c) smooth
        * in-page anchor scrolling. Both are disabled under
        * prefers-reduced-motion, and neither locks scrolling nor
@@ -208,6 +275,30 @@ export default function App() {
         @keyframes app-route-fade {
           from { opacity: 0; transform: translateY(8px); }
           to { opacity: 1; transform: none; }
+        }
+        .app-section-sweep {
+          position: fixed;
+          left: 0;
+          right: 0;
+          bottom: 0;
+          height: 3px;
+          background: #0859D4;
+          transform: scaleX(0);
+          transform-origin: left;
+          opacity: 0;
+          z-index: 90;
+          pointer-events: none;
+        }
+        .app-section-sweep.app-sweep-run {
+          animation: app-section-sweep 700ms cubic-bezier(0.22, 1, 0.36, 1) forwards;
+        }
+        @keyframes app-section-sweep {
+          0% { transform: scaleX(0); opacity: 1; }
+          70% { transform: scaleX(1); opacity: 1; }
+          100% { transform: scaleX(1); opacity: 0; }
+        }
+        @media (prefers-reduced-motion: reduce) {
+          .app-section-sweep { display: none; }
         }
       `}</style>
       <div

@@ -1,4 +1,4 @@
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Link } from "react-router-dom";
 import { researchItems } from "../data/content";
 
@@ -19,6 +19,10 @@ import { researchItems } from "../data/content";
  *   from its existing meta label, in mono, plus one tiny abstract
  *   CSS glyph for that type (circle, diamond, triangle, square).
  *   Shapes only, no images, no new facts.
+ * - A traveler dot on the route line: a 10px blue dot that rides the
+ *   dashed line from top to bottom and back, decorative only.
+ * - The section header rides a "sec-slide from-right" wrapper; the
+ *   slide CSS lives in src/styles/section-slide.css, owned elsewhere.
  *
  * Integrity rules enforced here:
  * - The FAERS row shows ONLY N = 6,601 and the verified framing. NO ROR
@@ -177,6 +181,41 @@ function glyphFor(tag: string): string {
 
 export default function Works() {
   const listRef = useRef<HTMLOListElement | null>(null);
+  const headerRef = useRef<HTMLDivElement | null>(null);
+  const [headerIn, setHeaderIn] = useState(false);
+
+  /* Header slide-in: "in" is added once the header enters view.
+     Under reduced motion the header is shown at once, with no
+     observer wait, so content never depends on animation. */
+  useEffect(() => {
+    if (
+      typeof window !== "undefined" &&
+      typeof window.matchMedia !== "undefined" &&
+      window.matchMedia("(prefers-reduced-motion: reduce)").matches
+    ) {
+      setHeaderIn(true);
+      return;
+    }
+    const header = headerRef.current;
+    if (!header) return;
+    if (typeof IntersectionObserver === "undefined") {
+      setHeaderIn(true);
+      return;
+    }
+    const headerObserver = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            setHeaderIn(true);
+            headerObserver.disconnect();
+          }
+        });
+      },
+      { threshold: 0.15 },
+    );
+    headerObserver.observe(header);
+    return () => headerObserver.disconnect();
+  }, []);
 
   useEffect(() => {
     const list = listRef.current;
@@ -236,7 +275,7 @@ export default function Works() {
           from { opacity: 0; transform: translateY(14px); }
           to { opacity: 1; transform: translateY(0); }
         }
-        .wk-row { opacity: 0; position: relative; transition: background-color 300ms cubic-bezier(0.22, 1, 0.36, 1); }
+        .wk-row { opacity: 0; position: relative; z-index: 2; transition: background-color 300ms cubic-bezier(0.22, 1, 0.36, 1); }
         /* Giant outlined index numeral, decorative only. */
         @keyframes wkGiantIn {
           from { opacity: 0; transform: translateY(calc(-50% + 14px)); }
@@ -271,9 +310,32 @@ export default function Works() {
           transform: scaleY(0);
           transform-origin: top;
           transition: transform 1200ms cubic-bezier(0.22, 1, 0.36, 1);
+          z-index: 0;
         }
         .wk-route-in .wk-route {
           transform: scaleY(1);
+        }
+        /* Traveler dot riding the dashed route line, top to bottom
+           and back. It sits above the line (z-index 1) and below row
+           content (rows carry z-index 2). Geometrically it never
+           overlaps row text, which starts at 150px padding (88px on
+           mobile) while the dot rides at 70px (34px on mobile). */
+        @keyframes wkTravel {
+          from { top: 0%; }
+          to { top: 100%; }
+        }
+        .wk-traveler {
+          position: absolute;
+          left: 70px;
+          top: 0;
+          width: 10px;
+          height: 10px;
+          border-radius: 50%;
+          background: #0859D4;
+          transform: translate(-50%, -50%);
+          pointer-events: none;
+          z-index: 1;
+          animation: wkTravel 14s ease-in-out infinite alternate;
         }
         /* Per-row visual tag: mono type label plus a tiny glyph. */
         .wk-tag {
@@ -321,6 +383,7 @@ export default function Works() {
           .wk-row { padding-left: 88px !important; }
           .wk-giant { font-size: 56px; }
           .wk-route { left: 34px; }
+          .wk-traveler { left: 34px; }
         }
         .wk-row:hover, .wk-row:focus-within { background-color: #EFF4FE; }
         .wk-row.wk-in { animation: wkRise 500ms cubic-bezier(0.22, 1, 0.36, 1) forwards; }
@@ -365,6 +428,7 @@ export default function Works() {
           .wk-row { opacity: 1 !important; animation: none !important; transform: none !important; transition: none; }
           .wk-giant { animation: none !important; opacity: 1; transform: translateY(-50%); color: #E8E8E8; -webkit-text-stroke: 0; }
           .wk-route { transition: none; transform: none; }
+          .wk-traveler { animation: none !important; top: 0; }
           .wk-index { transition: none; }
           .wk-arrow { transition: none; transform: none; }
           .wk-row:hover .wk-arrow, .wk-row:focus-within .wk-arrow { opacity: 1; transform: none; }
@@ -374,6 +438,10 @@ export default function Works() {
         }
       `}</style>
       <div style={{ maxWidth: 1160, margin: "0 auto" }}>
+        <div
+          ref={headerRef}
+          className={`sec-slide from-right${headerIn ? " in" : ""}`}
+        >
         <p
           style={{
             margin: "0 0 24px",
@@ -403,8 +471,10 @@ export default function Works() {
           className="wk-dotted-rule"
           style={{ margin: "0 0 56px" }}
         />
+        </div>
         <div style={{ position: "relative" }}>
           <div aria-hidden="true" className="wk-route" />
+          <div aria-hidden="true" className="wk-traveler" />
           <ol
             ref={listRef}
             style={{ listStyle: "none", margin: 0, padding: 0 }}

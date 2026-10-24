@@ -26,16 +26,25 @@
  *   once it enters the viewport, then unobserves. Elements are only
  *   hidden after the effect arms the section (mvM-armed), so content
  *   never stays invisible if the observer cannot run.
- * - Dashed route draws on reveal (1.4s); station nodes pop with
- *   cubic-bezier(0.34, 1.56, 0.64, 1), staggered 150ms; station
+ * - Dashed route draws on SCROLL, not on a timer: a rAF-throttled
+ *   passive scroll listener maps section scroll progress (0 to 1,
+ *   from the section bounding rect) to the route line scale, the
+ *   same value for the desktop horizontal line and the mobile
+ *   vertical segments (via --journey-progress). Station nodes pop
+ *   with cubic-bezier(0.34, 1.56, 0.64, 1), staggered 150ms; station
  *   content fades up with the same stagger.
+ * - Active station: the station nearest the viewport center gets a
+ *   soft pulsing box-shadow ring (2s ease-in-out infinite).
+ * - The header block (kicker, heading, intro) sits in a sec-slide
+ *   from-right wrapper (CSS owned by section-slide.css); it slides
+ *   in when the section enters view.
  * - The blue drift blob from v4 is kept behind the content.
  * - prefers-reduced-motion: full static route, no draw animation,
- *   no pops, content fully visible. Touch: no hover-dependent
- *   content, no scroll hijack, no drag.
+ *   no pops, no pulse, slide static, no scroll listener.
+ *   Touch: no hover-dependent content, no scroll hijack, no drag.
  */
 
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState, type CSSProperties } from "react";
 import { Fragment } from "react";
 
 const DISPLAY =
@@ -161,9 +170,22 @@ const REVEAL_CSS = `
 .mvM-armed .journey-line {
   transform: scaleX(0);
 }
-.mvM-armed.mvM-in .journey-line {
-  transform: scaleX(1);
-  transition: transform 1400ms ease 100ms;
+/* Scroll-driven draw: the inline scaleX (section progress) wins
+   over the armed rule above once the effect runs. */
+.journey-node-active .journey-node-dot,
+.journey-station-active .journey-node-mobile {
+  animation: journey-pulse 2s ease-in-out infinite;
+}
+@keyframes journey-pulse {
+  0% {
+    box-shadow: 0 0 0 0 rgba(8, 89, 212, 0.45);
+  }
+  70% {
+    box-shadow: 0 0 0 12px rgba(8, 89, 212, 0);
+  }
+  100% {
+    box-shadow: 0 0 0 0 rgba(8, 89, 212, 0);
+  }
 }
 .journey-node {
   grid-row: 2;
@@ -225,12 +247,8 @@ const REVEAL_CSS = `
     height: 14px;
   }
   .mvM-armed .journey-station::before {
-    transform: scaleY(0);
+    transform: scaleY(var(--journey-progress, 0));
     transform-origin: top;
-  }
-  .mvM-armed.mvM-in .journey-station::before {
-    transform: scaleY(1);
-    transition: transform 1200ms ease;
   }
   .journey-node-mobile {
     display: block;
@@ -257,6 +275,10 @@ const REVEAL_CSS = `
     transform: none !important;
     transition: none !important;
   }
+  .journey-node-active .journey-node-dot,
+  .journey-station-active .journey-node-mobile {
+    animation: none !important;
+  }
   .mvM-armed .journey-station::before {
     transform: none !important;
     transition: none !important;
@@ -266,28 +288,76 @@ const REVEAL_CSS = `
 
 export default function Manifesto() {
   const sectionRef = useRef<HTMLElement | null>(null);
+  const [progress, setProgress] = useState(0);
+  const [activeIdx, setActiveIdx] = useState(-1);
+  const [inView, setInView] = useState(false);
 
   useEffect(() => {
     const section = sectionRef.current;
     if (!section) return;
     section.classList.add("mvM-armed");
-    if (typeof IntersectionObserver === "undefined") {
+    const reduced =
+      typeof window !== "undefined" &&
+      window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    if (reduced) {
       section.classList.add("mvM-in");
+      setProgress(1);
       return;
     }
-    const observer = new IntersectionObserver(
-      (entries) => {
-        entries.forEach((entry) => {
-          if (entry.isIntersecting) {
-            section.classList.add("mvM-in");
-            observer.disconnect();
+    let observer: IntersectionObserver | null = null;
+    if (typeof IntersectionObserver === "undefined") {
+      section.classList.add("mvM-in");
+      setInView(true);
+    } else {
+      observer = new IntersectionObserver(
+        (entries) => {
+          entries.forEach((entry) => {
+            if (entry.isIntersecting) {
+              section.classList.add("mvM-in");
+              setInView(true);
+              observer?.disconnect();
+            }
+          });
+        },
+        { threshold: 0.15 },
+      );
+      observer.observe(section);
+    }
+    // Scroll-driven route: section progress from the bounding rect,
+    // clamped 0 to 1, plus the station nearest the viewport center.
+    let raf = 0;
+    const update = () => {
+      raf = 0;
+      const rect = section.getBoundingClientRect();
+      const vh = window.innerHeight || 1;
+      const p = Math.min(1, Math.max(0, (vh - rect.top) / (vh + rect.height)));
+      setProgress((prev) => (Math.abs(prev - p) < 0.005 ? prev : p));
+      let best = -1;
+      if (rect.bottom > 0 && rect.top < vh) {
+        let bestDist = Infinity;
+        section.querySelectorAll(".journey-station").forEach((el, idx) => {
+          const r = el.getBoundingClientRect();
+          const d = Math.abs(r.top + r.height / 2 - vh / 2);
+          if (d < bestDist) {
+            bestDist = d;
+            best = idx;
           }
         });
-      },
-      { threshold: 0.15 },
-    );
-    observer.observe(section);
-    return () => observer.disconnect();
+      }
+      setActiveIdx((prev) => (prev === best ? prev : best));
+    };
+    const onScroll = () => {
+      if (!raf) raf = requestAnimationFrame(update);
+    };
+    update();
+    window.addEventListener("scroll", onScroll, { passive: true });
+    window.addEventListener("resize", onScroll);
+    return () => {
+      window.removeEventListener("scroll", onScroll);
+      window.removeEventListener("resize", onScroll);
+      if (raf) cancelAnimationFrame(raf);
+      observer?.disconnect();
+    };
   }, []);
 
   return (
@@ -324,6 +394,7 @@ export default function Manifesto() {
         }}
       />
       <div style={{ position: "relative", zIndex: 1, maxWidth: 1160, margin: "0 auto" }}>
+        <div className={`sec-slide from-right${inView ? " in" : ""}`}>
         <p
           style={{
             fontFamily: MONO,
@@ -365,15 +436,27 @@ export default function Manifesto() {
           From starting medicine at UII in 2021 to the clinic and a Seoul
           congress poster in 2026, in five year stations.
         </p>
-        <div className="journey-grid">
-          <div aria-hidden="true" className="journey-line" />
+        </div>
+        <div
+          className="journey-grid"
+          style={{ "--journey-progress": progress } as CSSProperties}
+        >
+          <div
+            aria-hidden="true"
+            className="journey-line"
+            style={{ transform: `scaleX(${progress})` }}
+          />
           {STATIONS.map((station, i) => {
             const onTop = i % 2 === 0;
             return (
               <Fragment key={station.year}>
                 <div
                   aria-hidden="true"
-                  className="journey-node"
+                  className={
+                    activeIdx === i
+                      ? "journey-node journey-node-active"
+                      : "journey-node"
+                  }
                   style={{ gridColumn: i + 1 }}
                 >
                   <span
@@ -383,7 +466,11 @@ export default function Manifesto() {
                   />
                 </div>
                 <article
-                  className="mvM-reveal journey-station"
+                  className={
+                    activeIdx === i
+                      ? "mvM-reveal journey-station journey-station-active"
+                      : "mvM-reveal journey-station"
+                  }
                   style={{
                     gridColumn: i + 1,
                     gridRow: onTop ? 1 : 3,

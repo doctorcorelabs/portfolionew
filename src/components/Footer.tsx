@@ -82,6 +82,10 @@ export default function Footer() {
             transform: none !important;
             background-size: 100% 1px;
           }
+          /* Dash travel off: the dotted rule stays static. */
+          .footer-mv-root .footer-dotted-rule {
+            animation: none !important;
+          }
         }
         /* Dotted motif: 1px square tiles from a repeating gradient,
            matching the section title rules elsewhere on the site. */
@@ -91,6 +95,13 @@ export default function Footer() {
           background-image: repeating-linear-gradient(to right, rgba(1, 1, 1, 0.55) 0 1px, transparent 1px 4px);
           background-size: 4px 1px;
           background-repeat: repeat-x;
+          /* Active motion, rule only: the 4px tile period shifts one
+             full period per loop, so the dashes travel seamlessly. */
+          animation: footer-dash-travel 10s linear infinite;
+        }
+        @keyframes footer-dash-travel {
+          from { background-position-x: 0; }
+          to { background-position-x: 4px; }
         }
       `}</style>
       <div style={styles.inner}>

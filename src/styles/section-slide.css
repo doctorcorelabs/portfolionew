@@ -1,0 +1,38 @@
+/* Section slide system (v6, agent 11 contract).
+ * Sibling agents add .sec-slide plus one direction class to a section
+ * wrapper, then add .in when it enters view. Base state is hidden;
+ * .in reveals it with a 700ms ease-out slide. Under reduced motion
+ * every slide is fully visible with no transition. This file never
+ * hijacks scrolling or replaces the cursor. */
+.sec-slide {
+  opacity: 0;
+}
+
+.sec-slide.from-left {
+  transform: translateX(-48px);
+}
+
+.sec-slide.from-right {
+  transform: translateX(48px);
+}
+
+.sec-slide.from-bottom {
+  transform: translateY(32px);
+}
+
+.sec-slide.in {
+  opacity: 1;
+  transform: none;
+  transition:
+    opacity 700ms cubic-bezier(0.22, 1, 0.36, 1),
+    transform 700ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .sec-slide,
+  .sec-slide.in {
+    opacity: 1;
+    transform: none;
+    transition: none;
+  }
+}
