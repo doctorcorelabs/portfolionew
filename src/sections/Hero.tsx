@@ -55,7 +55,8 @@ import PosterWindow from "../components/hero-v8/PosterWindow";
 import MicroscopeCard from "../components/hero-v8/MicroscopeCard";
 import DeskCard from "../components/hero-v8/DeskCard";
 import NotifyBubble from "../components/hero-v8/NotifyBubble";
-import DbStackCard from "../components/hero-v8/DbStackCard";
+import DbLogoFloat from "../components/hero-v8/DbLogoFloat";
+import DbLogoRow from "../components/hero-v8/DbLogoRow";
 import Stickers from "../components/hero-v8/Stickers";
 
 const INK = "#010101";
@@ -137,10 +138,14 @@ const FACT_PILLS: Array<{
   },
 ];
 
-/* Hero collage (decorative only, never content): 15 research mockups
- * scattered around the giant word at the periphery. The 8 v7 cards
- * keep their positions; 7 v8 mockups join them (2 windows, 2 photos,
- * 1 dark database card, 1 bubble, 1 sticker row). All
+/* Hero collage (decorative only, never content): 19 items, 18 visible
+ * on desktop. The 8 v7 cards keep their positions; 6 v8 mockups join
+ * them (2 windows, 2 photos, 1 bubble, 1 sticker row); the v9 dark
+ * database card is gone, replaced in v10 by 4 free-floating database
+ * logo tiles (2 visible at every desktop width at normal heights,
+ * 2 more above 1400px; on short viewports at or below 700px height
+ * the ScienceDirect icon hides via hide-short, leaving 3 above
+ * 1400px and 1 at 720-1400px) plus 1 mobile-only logo row. All
  * positions sit in the top and bottom bands of the hero, and never
  * over the centered label or the word center point. The faint helix
  * motif may tuck under the frame edge on mid-height stages, and the
@@ -153,11 +158,18 @@ const FACT_PILLS: Array<{
  * lives on an inner wrapper per docs/hero-v8/02-visual-system.md
  * (stylesheet classes only, so the mobile stack can zero them).
  * DOM order is paint order inside the layer: cards first, windows
- * above cards, dark cards above light cards they overlap, stickers
- * last and topmost. On narrow screens the layer drops into a static
- * stack below the word showing only FaersCard,
- * NotifyBubble, and DbStackCard, in that order, tilts zeroed and
+ * above cards, stickers last and topmost. On narrow screens the layer
+ * drops into a static stack below the word showing only FaersCard,
+ * NotifyBubble, and DbLogoRow, in that order, tilts zeroed and
  * floats off. */
+/* Free-floating database logo tiles (v10): DbLogoFloat takes a brand
+   prop, but COLLAGE_ITEMS renders <item.Card /> with no props, so
+   each brand gets a thin module-level wrapper here (never inline in
+   the render loop, so the tiles never remount on re-render). */
+const DbPubmedFloat = () => <DbLogoFloat brand="pubmed" />;
+const DbElsevierFloat = () => <DbLogoFloat brand="elsevier" />;
+const DbScopusFloat = () => <DbLogoFloat brand="scopus" />;
+const DbSciencedirectFloat = () => <DbLogoFloat brand="sciencedirect" />;
 const COLLAGE_ITEMS: Array<{
   id: string;
   Card: React.ComponentType;
@@ -180,7 +192,11 @@ const COLLAGE_ITEMS: Array<{
   { id: "microscope", Card: MicroscopeCard, style: { left: "2.5%", bottom: "39%", width: 210 }, floatDuration: 13, floatDelay: 0.9, hideClass: "mv-collage-hide-mid", tiltClass: "mv-tilt-card-c" },
   { id: "desk", Card: DeskCard, style: { left: "53%", bottom: "3%" }, floatDuration: 11, floatDelay: 1.5, hideClass: "mv-collage-hide-1400", tiltClass: "mv-tilt-card-c" },
   { id: "notify", Card: NotifyBubble, style: { left: "2.5%", bottom: "25%" }, floatDuration: 9, floatDelay: 1.1, hideClass: "mv-collage-hide-720-1160", tiltClass: "mv-tilt-sticker-b" },
-  { id: "dbstack", Card: DbStackCard, style: { right: "22%", bottom: "5%" }, floatDuration: 15, floatDelay: 0.7, hideClass: "mv-collage-hide-720-1400", tiltClass: "mv-tilt-card-d" },
+  { id: "db-pubmed", Card: DbPubmedFloat, style: { left: "43%", bottom: "5%" }, floatDuration: 13, floatDelay: 0.5, hideClass: "mv-collage-mobile-hide", tiltClass: "mv-tilt-card-b" },
+  { id: "db-elsevier", Card: DbElsevierFloat, style: { left: "70%", bottom: "5%" }, floatDuration: 11, floatDelay: 1.3, hideClass: "mv-collage-mobile-hide mv-collage-hide-1400", tiltClass: "mv-tilt-card-a" },
+  { id: "db-scopus", Card: DbScopusFloat, style: { left: "20%", top: "3%" }, floatDuration: 15, floatDelay: 0.9, hideClass: "mv-collage-mobile-hide mv-collage-hide-1400", tiltClass: "mv-tilt-card-c" },
+  { id: "db-sciencedirect", Card: DbSciencedirectFloat, style: { left: "43%", bottom: "19%" }, floatDuration: 12, floatDelay: 1.7, hideClass: "mv-collage-mobile-hide mv-collage-hide-short", tiltClass: "mv-tilt-card-e" },
+  { id: "db-row", Card: DbLogoRow, style: {}, floatDuration: 12, floatDelay: 0, hideClass: "mv-collage-hide-min-720", tiltClass: "" },
   { id: "stickers", Card: Stickers, style: { left: "2.5%", top: "32%" }, floatDuration: 12, floatDelay: 1.8, hideClass: "mv-collage-hide-mid", tiltClass: "mv-tilt-sticker-b" },
 ];
 
@@ -675,6 +691,11 @@ export default function Hero() {
         }
         @media (min-width: 1400px) {
           .mv-collage-hide-min-1400 {
+            display: none;
+          }
+        }
+        @media (min-width: 720px) {
+          .mv-collage-hide-min-720 {
             display: none;
           }
         }
