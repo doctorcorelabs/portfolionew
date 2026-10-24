@@ -49,6 +49,8 @@ export interface Profile {
 export interface FaersData {
   /** Total reports in the analysed sample, as recorded in the poster audit. */
   sampleSize: number;
+  /** Total reports before the analysis-set filter, as recorded in docs/faers-verification.md (6,601 of 7,519). Anchors the homepage "7,519 reports to 6,601 analysis set" flow line. */
+  totalReports: number;
   /** True while any ROR row remains unverified (see docs/faers-verified.json). */
   rorUnverified: boolean;
   /**
@@ -183,6 +185,7 @@ export const researchItems: ResearchItem[] = [
     linkLabel: "Read the study",
     faers: {
       sampleSize: 6601,
+      totalReports: 7519,
       rorUnverified: true,
       percentChangeUnverified: {
         verified: false,

@@ -42,6 +42,15 @@
  */
 
 import { useEffect, useRef, useState } from "react";
+import FaersCard from "../components/hero-collage/FaersCard";
+import DockingCard from "../components/hero-collage/DockingCard";
+import GutAxisCard from "../components/hero-collage/GutAxisCard";
+import ReviewCard from "../components/hero-collage/ReviewCard";
+import PosterCard from "../components/hero-collage/PosterCard";
+import AwardsCard from "../components/hero-collage/AwardsCard";
+import StrokeCard from "../components/hero-collage/StrokeCard";
+import PhotoCard from "../components/hero-collage/PhotoCard";
+import DnaHelix from "../components/hero-collage/DnaHelix";
 
 const INK = "#010101";
 const GRID_LINE = "rgba(18, 18, 19, 0.06)";
@@ -122,8 +131,39 @@ const FACT_PILLS: Array<{
   },
 ];
 
+/* Hero collage (decorative only, never content): 9 research cards
+ * built by sibling agents, scattered around the giant word at the
+ * periphery. All positions sit in the top and bottom bands of the
+ * hero, and never over the centered label. The faint helix motif
+ * may tuck under the frame edge on mid-height stages, but it never
+ * covers the word itself (the frame paints above it, and it hides
+ * entirely on short stages). The layer sits between the grid and the
+ * word/frame (z-index 0 vs frame 1, diorama 2), is pointer-dead so
+ * drag still works, and is aria-hidden. Float durations are
+ * desynced 9-16s. On narrow screens the layer drops into a static
+ * stack below the word showing only FaersCard and PhotoCard. */
+const COLLAGE_ITEMS: Array<{
+  id: string;
+  Card: React.ComponentType;
+  style: React.CSSProperties;
+  floatDuration: number;
+  floatDelay: number;
+  hideClass: string;
+}> = [
+  { id: "docking", Card: DockingCard, style: { left: "2.5%", top: "3%" }, floatDuration: 11, floatDelay: 0.4, hideClass: "mv-collage-mobile-hide" },
+  { id: "helix", Card: DnaHelix, style: { left: "27%", top: "2%", width: 100 }, floatDuration: 14, floatDelay: 1.1, hideClass: "mv-collage-hide-mid mv-collage-mobile-hide mv-collage-hide-short" },
+  { id: "review", Card: ReviewCard, style: { right: "27%", top: "3%" }, floatDuration: 9, floatDelay: 0.8, hideClass: "mv-collage-mobile-hide mv-collage-hide-1000" },
+  { id: "poster", Card: PosterCard, style: { right: "2.5%", top: "2%" }, floatDuration: 13, floatDelay: 0.2, hideClass: "mv-collage-mobile-hide" },
+  { id: "faers", Card: FaersCard, style: { left: "2.5%", bottom: "4%" }, floatDuration: 12, floatDelay: 1.4, hideClass: "" },
+  { id: "gutaxis", Card: GutAxisCard, style: { left: "25%", bottom: "3%", width: 230 }, floatDuration: 16, floatDelay: 0.6, hideClass: "mv-collage-mobile-hide mv-collage-hide-1400" },
+  { id: "photo", Card: PhotoCard, style: { left: "calc(50% - 110px)", bottom: "3%", width: 220 }, floatDuration: 10, floatDelay: 1.0, hideClass: "" },
+  { id: "awards", Card: AwardsCard, style: { right: "25%", bottom: "4%" }, floatDuration: 15, floatDelay: 0.3, hideClass: "mv-collage-hide-mid mv-collage-mobile-hide" },
+  { id: "stroke", Card: StrokeCard, style: { right: "2.5%", bottom: "5%" }, floatDuration: 9, floatDelay: 1.6, hideClass: "mv-collage-mobile-hide" },
+];
+
 export default function Hero() {
   const sectionRef = useRef<HTMLElement | null>(null);
+  const collageRef = useRef<HTMLDivElement | null>(null);
   const frameRef = useRef<HTMLDivElement | null>(null);
   const wordRef = useRef<HTMLHeadingElement | null>(null);
   const chipRefs = useRef<Array<HTMLSpanElement | null>>([]);
@@ -285,6 +325,59 @@ export default function Hero() {
     };
     raf = requestAnimationFrame(tick);
     return () => cancelAnimationFrame(raf);
+  }, []);
+
+  /* Collage pointer parallax (collage layer only, mouse devices
+     only): rAF-throttled mousemove translates the whole collage
+     layer plus/minus 8px from the pointer's offset from stage
+     center. The layer is pointer-dead, so this never interferes
+     with drag. Off on touch (no hover+fine pointer) and under
+     prefers-reduced-motion. Transform is written straight to the
+     layer; no React state changes per frame. */
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    const section = sectionRef.current;
+    const layer = collageRef.current;
+    if (!section || !layer) return;
+    if (!window.matchMedia("(hover: hover) and (pointer: fine)").matches) {
+      return;
+    }
+    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+      return;
+    }
+    let raf = 0;
+    let pending = false;
+    let px = 0;
+    let py = 0;
+    const apply = () => {
+      pending = false;
+      layer.style.transform = `translate(${px.toFixed(1)}px, ${py.toFixed(1)}px)`;
+    };
+    const onMove = (event: MouseEvent) => {
+      const rect = section.getBoundingClientRect();
+      if (rect.width === 0 || rect.height === 0) return;
+      px = ((event.clientX - rect.left) / rect.width - 0.5) * 16;
+      py = ((event.clientY - rect.top) / rect.height - 0.5) * 16;
+      if (!pending) {
+        pending = true;
+        raf = requestAnimationFrame(apply);
+      }
+    };
+    const onLeave = () => {
+      px = 0;
+      py = 0;
+      if (!pending) {
+        pending = true;
+        raf = requestAnimationFrame(apply);
+      }
+    };
+    section.addEventListener("mousemove", onMove);
+    section.addEventListener("mouseleave", onLeave);
+    return () => {
+      section.removeEventListener("mousemove", onMove);
+      section.removeEventListener("mouseleave", onLeave);
+      cancelAnimationFrame(raf);
+    };
   }, []);
 
   /* The frame fade is 1s at a 0.5s delay, so the active state lands
@@ -495,6 +588,88 @@ export default function Hero() {
             display: none;
           }
         }
+        /* Hero collage layer: between the grid and the word/frame
+           (z-index 0 vs frame 1, diorama 2), pointer-dead so drag
+           still works, fades in late like the diorama. Float
+           animation lives on each item wrapper (translateY only),
+           parallax transform lives on the layer, so the two never
+           fight. Items are positioned with left/right/top/bottom
+           only, never transform, so the float keyframes are free. */
+        .mv-collage {
+          position: absolute;
+          inset: 0;
+          z-index: 0;
+          pointer-events: none;
+          overflow: hidden;
+          animation: mv-collage-in 0.8s ease 2.2s both;
+        }
+        .mv-collage-item {
+          position: absolute;
+          pointer-events: none;
+        }
+        .mv-collage-float {
+          animation: mv-collage-float 12s ease-in-out infinite alternate;
+        }
+        @keyframes mv-collage-float {
+          from { transform: translateY(0); }
+          to { transform: translateY(-8px); }
+        }
+        @keyframes mv-collage-in {
+          from { opacity: 0; }
+          to { opacity: 1; }
+        }
+        @media (max-width: 1160px) {
+          .mv-collage-hide-mid {
+            display: none;
+          }
+        }
+        @media (max-width: 1400px) {
+          .mv-collage-hide-1400 {
+            display: none;
+          }
+        }
+        @media (max-width: 1000px) {
+          .mv-collage-hide-1000 {
+            display: none;
+          }
+        }
+        @media (max-height: 700px) {
+          .mv-collage-hide-short {
+            display: none;
+          }
+        }
+        @media (max-width: 719px) {
+          .mv-hero {
+            height: auto !important;
+          }
+          .mv-collage {
+            position: static;
+            inset: auto;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 16px;
+            width: 100%;
+            overflow: visible;
+          }
+          .mv-collage-item {
+            position: static;
+          }
+          .mv-collage-float {
+            animation: none;
+          }
+          .mv-collage-mobile-hide {
+            display: none;
+          }
+        }
+        @media (prefers-reduced-motion: reduce) {
+          .mv-collage {
+            animation: none;
+          }
+          .mv-collage-float {
+            animation: none;
+          }
+        }
       `}</style>
       <div
         aria-hidden="true"
@@ -684,6 +859,26 @@ export default function Hero() {
         >
           daivanlabs.
         </h1>
+      </div>
+      <div
+        ref={collageRef}
+        aria-hidden="true"
+        className="mv-collage"
+      >
+        {COLLAGE_ITEMS.map((item) => (
+          <div
+            key={item.id}
+            className={`mv-collage-item mv-collage-float ${item.hideClass}`.trim()}
+            style={{
+              ...item.style,
+              pointerEvents: "none",
+              animationDuration: `${item.floatDuration}s`,
+              animationDelay: `${item.floatDelay}s`,
+            }}
+          >
+            <item.Card />
+          </div>
+        ))}
       </div>
     </section>
   );
