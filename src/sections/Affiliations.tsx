@@ -1,38 +1,49 @@
-const ink = "#0A0A0A";
-const paper = "#FFFFFF";
-const archive = "#F2F2EF";
-const graphite = "#3C3C38";
-const marginGrey = "#6F6F68";
-const hairline = "#D8D8D0";
-const red = "#C8102E";
-const mono = "'IBM Plex Mono', ui-monospace, SFMono-Regular, Menlo, monospace";
-const display = "Archivo, Inter, -apple-system, 'Segoe UI', sans-serif";
+/**
+ * Affiliations: the Onlines monochrome logo wall, translated honestly.
+ * Institutions are shown as TEXT wordmarks only. No institution logo is
+ * fabricated, and no Onlines client logo is copied. Each wordmark carries
+ * a small label stating the real relationship, so nothing reads as an
+ * endorsement or a client relationship.
+ */
+
+const INK = "#010101";
+const MUTED = "#98989c";
+const PAPER = "#ffffff";
+const HAIRLINE = "#e0e0e0";
+
+const DISPLAY =
+  "'Inter Display', Inter, -apple-system, 'Segoe UI', Roboto, sans-serif";
+const MONO =
+  "'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, monospace";
 
 const affiliations = [
   {
     name: "Universitas Islam Indonesia",
-    context: "Bachelor of Medicine, 2021 to present",
-    role: "Place of study",
+    relation: "Place of study",
   },
   {
     name: "Chulalongkorn University",
-    context: "Summer School Program, Pharmaceutical and Clinical Development (AASP-PECT), 2025",
-    role: "Place of study",
+    relation: "Place of study",
   },
   {
     name: "World Health Organization",
-    context: "Courses completed, 2024",
-    role: "Course provider",
+    relation: "Course provider",
   },
   {
-    name: "Beasiswa Unggulan",
-    context: "Scholarship awardee, Ministry of Education, Culture, Research, and Technology, since 2023",
-    role: "Scholarship program",
+    name: "UNITAR",
+    relation: "Course provider",
+  },
+  {
+    name: "The Johns Hopkins University",
+    relation: "Course provider",
+  },
+  {
+    name: "Ministry of Education",
+    relation: "Scholarship program, Beasiswa Unggulan",
   },
   {
     name: "Korean Society of Hypertension",
-    context: "Hypertension Seoul 2026, poster ABST-000034 accepted",
-    role: "Congress",
+    relation: "Congress, Hypertension Seoul 2026",
   },
 ];
 
@@ -41,103 +52,78 @@ export default function Affiliations() {
     <section
       aria-label="Study and affiliation"
       style={{
-        background: archive,
-        color: ink,
-        fontFamily: display,
-        padding: "72px 24px",
+        background: PAPER,
+        color: INK,
+        fontFamily: DISPLAY,
+        padding: "80px 24px 130px",
+        borderTop: `1px solid ${HAIRLINE}`,
       }}
     >
-      <div style={{ maxWidth: 1080, margin: "0 auto" }}>
+      <div style={{ maxWidth: 1160, margin: "0 auto" }}>
         <p
           style={{
-            margin: 0,
-            fontFamily: mono,
+            margin: "0 0 24px",
+            fontFamily: MONO,
             fontSize: 13,
             letterSpacing: "0.08em",
             textTransform: "uppercase",
-            color: marginGrey,
+            color: MUTED,
           }}
         >
-          FIG. 07 - Affiliation
+          Affiliation
         </p>
-        <h2
-          style={{
-            margin: "16px 0 8px",
-            fontSize: "clamp(48px, 8vw, 104px)",
-            fontWeight: 900,
-            lineHeight: 0.95,
-            letterSpacing: "-0.03em",
-          }}
-        >
-          where I study<span style={{ color: red }}>.</span>
-        </h2>
         <p
           style={{
-            margin: "0 0 40px",
-            maxWidth: 560,
+            margin: "0 0 64px",
+            maxWidth: 680,
             fontSize: 18,
-            lineHeight: 1.65,
-            color: graphite,
+            lineHeight: 1.6,
+            color: INK,
           }}
         >
-          Places of study and affiliation. This is a personal portfolio, so
-          these institutions are not clients, and they are not presented as
-          clients anywhere on this page.
+          These are places of study and affiliation, not clients, and they
+          are not presented as clients anywhere on this site.
         </p>
         <ul
           style={{
             listStyle: "none",
             margin: 0,
             padding: 0,
-            display: "grid",
-            gridTemplateColumns: "repeat(auto-fit, minmax(260px, 1fr))",
-            gap: 0,
-            borderTop: `1px solid ${hairline}`,
-            borderLeft: `1px solid ${hairline}`,
+            display: "flex",
+            flexWrap: "wrap",
+            gap: "48px 80px",
+            alignItems: "flex-start",
           }}
         >
-          {affiliations.map((item) => (
-            <li
-              key={item.name}
-              style={{
-                background: paper,
-                padding: "24px",
-                borderRight: `1px solid ${hairline}`,
-                borderBottom: `1px solid ${hairline}`,
-              }}
-            >
-              <p
+          {affiliations.map((entry) => (
+            <li key={entry.name} style={{ maxWidth: 260 }}>
+              <span
                 style={{
-                  margin: 0,
-                  fontFamily: mono,
+                  display: "block",
+                  fontFamily: MONO,
+                  fontSize: 16,
+                  fontWeight: 700,
+                  letterSpacing: "0.04em",
+                  textTransform: "uppercase",
+                  lineHeight: 1.4,
+                }}
+              >
+                {entry.name}
+              </span>
+              <span
+                style={{
+                  display: "block",
+                  marginTop: 8,
+                  fontFamily: MONO,
                   fontSize: 12,
                   letterSpacing: "0.08em",
                   textTransform: "uppercase",
-                  color: red,
-                }}
-              >
-                {item.role}
-              </p>
-              <p
-                style={{
-                  margin: "12px 0 6px",
-                  fontSize: 20,
-                  fontWeight: 700,
-                  lineHeight: 1.3,
-                }}
-              >
-                {item.name}
-              </p>
-              <p
-                style={{
-                  margin: 0,
-                  fontSize: 15,
+                  color: MUTED,
                   lineHeight: 1.6,
-                  color: graphite,
                 }}
               >
-                {item.context}
-              </p>
+                {entry.relation}
+              </span>
             </li>
           ))}
         </ul>

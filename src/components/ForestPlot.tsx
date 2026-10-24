@@ -39,15 +39,15 @@ type ForestPlotProps = {
   studyLabel?: string;
 };
 
-const INK = "#0A0A0A";
-const GRAPHITE = "#3C3C38";
-const MARGIN_GREY = "#6F6F68";
-const HAIRLINE = "#D8D8D0";
-const ARCHIVE = "#F2F2EF";
-const RED = "#C8102E";
+const INK = "#010101";
+const GRAPHITE = "#1D1D1F";
+const MARGIN_GREY = "#666666";
+const HAIRLINE = "#E0E0E0";
+const ARCHIVE = "#F5F5F7";
+const ACCENT = "#0859D4";
 
 const MONO =
-  "'IBM Plex Mono', ui-monospace, SFMono-Regular, Menlo, monospace";
+  "'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, monospace";
 
 /* Plot geometry. The SVG scales to its container width. */
 const WIDTH = 960;
@@ -166,7 +166,7 @@ export default function ForestPlot({ rows, studyLabel }: ForestPlotProps) {
           y1={HEADER_HEIGHT}
           x2={logX(1)}
           y2={HEADER_HEIGHT + plotted.length * ROW_HEIGHT}
-          stroke={RED}
+          stroke={ACCENT}
           strokeWidth={1.5}
           strokeDasharray="6 4"
         />
@@ -176,7 +176,7 @@ export default function ForestPlot({ rows, studyLabel }: ForestPlotProps) {
           textAnchor="middle"
           fontFamily={MONO}
           fontSize={10}
-          fill={RED}
+          fill={ACCENT}
         >
           1 = neutral
         </text>
@@ -224,7 +224,7 @@ export default function ForestPlot({ rows, studyLabel }: ForestPlotProps) {
                   y={y - size / 2}
                   width={size}
                   height={size}
-                  fill={RED}
+                  fill={ACCENT}
                   transform={`rotate(45 ${center} ${y})`}
                 />
               ) : (

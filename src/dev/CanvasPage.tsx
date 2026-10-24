@@ -348,22 +348,51 @@ export function CanvasPage() {
 
   return (
     <div className="dev-canvas-page">
+      <style>{`
+        .dev-canvas-page .canvas-shell {
+          background-color: #FFFFFF;
+          background-image: linear-gradient(rgba(18, 18, 19, 0.04) 1px, transparent 1px), linear-gradient(90deg, rgba(18, 18, 19, 0.04) 1px, transparent 1px);
+          background-size: 80px 80px;
+        }
+        .dev-canvas-page .canvas-item-preview {
+          border: 1px solid #E0E0E0;
+          background: #FFFFFF;
+        }
+        .dev-canvas-page .canvas-item-label {
+          font-family: "JetBrains Mono", ui-monospace, monospace;
+          font-size: 11px;
+          letter-spacing: 0.08em;
+          text-transform: uppercase;
+          color: #1D1D1F;
+        }
+        .dev-canvas-page .canvas-item-handle {
+          font-family: "JetBrains Mono", ui-monospace, monospace;
+          font-size: 11px;
+          color: #0859D4;
+        }
+        .dev-canvas-page .canvas-controls button {
+          font-family: "JetBrains Mono", ui-monospace, monospace;
+        }
+        .dev-canvas-page .canvas-copied-toast {
+          font-family: "JetBrains Mono", ui-monospace, monospace;
+        }
+      `}</style>
       <div
         style={{
           padding: "16px 24px",
-          borderBottom: "1px solid #D8D8D0",
+          borderBottom: "1px solid #E0E0E0",
           display: "flex",
           gap: 16,
           alignItems: "baseline",
           flexWrap: "wrap",
-          fontFamily: "Archivo, system-ui, sans-serif",
+          fontFamily: "Inter, Arial, sans-serif",
         }}
       >
         <button type="button" onClick={goBack}>
           Kembali ke situs
         </button>
-        <strong>Canvas DEV-only - rebuild portfolio riset</strong>
-        <span style={{ color: "#6F6F68" }}>
+        <strong>Canvas DEV-only - rebuild portfolio v2 (Onlines)</strong>
+        <span style={{ color: "#98989C" }}>
           Semua data di canvas ini 100 persen sintetis. Seret ruang kosong
           buat pan, Ctrl + scroll buat zoom, seret handle Geser buat memindah
           kartu. Panel DialKit ada di pojok kanan bawah.

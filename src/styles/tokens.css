@@ -1,89 +1,101 @@
-/* Design tokens for the DaivanLabs rebuild, direction MANUSKRIP. */
-/* Source: research/11-arah-visual.md section 2. Palette is locked. */
-/* Do not add a seventh color without revising that document. */
+/* Design tokens for the DaivanLabs rebuild, direction ONLINES. */
+/* Source: research/03-onlines-layout.md and research/04-onlines-tipografi-warna.md. */
+/* Measured values from the production CSS of onlines.com.ar, fetched 24 Oct 2026. */
+/* This REPLACES the previous MANUSKRIP journal look. Do not mix the two systems. */
 
 :root {
-  /* Palette, exact values from the MANUSKRIP spec. */
-  --ink: #0A0A0A;
+  /* Palette: near-monochrome, one blue accent for actions only. */
+  --ink: #010101;
+  --title: #1D1D1F;
+  --dark: #111111;
+  --dark-soft: #171717;
   --paper: #FFFFFF;
-  --archive: #F2F2EF;
-  --graphite: #3C3C38;
-  --margin-grey: #6F6F68;
-  --hairline: #D8D8D0;
-  --red: #C8102E;
+  --off-white: #FAFAFA;
+  --light-grey: #F5F5F7;
+  --hairline: #E0E0E0;
+  --body-text: #424242;
+  --secondary: #666666;
+  --margin-grey: #666666;
+  --graphite: #1D1D1F;
+  --muted: #98989C;
+  --blue: #0859D4;
+  --blue-hover: #1A59F9;
 
-  /* Contrast notes from the spec, kept for reference. */
-  /* Ink on Paper 19.8 to 1. Graphite on Paper 11.3 to 1. */
-  /* Evidence Red on Paper 5.9 to 1, for large text and key graphics. */
-  /* Margin Grey on Paper 5.0 to 1, supporting text 13px and up only. */
+  /* Blue budget: links, hovers, and small interactive accents only. */
+  /* Never a section background, never a headline color, never decoration. */
 
-  /* Spacing scale, 4px base. */
-  --space-1: 4px;
-  --space-2: 8px;
+  /* Layout: single 1160px container (10-column system), 1rem side padding below 1432px. */
+  --content-max: 1160px;
+  --measure: 62ch;
+
+  /* Section padding scale, measured from Onlines. */
+  --section-pad: 80px;
+  --section-pad-major: 130px;
+  --section-pad-closing: 200px;
+  --section-pad-mobile: 40px;
+
+  /* Spacing scale for tight groups and large separators. */
+  --space-1: 8px;
+  --space-2: 10px;
   --space-3: 12px;
-  --space-4: 16px;
-  --space-6: 24px;
-  --space-8: 32px;
-  --space-12: 48px;
-  --space-16: 64px;
-  --space-24: 96px;
-  --space-32: 128px;
+  --space-4: 20px;
+  --space-5: 55px;
+  --space-6: 80px;
 
-  /* Radius. A manuscript has no rounded corners. */
+  /* Radius: the rebuild uses square corners everywhere. */
   --radius-0: 0;
   --radius-none: 0;
   --radius: 0;
 
-  /* Hairline rules. */
+  /* Hairline and selection-box rules. */
   --hairline-width: 1px;
+  --selection-border: 1px dashed rgba(18, 18, 19, 0.2);
+  --handle-size: 10px;
 
   /* Typography families, self-hosted via fontsource. */
-  --font-display: "Archivo", "Helvetica Neue", Arial, sans-serif;
-  --font-body: "Archivo", "Helvetica Neue", Arial, sans-serif;
-  --font-serif-accent: "Instrument Serif", Georgia, serif;
-  --font-mono: "IBM Plex Mono", "SFMono-Regular", Menlo, monospace;
+  --font-display: "Inter", "Helvetica Neue", Arial, sans-serif;
+  --font-body: "Inter", "Helvetica Neue", Arial, sans-serif;
+  --font-mono: "JetBrains Mono", "Courier New", ui-monospace, monospace;
 
-  /* Typography weights. */
+  /* Typography weights: 700 statements, 600 section and card titles, */
+  /* 500 firm body and H1 statements, 400 long running text. */
   --weight-regular: 400;
   --weight-medium: 500;
-  --weight-extrabold: 800;
-  --weight-black: 900;
+  --weight-semibold: 600;
+  --weight-bold: 700;
 
   /* Typography sizes. */
-  --text-hero: clamp(72px, 16vw, 210px);
-  --text-section: clamp(44px, 7vw, 96px);
+  /* Hero single word: 180px desktop, 64px at the low breakpoint. */
+  --text-hero: clamp(64px, 14vw, 180px);
+  /* Contact giant: 266px desktop, 170px at the smaller variant. */
+  --text-contact: clamp(64px, 18vw, 266px);
+  /* Section titles: 96px team titles, 72px standard sections. */
+  --text-section: clamp(48px, 7vw, 96px);
+  --text-section-standard: clamp(40px, 5vw, 72px);
+  --text-card-title: clamp(28px, 3vw, 38px);
   --text-body: 18px;
-  --text-body-small: 17px;
-  --text-caption: 15px;
+  --text-body-small: 16px;
   --text-label: 13px;
-  --text-fig-label: 13px;
+  --text-micro: 10px;
 
   /* Typography rhythm. */
-  --leading-display: 0.92;
-  --leading-title: 1.02;
-  --leading-body: 1.65;
-  --tracking-display: -0.03em;
-  --tracking-display-tight: -0.045em;
+  /* Measured hero: line-height 95px at 180px, tracking -1.8px. */
+  /* The class uses a safer leading so wrapped giant words stay readable. */
+  --leading-hero: 0.95;
+  --leading-contact: 0.82;
+  --leading-title: 1.05;
+  --leading-body: 1.5;
+  --tracking-hero: -1.8px;
+  --tracking-section: -0.72px;
+  --tracking-contact: -0.037em;
   --tracking-label: 0.08em;
-  --serif-accent-scale: 1.15;
 
-  /* Layout. */
-  --content-max: 1160px;
-  --measure: 56ch;
-  --journal-content: 7fr;
-  --journal-margin: 3fr;
-
-  /* Motion, initial values before DialKit tuning. */
-  --duration-micro: 160ms;
-  --duration-hover: 220ms;
-  --duration-reveal: 600ms;
-  --duration-page: 320ms;
+  /* Motion: slow and restrained, 0.4s to 0.8s. No scroll lock, no custom cursor. */
+  --duration-hover: 400ms;
+  --duration-fade: 800ms;
   --ease-out: cubic-bezier(0.22, 1, 0.36, 1);
 
   /* Focus. */
   --focus-width: 2px;
   --focus-offset: 3px;
-
-  /* Evidence Red budget: under 3 percent of a viewport. */
-  /* It marks proof only, never decoration. */
 }

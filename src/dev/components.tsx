@@ -1,5 +1,10 @@
 /**
- * Komponen presentasi untuk canvas DEV-only.
+ * Komponen presentasi untuk canvas DEV-only, gaya v2 Onlines.
+ *
+ * Token di sini mengikuti research/03-onlines-layout.md bagian 13:
+ * Inter (fallback Arial) + JetBrains Mono, tinta #010101, kertas #FFFFFF,
+ * abu latar #F5F5F7, garis #E0E0E0, satu aksen biru #0859D4 untuk aksen
+ * kecil saja, radius 0, container 1160px. Bukan lagi palet MANUSKRIP v1.
  *
  * Catatan arsitektur yang jujur: di workdir ini belum ada komponen produksi
  * di src/components/, jadi varian canvas untuk putaran pertama dirender dari
@@ -20,13 +25,13 @@ import {
   karyaSintetis,
 } from "./synthetic-data";
 
-const INK = "#0A0A0A";
-const GRAPHITE = "#3C3C38";
-const MARGIN_GREY = "#6F6F68";
-const HAIRLINE = "#D8D8D0";
+const INK = "#010101";
+const GRAPHITE = "#1D1D1F";
+const MARGIN_GREY = "#98989C";
+const HAIRLINE = "#E0E0E0";
 const PAPER = "#FFFFFF";
-const ARCHIVE = "#F2F2EF";
-const ACCENT_DEFAULT = "#C8102E";
+const ARCHIVE = "#F5F5F7";
+const ACCENT_DEFAULT = "#0859D4";
 
 export interface HeroValues {
   kataRaksasaSize: number;
@@ -58,13 +63,24 @@ export function HeroEditorialRaksasa(props: Partial<HeroValues> = {}) {
   const v: HeroValues = { ...heroDefaults, ...props };
   const sectionStyle: CSSProperties = {
     background: PAPER,
+    backgroundImage:
+      "linear-gradient(rgba(18, 18, 19, 0.04) 1px, transparent 1px), linear-gradient(90deg, rgba(18, 18, 19, 0.04) 1px, transparent 1px)",
+    backgroundSize: "80px 80px",
     color: INK,
     padding: `${v.heroPaddingTop}px 48px ${v.heroPaddingBottom}px`,
     display: "flex",
     flexDirection: "column",
     gap: v.heroGap,
-    fontFamily: "Archivo, system-ui, sans-serif",
+    fontFamily: "Inter, Arial, sans-serif",
     height: "100%",
+    boxSizing: "border-box",
+  };
+  const handleStyle: CSSProperties = {
+    position: "absolute",
+    width: 10,
+    height: 10,
+    background: PAPER,
+    border: `1px solid ${HAIRLINE}`,
     boxSizing: "border-box",
   };
   return (
@@ -72,7 +88,7 @@ export function HeroEditorialRaksasa(props: Partial<HeroValues> = {}) {
       <p
         style={{
           margin: 0,
-          fontFamily: "IBM Plex Mono, ui-monospace, monospace",
+          fontFamily: "JetBrains Mono, ui-monospace, monospace",
           fontSize: v.metaSize,
           letterSpacing: "0.08em",
           color: MARGIN_GREY,
@@ -81,17 +97,32 @@ export function HeroEditorialRaksasa(props: Partial<HeroValues> = {}) {
       >
         Fig. 00 - Portfolio contoh, data sintetis
       </p>
-      <h1
+      <div
         style={{
-          margin: 0,
-          fontSize: v.kataRaksasaSize,
-          lineHeight: 0.95,
-          letterSpacing: "-0.03em",
-          fontWeight: 900,
+          position: "relative",
+          alignSelf: "flex-start",
+          border: "1px dashed rgba(18, 18, 19, 0.2)",
+          padding: "24px 32px",
         }}
       >
-        riset<span style={{ color: v.aksen }}>.</span>
-      </h1>
+        <span style={{ ...handleStyle, top: -5, left: -5 }} />
+        <span style={{ ...handleStyle, top: -5, left: "50%", marginLeft: -5 }} />
+        <span style={{ ...handleStyle, top: -5, right: -5 }} />
+        <span style={{ ...handleStyle, bottom: -5, left: -5 }} />
+        <span style={{ ...handleStyle, bottom: -5, left: "50%", marginLeft: -5 }} />
+        <span style={{ ...handleStyle, bottom: -5, right: -5 }} />
+        <h1
+          style={{
+            margin: 0,
+            fontSize: v.kataRaksasaSize,
+            lineHeight: 0.95,
+            letterSpacing: "-0.03em",
+            fontWeight: 700,
+          }}
+        >
+          daivanlabs<span style={{ color: v.aksen }}>.</span>
+        </h1>
+      </div>
       <h2
         style={{
           margin: 0,
@@ -118,14 +149,14 @@ export function HeroEditorialRaksasa(props: Partial<HeroValues> = {}) {
           color: GRAPHITE,
         }}
       >
-        Satu kata raksasa, satu kalimat misi, lalu bukti. Ini varian kandidat
-        gaya editorial untuk hero portfolio riset, dirender dengan data
-        sintetis di canvas saja.
+        Satu kata raksasa dalam kotak seleksi dashed, satu kalimat misi, lalu
+        bukti. Ini varian kandidat gaya Onlines untuk hero portfolio riset,
+        dirender dengan data sintetis di canvas saja.
       </p>
       <p
         style={{
           margin: 0,
-          fontFamily: "IBM Plex Mono, ui-monospace, monospace",
+          fontFamily: "JetBrains Mono, ui-monospace, monospace",
           fontSize: v.metaSize,
           color: MARGIN_GREY,
         }}
@@ -162,7 +193,7 @@ export function HeroManifestoDuaKolom(props: Partial<ManifestoValues> = {}) {
         background: PAPER,
         color: INK,
         padding: `${v.heroPaddingTop}px 48px ${v.heroPaddingBottom}px`,
-        fontFamily: "Archivo, system-ui, sans-serif",
+        fontFamily: "Inter, Arial, sans-serif",
         height: "100%",
         boxSizing: "border-box",
       }}
@@ -195,7 +226,7 @@ export function HeroManifestoDuaKolom(props: Partial<ManifestoValues> = {}) {
           <p
             style={{
               margin: 0,
-              fontFamily: "IBM Plex Mono, ui-monospace, monospace",
+              fontFamily: "JetBrains Mono, ui-monospace, monospace",
               fontSize: v.metaSize,
               color: MARGIN_GREY,
             }}
@@ -236,7 +267,7 @@ export function KartuRisetIndeksBaris(props: Partial<KartuValues> = {}) {
         background: PAPER,
         color: INK,
         padding: "40px 48px",
-        fontFamily: "Archivo, system-ui, sans-serif",
+        fontFamily: "Inter, Arial, sans-serif",
         height: "100%",
         boxSizing: "border-box",
         overflow: "hidden",
@@ -245,7 +276,7 @@ export function KartuRisetIndeksBaris(props: Partial<KartuValues> = {}) {
       <p
         style={{
           margin: "0 0 24px",
-          fontFamily: "IBM Plex Mono, ui-monospace, monospace",
+          fontFamily: "JetBrains Mono, ui-monospace, monospace",
           fontSize: v.metaSize,
           letterSpacing: "0.08em",
           color: MARGIN_GREY,
@@ -284,7 +315,7 @@ export function KartuRisetIndeksBaris(props: Partial<KartuValues> = {}) {
               <p
                 style={{
                   margin: "8px 0 0",
-                  fontFamily: "IBM Plex Mono, ui-monospace, monospace",
+                  fontFamily: "JetBrains Mono, ui-monospace, monospace",
                   fontSize: v.metaSize,
                   color: MARGIN_GREY,
                 }}
@@ -294,7 +325,7 @@ export function KartuRisetIndeksBaris(props: Partial<KartuValues> = {}) {
             </div>
             <span
               style={{
-                fontFamily: "IBM Plex Mono, ui-monospace, monospace",
+                fontFamily: "JetBrains Mono, ui-monospace, monospace",
                 fontSize: v.metaSize,
                 color: GRAPHITE,
                 textAlign: "right",
@@ -356,7 +387,7 @@ export function VizForestPlot(props: Partial<VizValues> = {}) {
         background: ARCHIVE,
         color: INK,
         padding: `${v.sectionPaddingY}px 48px`,
-        fontFamily: "Archivo, system-ui, sans-serif",
+        fontFamily: "Inter, Arial, sans-serif",
         height: "100%",
         boxSizing: "border-box",
         overflow: "hidden",
@@ -365,7 +396,7 @@ export function VizForestPlot(props: Partial<VizValues> = {}) {
       <p
         style={{
           margin: "0 0 8px",
-          fontFamily: "IBM Plex Mono, ui-monospace, monospace",
+          fontFamily: "JetBrains Mono, ui-monospace, monospace",
           fontSize: v.labelSize,
           letterSpacing: "0.08em",
           color: MARGIN_GREY,
@@ -410,7 +441,7 @@ export function VizForestPlot(props: Partial<VizValues> = {}) {
                 x={8}
                 y={y + 4}
                 fontSize={v.labelSize}
-                fontFamily="Archivo, system-ui, sans-serif"
+                fontFamily="Inter, Arial, sans-serif"
                 fill={INK}
               >
                 {baris.label}
@@ -428,7 +459,7 @@ export function VizForestPlot(props: Partial<VizValues> = {}) {
                 x={plotRight + 24}
                 y={y + 4}
                 fontSize={v.angkaSize}
-                fontFamily="IBM Plex Mono, ui-monospace, monospace"
+                fontFamily="JetBrains Mono, ui-monospace, monospace"
                 fill={GRAPHITE}
               >
                 {baris.estimasi.toFixed(2)} ({baris.bawah.toFixed(2)} -{" "}
@@ -441,7 +472,7 @@ export function VizForestPlot(props: Partial<VizValues> = {}) {
       <p
         style={{
           margin: "16px 0 0",
-          fontFamily: "IBM Plex Mono, ui-monospace, monospace",
+          fontFamily: "JetBrains Mono, ui-monospace, monospace",
           fontSize: v.labelSize,
           color: MARGIN_GREY,
         }}
@@ -464,10 +495,10 @@ export interface FooterValues {
 }
 
 export const footerDefaults: FooterValues = {
-  ctaSize: 72,
+  ctaSize: 88,
   ctaLineHeight: 1.05,
-  footerPaddingTop: 88,
-  footerPaddingBottom: 48,
+  footerPaddingTop: 80,
+  footerPaddingBottom: 40,
   linkSize: 14,
   linkGap: 10,
   borderWidth: 1,
@@ -482,7 +513,7 @@ export function FooterCtaRaksasa(props: Partial<FooterValues> = {}) {
         color: INK,
         borderTop: `${v.borderWidth}px solid ${HAIRLINE}`,
         padding: `${v.footerPaddingTop}px 48px ${v.footerPaddingBottom}px`,
-        fontFamily: "Archivo, system-ui, sans-serif",
+        fontFamily: "Inter, Arial, sans-serif",
         height: "100%",
         boxSizing: "border-box",
       }}
@@ -516,7 +547,7 @@ export function FooterCtaRaksasa(props: Partial<FooterValues> = {}) {
       <p
         style={{
           margin: `${v.linkGap + 24}px 0 0`,
-          fontFamily: "IBM Plex Mono, ui-monospace, monospace",
+          fontFamily: "JetBrains Mono, ui-monospace, monospace",
           fontSize: v.linkSize,
           color: MARGIN_GREY,
         }}

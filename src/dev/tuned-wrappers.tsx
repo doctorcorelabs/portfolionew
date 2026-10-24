@@ -1,5 +1,6 @@
 /**
- * Wrapper tuning DialKit untuk canvas DEV-only.
+ * Wrapper tuning DialKit untuk canvas DEV-only, gaya v2 Onlines.
+ * Nilai bawaan dan aksen mengalir dari components.tsx (token Onlines).
  *
  * Pola yang dipakai (dari research/13-canvas-dialkit-plan.md bagian 3.1):
  * wrapper hidup di src/dev/, memanggil useDialKit, lalu meneruskan nilai

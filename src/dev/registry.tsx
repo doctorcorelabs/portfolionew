@@ -10,6 +10,7 @@
  * gesture di CanvasPage.tsx tidak perlu diubah. Varian baru mendapat id
  * dan nama baru; varian lama dipertahankan.
  *
+ * Lebar preview mengikuti container Onlines 1160px (research/03 bagian 13).
  * Data semua varian 100 persen sintetis dari synthetic-data.ts. Tidak ada
  * angka riset asli, data pasien, data pengguna asli, atau kredensial.
  * Komponen di sini adalah wrapper tuning di tuned-wrappers.tsx, yang
@@ -40,7 +41,7 @@ export const canvasItems: CanvasItem[] = [
     id: "hero-editorial-raksasa",
     name: "Hero - editorial raksasa",
     component: TunedHeroEditorialRaksasa,
-    width: 1180,
+    width: 1160,
     height: 600,
     initialPosition: { x: 60, y: 60 },
   },
@@ -48,7 +49,7 @@ export const canvasItems: CanvasItem[] = [
     id: "hero-manifesto-dua-kolom",
     name: "Hero - manifesto dua kolom",
     component: TunedHeroManifestoDuaKolom,
-    width: 1180,
+    width: 1160,
     height: 600,
     initialPosition: { x: 1340, y: 60 },
   },
@@ -56,7 +57,7 @@ export const canvasItems: CanvasItem[] = [
     id: "kartu-riset-indeks-baris",
     name: "Kartu riset - indeks baris",
     component: TunedKartuRisetIndeksBaris,
-    width: 1180,
+    width: 1160,
     height: 520,
     initialPosition: { x: 60, y: 900 },
   },
@@ -64,7 +65,7 @@ export const canvasItems: CanvasItem[] = [
     id: "viz-forest-plot",
     name: "Visualisasi - forest plot",
     component: TunedVizForestPlot,
-    width: 1180,
+    width: 1160,
     height: 560,
     initialPosition: { x: 60, y: 1620 },
   },
@@ -72,7 +73,7 @@ export const canvasItems: CanvasItem[] = [
     id: "footer-cta-raksasa",
     name: "Footer - ajakan raksasa",
     component: TunedFooterCtaRaksasa,
-    width: 1180,
+    width: 1160,
     height: 420,
     initialPosition: { x: 60, y: 2380 },
   },

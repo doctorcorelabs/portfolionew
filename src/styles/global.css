@@ -1,15 +1,13 @@
-/* Global styles for the DaivanLabs rebuild, direction MANUSKRIP. */
+/* Global styles for the DaivanLabs rebuild, direction ONLINES. */
 /* Self-hosted fonts only. No font is loaded from an external CDN. */
+/* This REPLACES the previous MANUSKRIP journal look. */
 
 /* Fontsource imports must stay first in this file. */
-@import "@fontsource/archivo/400.css";
-@import "@fontsource/archivo/500.css";
-@import "@fontsource/archivo/800.css";
-@import "@fontsource/archivo/900.css";
-@import "@fontsource/instrument-serif/400.css";
-@import "@fontsource/instrument-serif/400-italic.css";
-@import "@fontsource/ibm-plex-mono/400.css";
-@import "@fontsource/ibm-plex-mono/500.css";
+@import "@fontsource/inter/400.css";
+@import "@fontsource/inter/500.css";
+@import "@fontsource/inter/700.css";
+@import "@fontsource/jetbrains-mono/400.css";
+@import "@fontsource/jetbrains-mono/500.css";
 @import "./tokens.css";
 
 /* Light reset. */
@@ -26,7 +24,7 @@ html {
 body {
   margin: 0;
   background: var(--paper);
-  color: var(--ink);
+  color: var(--body-text);
   font-family: var(--font-body);
   font-size: var(--text-body);
   font-weight: var(--weight-regular);
@@ -42,10 +40,10 @@ h4,
 h5,
 h6 {
   margin: 0;
-  color: var(--ink);
+  color: var(--title);
   font-family: var(--font-display);
-  font-weight: var(--weight-extrabold);
-  letter-spacing: var(--tracking-display);
+  font-weight: var(--weight-bold);
+  letter-spacing: var(--tracking-section);
   line-height: var(--leading-title);
 }
 
@@ -56,13 +54,15 @@ p {
 
 a {
   color: var(--ink);
+  text-decoration: underline;
   text-decoration-color: var(--hairline);
   text-underline-offset: 3px;
+  transition: color var(--duration-hover) var(--ease-out);
 }
 
 a:hover {
-  color: var(--red);
-  text-decoration-color: var(--red);
+  color: var(--blue);
+  text-decoration-color: var(--blue);
 }
 
 img,
@@ -75,45 +75,66 @@ button {
   font: inherit;
 }
 
-/* Hero title: one giant word, Archivo 900, never rounded, never shaded. */
+/* Container: single 1160px column, breathing room on wide screens. */
+.onlines-container {
+  margin-inline: auto;
+  max-width: var(--content-max);
+  padding-inline: 1rem;
+  width: 100%;
+}
+
+/* Section rhythm: 80px standard, 130px major, up to 200px before closing. */
+.onlines-section {
+  padding-block: var(--section-pad);
+}
+
+.onlines-section-major {
+  padding-block: var(--section-pad-major);
+}
+
+.onlines-section-closing {
+  padding-block: var(--section-pad-major) var(--section-pad-closing);
+}
+
+/* Hero giant word: one word, Inter 700, tight tracking, ends with a period. */
 .hero-title {
   font-family: var(--font-display);
   font-size: var(--text-hero);
-  font-weight: var(--weight-black);
-  letter-spacing: var(--tracking-display);
-  line-height: var(--leading-display);
+  font-weight: var(--weight-bold);
+  letter-spacing: var(--tracking-hero);
+  line-height: var(--leading-hero);
+  white-space: nowrap;
 }
 
-/* Section title, same display family at a smaller poster scale. */
+/* Contact giant: the closing call, up to 266px desktop. */
+.giant-title {
+  font-family: var(--font-display);
+  font-size: var(--text-contact);
+  font-weight: var(--weight-bold);
+  letter-spacing: var(--tracking-contact);
+  line-height: var(--leading-contact);
+}
+
+/* Section titles: 96px team scale and 72px standard scale. */
 .section-title {
   font-family: var(--font-display);
   font-size: var(--text-section);
-  font-weight: var(--weight-black);
-  letter-spacing: var(--tracking-display);
+  font-weight: var(--weight-bold);
+  letter-spacing: var(--tracking-section);
   line-height: var(--leading-title);
 }
 
-/* Serif accent: italic only, used for at most one phrase per giant title. */
-.serif-accent {
-  font-family: var(--font-serif-accent);
-  font-size: calc(1em * var(--serif-accent-scale));
-  font-style: italic;
-  font-weight: var(--weight-regular);
+.section-title-standard {
+  font-family: var(--font-display);
+  font-size: var(--text-section-standard);
+  font-weight: var(--weight-semibold);
+  letter-spacing: var(--tracking-section);
+  line-height: var(--leading-title);
 }
 
-/* FIG label: mono, uppercase, margin grey, as in the MANUSKRIP spec. */
-.fig-label {
-  color: var(--margin-grey);
-  font-family: var(--font-mono);
-  font-size: var(--text-fig-label);
-  font-weight: var(--weight-medium);
-  letter-spacing: var(--tracking-label);
-  text-transform: uppercase;
-}
-
-/* Generic mono label for metadata, citations, axis labels, and captions. */
+/* Mono label: JetBrains Mono, uppercase, for metadata and citations. */
 .mono-label {
-  color: var(--margin-grey);
+  color: var(--secondary);
   font-family: var(--font-mono);
   font-size: var(--text-label);
   font-weight: var(--weight-medium);
@@ -121,16 +142,130 @@ button {
   text-transform: uppercase;
 }
 
-/* Margin note: mono 13px in margin grey, per the journal grid motif. */
-.margin-note {
-  color: var(--margin-grey);
+/* Micro footer text: JetBrains Mono 10px uppercase, faded. */
+.micro-label {
+  color: var(--muted);
   font-family: var(--font-mono);
-  font-size: var(--text-label);
-  font-weight: var(--weight-regular);
-  line-height: 1.5;
+  font-size: var(--text-micro);
+  font-weight: var(--weight-medium);
+  letter-spacing: var(--tracking-label);
+  text-transform: uppercase;
 }
 
-/* Section divider: one full width hairline plus its label, no color band. */
+/* Dark section: #111 background, white text, same grey hierarchy inverted. */
+.dark-section {
+  background: var(--dark);
+  color: var(--paper);
+}
+
+.dark-section h1,
+.dark-section h2,
+.dark-section h3 {
+  color: var(--paper);
+}
+
+.dark-section p {
+  color: var(--off-white);
+}
+
+.dark-section .mono-label {
+  color: var(--muted);
+}
+
+.dark-section a {
+  color: var(--paper);
+}
+
+.dark-section a:hover {
+  color: var(--blue);
+}
+
+/* Light grey alternating section background. */
+.light-grey-section {
+  background: var(--light-grey);
+}
+
+/* Selection box: the Onlines Figma-style dashed frame around the hero word. */
+/* The box itself is positioned by the hero component; handles are placed */
+/* with the .selection-handle modifiers below. */
+.selection-box {
+  border: var(--selection-border);
+  position: relative;
+}
+
+.selection-handle {
+  background: var(--paper);
+  border: 1px solid var(--muted);
+  height: var(--handle-size);
+  position: absolute;
+  width: var(--handle-size);
+}
+
+.selection-handle-tl {
+  left: -5px;
+  top: -5px;
+}
+
+.selection-handle-tr {
+  right: -5px;
+  top: -5px;
+}
+
+.selection-handle-bl {
+  bottom: -5px;
+  left: -5px;
+}
+
+.selection-handle-br {
+  bottom: -5px;
+  right: -5px;
+}
+
+.selection-handle-tm {
+  left: calc(50% - 5px);
+  top: -5px;
+}
+
+.selection-handle-bm {
+  bottom: -5px;
+  left: calc(50% - 5px);
+}
+
+/* Faint graph-paper grid background for the hero stage. */
+.graph-grid {
+  background-image:
+    linear-gradient(to right, rgba(18, 18, 19, 0.05) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(18, 18, 19, 0.05) 1px, transparent 1px);
+  background-size: 40px 40px;
+}
+
+/* Quote rule: dashed left border with square nodes, like a measuring line. */
+.quote-rule {
+  border-left: 1px dashed rgba(18, 18, 19, 0.2);
+  padding-left: 20px;
+  position: relative;
+}
+
+.quote-rule::before,
+.quote-rule::after {
+  background: var(--paper);
+  border: 1px solid var(--muted);
+  content: "";
+  height: var(--handle-size);
+  left: -6px;
+  position: absolute;
+  width: var(--handle-size);
+}
+
+.quote-rule::before {
+  top: -5px;
+}
+
+.quote-rule::after {
+  bottom: -5px;
+}
+
+/* Hairline divider, full width. */
 .hairline-divider {
   border: 0;
   border-top: var(--hairline-width) solid var(--hairline);
@@ -138,34 +273,24 @@ button {
   width: 100%;
 }
 
-/* Secondary text in graphite, captions in the same family. */
+/* Secondary text and captions. */
 .text-secondary {
-  color: var(--graphite);
+  color: var(--secondary);
 }
 
-.caption {
-  color: var(--graphite);
-  font-size: var(--text-caption);
-}
-
-/* Archive panel: the only alternating section background allowed. */
-.archive-panel {
-  background: var(--archive);
-}
-
-/* Focus must stay visible and must use the single accent color. */
+/* Focus stays visible and uses the single blue accent. */
 :focus-visible {
-  outline: var(--focus-width) solid var(--red);
+  outline: var(--focus-width) solid var(--blue);
   outline-offset: var(--focus-offset);
 }
 
 ::selection {
-  background: var(--archive);
+  background: var(--light-grey);
   color: var(--ink);
 }
 
-/* Reduced motion: every animation and transition stops, and the */
-/* final state shows at once. No curve draw, no count up, no marquee. */
+/* Reduced motion: no animation tricks, final state shows at once. */
+/* No scroll lock and no custom cursor anywhere in this system. */
 @media (prefers-reduced-motion: reduce) {
   html {
     scroll-behavior: auto;
@@ -179,5 +304,22 @@ button {
     animation-iteration-count: 1 !important;
     transition-duration: 0.01ms !important;
     transition-delay: 0ms !important;
+  }
+}
+
+/* Narrow screens: hero and section type step down, section padding shrinks. */
+@media (max-width: 1023px) {
+  .hero-title {
+    font-size: 64px;
+    white-space: normal;
+  }
+
+  .onlines-section,
+  .onlines-section-major {
+    padding-block: var(--section-pad-mobile);
+  }
+
+  .onlines-section-closing {
+    padding-block: var(--section-pad-mobile) 55px;
   }
 }

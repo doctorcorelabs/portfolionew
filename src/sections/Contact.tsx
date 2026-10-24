@@ -3,72 +3,80 @@ const EMAIL = "daivanfebrijuansetiya@gmail.com";
 export default function Contact() {
   return (
     <section id="contact" aria-labelledby="contact-heading" style={styles.section}>
-      <p style={styles.kicker}>FIG. 09 - CONTACT</p>
-      <h2 id="contact-heading" style={styles.giant}>
-        together.
-      </h2>
-      <p style={styles.body}>
-        Have a research question, an academic project, or an idea for a
-        healthcare tool? The clearest way to start is one email that says what
-        the work is, who it is for, and where it currently stands.
-        Collaboration, supervision conversations, and project discussions are
-        all welcome through that door.
-      </p>
-      <a href={`mailto:${EMAIL}`} style={styles.button}>
-        {EMAIL}
-      </a>
-      <p style={styles.small}>
-        Based in Indonesia. Replies go to the address above, which is the
-        contact published on this site.
-      </p>
+      <div style={styles.inner}>
+        <h2 id="contact-heading" style={styles.giant}>
+          Let&apos;s build together.
+        </h2>
+        <p style={styles.body}>
+          Collaboration, supervision conversations, and project discussions
+          are welcome. Send one email describing the work, who it is for,
+          and its current status.
+        </p>
+        <a href={`mailto:${EMAIL}`} style={styles.action}>
+          {EMAIL}
+        </a>
+        <p style={styles.links}>
+          <a href="https://www.linkedin.com/in/daivan-febri-juan-setiya/" target="_blank" rel="noreferrer" style={styles.link}>
+            LinkedIn
+          </a>
+          {" | "}
+          <a href="https://orcid.org/0009-0000-2528-8459" target="_blank" rel="noreferrer" style={styles.link}>
+            ORCID
+          </a>
+          {" | "}
+          <a href="https://www.instagram.com/ddaiivan/" target="_blank" rel="noreferrer" style={styles.link}>
+            Instagram
+          </a>
+        </p>
+      </div>
     </section>
   );
 }
 
 const styles: Record<string, React.CSSProperties> = {
   section: {
-    background: "#F2F2EF",
-    color: "#0A0A0A",
-    borderTop: "1px solid #D8D8D0",
-    padding: "72px 24px",
+    background: "#F5F5F7",
+    color: "#010101",
+    padding: "130px 24px 200px",
   },
-  kicker: {
-    margin: "0 0 16px",
-    fontFamily: "IBM Plex Mono, ui-monospace, monospace",
-    fontSize: 13,
-    letterSpacing: "0.08em",
-    textTransform: "uppercase",
-    color: "#6F6F68",
+  inner: {
+    maxWidth: 1160,
+    margin: "0 auto",
   },
   giant: {
-    margin: "0 0 32px",
-    fontSize: "clamp(64px, 12vw, 160px)",
-    fontWeight: 900,
-    lineHeight: 0.95,
-    letterSpacing: "-0.03em",
+    margin: "0 0 40px",
+    fontFamily: "'Inter Display', Inter, Arial, sans-serif",
+    fontSize: "clamp(56px, 13vw, 200px)",
+    fontWeight: 700,
+    lineHeight: 1,
+    letterSpacing: "-0.02em",
+    overflowWrap: "break-word",
   },
   body: {
-    margin: "0 0 32px",
+    margin: "0 0 40px",
     maxWidth: 620,
+    fontFamily: "'Inter Display', Inter, Arial, sans-serif",
     fontSize: 18,
     lineHeight: 1.65,
-    color: "#3C3C38",
+    color: "#1D1D1F",
   },
-  button: {
-    display: "inline-block",
-    background: "#0A0A0A",
-    color: "#FFFFFF",
-    padding: "16px 24px",
+  links: {
+    margin: "32px 0 0",
+    fontFamily: "'Inter Display', Inter, Arial, sans-serif",
     fontSize: 16,
-    fontWeight: 600,
+    color: "#1D1D1F",
+  },
+  link: {
+    color: "#0859D4",
+    textDecoration: "none",
+  },
+  action: {
+    display: "inline-block",
+    fontFamily: "'Inter Display', Inter, Arial, sans-serif",
+    fontSize: 18,
+    fontWeight: 700,
+    color: "#0859D4",
     textDecoration: "none",
     overflowWrap: "anywhere",
-  },
-  small: {
-    margin: "24px 0 0",
-    fontFamily: "IBM Plex Mono, ui-monospace, monospace",
-    fontSize: 13,
-    lineHeight: 1.6,
-    color: "#6F6F68",
   },
 };

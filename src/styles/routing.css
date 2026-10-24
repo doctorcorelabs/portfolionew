@@ -88,3 +88,10 @@
   line-height: 0.95;
   margin: 0 0 16px;
 }
+
+.container {
+  max-width: 1160px;
+  margin: 0 auto;
+  padding-left: 24px;
+  padding-right: 24px;
+}

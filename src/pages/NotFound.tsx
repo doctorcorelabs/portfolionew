@@ -7,16 +7,16 @@ import { usePageTitle } from "../hooks/usePageTitle";
  */
 export default function NotFound() {
   usePageTitle(
-    "404 - Halaman tidak ditemukan | DaivanLabs",
-    "Halaman yang dicari tidak ada di portfolio riset DaivanLabs. Kembali ke beranda untuk melihat riset dan tools.",
+    "404 - Page not found | DaivanLabs",
+    "The page you are looking for is not in the DaivanLabs research portfolio. Go back home to browse research and tools.",
   );
 
   return (
     <main
       style={{
         backgroundColor: "#FFFFFF",
-        color: "#0A0A0A",
-        fontFamily: "Archivo, system-ui, sans-serif",
+        color: "#010101",
+        fontFamily: "'Inter', system-ui, sans-serif",
         margin: "0 auto",
         maxWidth: "720px",
         minHeight: "100vh",
@@ -25,14 +25,14 @@ export default function NotFound() {
     >
       <p
         style={{
-          color: "#6F6F68",
-          fontFamily: "IBM Plex Mono, ui-monospace, monospace",
+          color: "#666666",
+          fontFamily: "'JetBrains Mono', ui-monospace, monospace",
           fontSize: "13px",
           letterSpacing: "0.08em",
           textTransform: "uppercase",
         }}
       >
-        FIG. 404 - Halaman tidak ditemukan
+        404 - Page not found
       </p>
 
       <h1
@@ -44,37 +44,37 @@ export default function NotFound() {
           margin: "24px 0 0",
         }}
       >
-        404<span style={{ color: "#C8102E" }}>.</span>
+        404<span style={{ color: "#0859D4" }}>.</span>
       </h1>
 
       <p
         style={{
-          fontFamily: "Instrument Serif, Georgia, serif",
+          fontFamily: "'Inter', Georgia, serif",
           fontSize: "24px",
           fontStyle: "italic",
           margin: "24px 0 0",
         }}
       >
-        Naskah ini tidak ada di arsip.
+        This page is not in the archive.
       </p>
 
       <p style={{ fontSize: "17px", lineHeight: 1.65, margin: "24px 0 0" }}>
-        Alamat yang dibuka tidak mengarah ke halaman mana pun di portfolio ini.
-        Kemungkinan tautannya sudah berubah atau salah ketik.
+        The address you opened does not point to any page in this
+        portfolio. The link may have changed or been mistyped.
       </p>
 
-      <p style={{ borderTop: "1px solid #D8D8D0", marginTop: "40px", paddingTop: "24px" }}>
+      <p style={{ borderTop: "1px solid #E0E0E0", marginTop: "40px", paddingTop: "24px" }}>
         <a
           href="/"
           style={{
-            color: "#0A0A0A",
+            color: "#010101",
             fontWeight: 700,
             textDecoration: "underline",
-            textDecorationColor: "#C8102E",
+            textDecorationColor: "#0859D4",
             textUnderlineOffset: "4px",
           }}
         >
-          Kembali ke beranda
+          Back to home
         </a>
       </p>
     </main>

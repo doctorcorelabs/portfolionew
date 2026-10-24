@@ -1,24 +1,31 @@
 import { lazy, Suspense, useEffect, useState } from "react";
 import type { ComponentType } from "react";
-import { Link, Route, Routes } from "react-router-dom";
+import { Route, Routes } from "react-router-dom";
+import Header from "./components/Header";
+import Footer from "./components/Footer";
 import NotFound from "./pages/NotFound";
 import ResearchDetail from "./pages/ResearchDetail";
+import ResearchIndex from "./pages/ResearchIndex";
+import AwardsPage from "./pages/AwardsPage";
+import ExperiencePage from "./pages/ExperiencePage";
+import EducationPage from "./pages/EducationPage";
+import CertificationsPage from "./pages/CertificationsPage";
 
 /**
- * Homepage section order, narrative first: hero, featured research,
- * method, timeline, tools, principles, awards, affiliations, about,
- * contact. Every section is a default-export, no-props component in
- * src/sections/, loaded lazily so a slow section never blocks the rest.
+ * Homepage section order, Onlines anatomy: hero giant word, quote claim,
+ * dark services, dark manifesto, profile, selected works, affiliation
+ * strip, giant contact, footer. Every section is a default-export,
+ * no-props component in src/sections/, loaded lazily so a slow section
+ * never blocks the rest. Pages are imported directly, as in the
+ * previous App, so route components resolve without an extra boundary.
  */
 const Hero = lazy(() => import("./sections/Hero"));
-const Results = lazy(() => import("./sections/Results"));
-const Methods = lazy(() => import("./sections/Methods"));
-const Timeline = lazy(() => import("./sections/Timeline"));
-const Tools = lazy(() => import("./sections/Tools"));
-const Principles = lazy(() => import("./sections/Principles"));
-const Awards = lazy(() => import("./sections/Awards"));
+const Quote = lazy(() => import("./sections/Quote"));
+const Services = lazy(() => import("./sections/Services"));
+const Manifesto = lazy(() => import("./sections/Manifesto"));
+const Profile = lazy(() => import("./sections/Profile"));
+const Works = lazy(() => import("./sections/Works"));
 const Affiliations = lazy(() => import("./sections/Affiliations"));
-const About = lazy(() => import("./sections/About"));
 const Contact = lazy(() => import("./sections/Contact"));
 
 function HomePage() {
@@ -28,14 +35,12 @@ function HomePage() {
         fallback={<p className="page-loading">Memuat bagian...</p>}
       >
         <Hero />
-        <Results />
-        <Methods />
-        <Timeline />
-        <Tools />
-        <Principles />
-        <Awards />
+        <Quote />
+        <Services />
+        <Manifesto />
+        <Profile />
+        <Works />
         <Affiliations />
-        <About />
         <Contact />
       </Suspense>
     </main>
@@ -73,18 +78,19 @@ export default function App() {
 
   return (
     <div>
+      <Header />
       <Routes>
         <Route path="/" element={<HomePage />} />
+        <Route path="/research" element={<ResearchIndex />} />
         <Route path="/research/:slug" element={<ResearchDetail />} />
+        <Route path="/awards" element={<AwardsPage />} />
+        <Route path="/experience" element={<ExperiencePage />} />
+        <Route path="/education" element={<EducationPage />} />
+        <Route path="/certifications" element={<CertificationsPage />} />
         {/* Canvas DEV-only memakai hash #canvas (ditangani di atas, sebelum Routes). Bukan rute navigasi. */}
         <Route path="*" element={<NotFound />} />
       </Routes>
-      <footer className="container" style={{ padding: "24px 0 48px" }}>
-        <p className="research-meta">
-          <Link to="/">DaivanLabs.</Link> Research and healthcare tools from
-          Indonesia. Code for Cure.
-        </p>
-      </footer>
+      <Footer />
     </div>
   );
 }
