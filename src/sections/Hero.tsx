@@ -48,7 +48,6 @@ import GutAxisCard from "../components/hero-collage/GutAxisCard";
 import ReviewCard from "../components/hero-collage/ReviewCard";
 import PosterCard from "../components/hero-collage/PosterCard";
 import AwardsCard from "../components/hero-collage/AwardsCard";
-import StrokeCard from "../components/hero-collage/StrokeCard";
 import DnaHelix from "../components/hero-collage/DnaHelix";
 import SearchWindow from "../components/hero-v8/SearchWindow";
 import PosterWindow from "../components/hero-v8/PosterWindow";
@@ -203,7 +202,6 @@ const COLLAGE_ITEMS: Array<{
   { id: "m-elsevier", Card: DbElsevierFloat, style: {}, floatDuration: 12, floatDelay: 0, hideClass: "mv-collage-hide-min-720", tiltClass: "" },
   { id: "gutaxis", Card: GutAxisCard, style: { left: "25%", bottom: "3%", width: 230 }, floatDuration: 16, floatDelay: 0.6, hideClass: "mv-collage-mobile-hide mv-collage-hide-1400", tiltClass: "mv-tilt-card-a" },
   { id: "awards", Card: AwardsCard, style: { right: "27%", bottom: "4%" }, floatDuration: 15, floatDelay: 0.3, hideClass: "mv-collage-hide-mid mv-collage-mobile-hide mv-collage-hide-min-1400", tiltClass: "mv-tilt-card-c" },
-  { id: "stroke", Card: StrokeCard, style: { right: "2.5%", bottom: "2%" }, floatDuration: 9, floatDelay: 1.6, hideClass: "mv-collage-mobile-hide", tiltClass: "mv-tilt-card-b" },
   { id: "search", Card: SearchWindow, style: { left: "36%", top: "2%" }, floatDuration: 12, floatDelay: 0.6, hideClass: "mv-collage-hide-1400", tiltClass: "mv-tilt-window-b" },
   { id: "posterwindow", Card: PosterWindow, style: { right: "2.5%", top: "11%" }, floatDuration: 14, floatDelay: 1.2, hideClass: "mv-collage-hide-1400", tiltClass: "mv-tilt-window-a" },
   { id: "microscope", Card: MicroscopeCard, style: { left: "2.5%", bottom: "39%", width: 210 }, floatDuration: 13, floatDelay: 0.9, hideClass: "mv-collage-hide-1300 mv-collage-hide-microscope-800", tiltClass: "mv-tilt-card-c" },
@@ -215,8 +213,8 @@ const COLLAGE_ITEMS: Array<{
   { id: "m-scopus", Card: DbScopusFloat, style: {}, floatDuration: 12, floatDelay: 0, hideClass: "mv-collage-hide-min-720", tiltClass: "" },
   { id: "m-cochrane", Card: DbCochraneFloat, style: {}, floatDuration: 12, floatDelay: 0, hideClass: "mv-collage-hide-min-720", tiltClass: "" },
   { id: "db-pubmed", Card: DbPubmedFloat, style: { left: "43%", bottom: "5%" }, floatDuration: 13, floatDelay: 0.5, hideClass: "mv-collage-mobile-hide", tiltClass: "mv-tilt-card-b" },
-  { id: "db-elsevier", Card: DbElsevierFloat, style: { left: "70%", bottom: "5%" }, floatDuration: 11, floatDelay: 1.3, hideClass: "mv-collage-mobile-hide mv-collage-hide-1400", tiltClass: "mv-tilt-card-a" },
-  { id: "db-scopus", Card: DbScopusFloat, style: { left: "20%", top: "3%" }, floatDuration: 15, floatDelay: 0.9, hideClass: "mv-collage-mobile-hide mv-collage-hide-1400", tiltClass: "mv-tilt-card-c" },
+  { id: "db-elsevier", Card: DbElsevierFloat, style: { left: "70%", bottom: "5%" }, floatDuration: 11, floatDelay: 1.3, hideClass: "mv-collage-mobile-hide mv-collage-hide-1400 mv-collage-show-laptop", tiltClass: "mv-tilt-card-a" },
+  { id: "db-scopus", Card: DbScopusFloat, style: { left: "20%", top: "3%" }, floatDuration: 15, floatDelay: 0.9, hideClass: "mv-collage-mobile-hide mv-collage-hide-1400 mv-collage-show-laptop", tiltClass: "mv-tilt-card-c" },
   /* Cochrane lockup is portrait (361x466), so its tile is 69x82.
      It stacks under Scopus in the same left column (left 20%):
      Scopus tile is 100 wide, Cochrane 69 wide, both left-anchored,
@@ -239,7 +237,7 @@ const COLLAGE_ITEMS: Array<{
      Earlier slots failed and were rejected: left 29% sat inside
      the helix box covering about 85% of helix ink, and left 66%
      sat inside the review card span (right 29%). */
-  { id: "db-cochrane", Card: DbCochraneFloat, style: { left: "20%", top: "15%" }, floatDuration: 14, floatDelay: 2.1, hideClass: "mv-collage-mobile-hide mv-collage-hide-1400 mv-collage-hide-750", tiltClass: "mv-tilt-card-d" },
+  { id: "db-cochrane", Card: DbCochraneFloat, style: { left: "20%", top: "15%" }, floatDuration: 14, floatDelay: 2.1, hideClass: "mv-collage-mobile-hide mv-collage-hide-1400 mv-collage-hide-750 mv-collage-show-laptop-cochrane", tiltClass: "mv-tilt-card-d" },
   { id: "stickers", Card: Stickers, style: { left: "2.5%", top: "32%" }, floatDuration: 12, floatDelay: 1.8, hideClass: "mv-collage-hide-1300 mv-collage-hide-stickers-950", tiltClass: "mv-tilt-sticker-b" },
 ];
 
@@ -744,6 +742,161 @@ export default function Hero() {
         @media (max-width: 1400px) {
           .mv-collage-hide-1400 {
             display: none;
+          }
+        }
+        /* Laptop logo show rules: Scopus and Elsevier return at
+           720-1400px widths via the double-class selector, which
+           beats the single-class hide-1400 rule regardless of
+           order. Cochrane has its own height-scoped rule so the
+           hide-750 gate still hides it at VH 750 or below. */
+        @media (min-width: 720px) and (max-width: 740px) and (min-height: 751px) {
+          .mv-collage-show-laptop.mv-collage-hide-1400 {
+            display: block;
+          }
+        }
+        @media (min-width: 741px) and (max-width: 1400px) {
+          .mv-collage-show-laptop.mv-collage-hide-1400 {
+            display: block;
+          }
+        }
+        @media (min-width: 720px) and (max-width: 1300px) and (min-height: 751px) {
+          .mv-collage-show-laptop-cochrane.mv-collage-hide-1400 {
+            display: block;
+          }
+        }
+        @media (min-width: 1301px) and (max-width: 1400px) and (min-height: 801px) {
+          .mv-collage-show-laptop-cochrane.mv-collage-hide-1400 {
+            display: block;
+          }
+        }
+        /* Laptop logo positions (F2): 1161-1300px and 1301-1400px
+           bands. These only reposition tiles that F3's show-rules
+           already reveal; they write no display rule, so hide-750
+           and the 1400px gates still govern visibility. Positions
+           are inline, hence !important. Scopus and Elsevier share
+           .mv-collage-show-laptop, so they are told apart by their
+           tilt child (Scopus: card-c, Elsevier: card-a). The
+           1301-1400 Cochrane block is min-height 801px scoped:
+           the slot overlaps the FAERS chip drift box by 6px at
+           stage 600 (VH 700), so the new position applies only at
+           stage 701 and above; below that the tile falls back to
+           its inline position when shown. */
+        @media (min-width: 1161px) and (max-width: 1300px) {
+          .mv-collage-show-laptop-cochrane {
+            left: 40% !important;
+            top: 2% !important;
+          }
+          .mv-collage-show-laptop:has(> .mv-tilt-card-c) {
+            left: 40% !important;
+            top: 17.5% !important;
+          }
+          .mv-collage-show-laptop:has(> .mv-tilt-card-a) {
+            left: 27% !important;
+            bottom: 5% !important;
+          }
+        }
+        /* Blocker fix B1: at 17.5% the Scopus slot between
+           Cochrane bottom and label top is still too short at
+           the shortest stages, so Scopus hides below VH 687 in
+           1161-1300px only. Worst-phase label gap at first
+           shown height (VH 687) is +3.2px and grows 0.325px
+           per px of viewport height; Cochrane-above worst gap
+           at its first appearance (VH 751) is +9.4px and the
+           StrokeSense-chip-below worst gap at VH 687 is
+           +18.1px, so 687 is the binding height. The 3-class
+           selector beats the 2-class show-rule regardless of
+           order and :has(card-c) matches only Scopus; the
+           width scope keeps other bands and above-1400
+           untouched. */
+        @media (min-width: 1161px) and (max-width: 1300px) and (max-height: 686px) {
+          .mv-collage-show-laptop:has(> .mv-tilt-card-c).mv-collage-hide-1400 {
+            display: none;
+          }
+        }
+        @media (min-width: 1301px) and (max-width: 1400px) {
+          .mv-collage-show-laptop:has(> .mv-tilt-card-c) {
+            left: 36% !important;
+            top: 2% !important;
+          }
+          .mv-collage-show-laptop:has(> .mv-tilt-card-a) {
+            left: 30% !important;
+            bottom: 5% !important;
+          }
+        }
+        @media (min-width: 1301px) and (max-width: 1400px) and (min-height: 801px) {
+          .mv-collage-show-laptop-cochrane {
+            left: 21% !important;
+            top: 15% !important;
+          }
+        }
+        /* Laptop logo bands (F1 positions only): Scopus, Cochrane
+           and Elsevier repositioned at 720-1160px widths. Display
+           is owned by F3's show-rules above; these blocks only
+           override inline left/top (hence !important) and never
+           set display. Scopus and Elsevier share the show-laptop
+           marker, so they are told apart with :has() on the tilt
+           child class (Scopus tilt-card-c, Elsevier tilt-card-a),
+           which is unique among show-laptop tiles. Elsevier needs
+           bottom:auto wherever top is set, or its inline bottom
+           would stretch the tile. Band 1 is height-scoped
+           (min-height 751px) per brief. */
+        @media (min-width: 720px) and (max-width: 740px) and (min-height: 751px) {
+          .mv-collage-show-laptop.mv-collage-hide-1400:has(> .mv-tilt-card-c) {
+            left: 41% !important;
+            top: 4.3% !important;
+          }
+          .mv-collage-show-laptop-cochrane.mv-collage-hide-1400 {
+            left: 41% !important;
+            top: 14.3% !important;
+          }
+          .mv-collage-show-laptop.mv-collage-hide-1400:has(> .mv-tilt-card-a) {
+            left: 41% !important;
+            top: 28.6% !important;
+            bottom: auto !important;
+          }
+        }
+        @media (min-width: 741px) and (max-width: 1000px) {
+          .mv-collage-show-laptop.mv-collage-hide-1400:has(> .mv-tilt-card-c) {
+            left: 36% !important;
+            top: 4.3% !important;
+          }
+          .mv-collage-show-laptop-cochrane.mv-collage-hide-1400 {
+            left: 51% !important;
+            top: 4.3% !important;
+          }
+          .mv-collage-show-laptop.mv-collage-hide-1400:has(> .mv-tilt-card-a) {
+            left: 36% !important;
+            top: 16.5% !important;
+            bottom: auto !important;
+          }
+        }
+        @media (min-width: 1001px) and (max-width: 1023px) {
+          .mv-collage-show-laptop.mv-collage-hide-1400:has(> .mv-tilt-card-c) {
+            left: 27% !important;
+            top: 4.3% !important;
+          }
+          .mv-collage-show-laptop-cochrane.mv-collage-hide-1400 {
+            left: 38% !important;
+            top: 4.3% !important;
+          }
+          .mv-collage-show-laptop.mv-collage-hide-1400:has(> .mv-tilt-card-a) {
+            left: 27% !important;
+            top: 18.6% !important;
+            bottom: auto !important;
+          }
+        }
+        @media (min-width: 1024px) and (max-width: 1160px) {
+          .mv-collage-show-laptop.mv-collage-hide-1400:has(> .mv-tilt-card-c) {
+            left: 28% !important;
+            top: 3% !important;
+          }
+          .mv-collage-show-laptop-cochrane.mv-collage-hide-1400 {
+            left: 28% !important;
+            top: 15% !important;
+          }
+          .mv-collage-show-laptop.mv-collage-hide-1400:has(> .mv-tilt-card-a) {
+            left: 30% !important;
+            bottom: 5% !important;
           }
         }
         @media (min-width: 720px) and (max-width: 1400px) {
