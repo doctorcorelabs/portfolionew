@@ -224,7 +224,13 @@ transient below.
    model shows -0.14px worst at 881, so 882 is the first height clean
    in both models. The alternative (accept the VH 851-880 transient
    overlap as a second accepted class) is no longer needed for tablet.
-2. Separately, whether to raise the desktop notify gate (same
-   pre-existing exposure at 1161-1400, VH 851-880).
+2. DONE (2026-10-25, user-approved follow-up): desktop notify gate raised
+   the same way - the hide-notify-850 rule's threshold went from
+   max-height 850px to 881px (class name kept for churn safety, noted in
+   code comment). Notify is now hidden at VH <= 881 at all widths >= 720px
+   and shown at VH >= 882, where the worst gap is +0.12/+0.36px in both
+   models (y-geometry is width-independent, so the tablet proof carries
+   to desktop). Tablet behavior is unchanged (show-rules at min-height
+   882px still win above 881). Build passes; no other rule touched.
 3. Whether to hide microscope in the miniature to remove the ~50% word
    tuck, or accept it as the miniature's collage look.

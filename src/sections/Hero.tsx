@@ -1039,7 +1039,13 @@ export default function Hero() {
            tablet widths by hide-720-1160 and hide-1300, so these
            gates are moot there. Logo visibility counts are
            unaffected: no logo tile carries any of these classes. */
-        @media (min-width: 720px) and (max-height: 850px) {
+        /* Notify gate raised 850 -> 881 (2026-10-25, desktop B1 fix):
+           FaersCard true height is 180px (label wraps to 2 lines), so
+           notify vs faers overlapped worst-phase up to 7.7px at VH 851.
+           Class name keeps the old 850 for churn safety; the threshold
+           below is what matters. Tablet show-rules (min-height 882px)
+           still win above 881, so tablet behavior is unchanged. */
+        @media (min-width: 720px) and (max-height: 881px) {
           .mv-collage-hide-notify-850 {
             display: none;
           }
