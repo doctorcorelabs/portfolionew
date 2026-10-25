@@ -105,10 +105,10 @@ const CURSOR_CHIPS: Array<{
   duration: number;
   phase: number;
 }> = [
-  { label: "FAERS", color: "#0859D4", anchorX: 0.04, anchorY: 0.16, radius: 40, duration: 18, phase: 0 },
-  { label: "StrokeSense", color: "#177245", anchorX: 0.96, anchorY: 0.2, radius: 56, duration: 22, phase: 0.3 },
-  { label: "Code for Cure", color: "#A63A2E", anchorX: 0.05, anchorY: 0.82, radius: 32, duration: 16, phase: 0.55 },
-  { label: "Seoul 2026", color: "#7A5A00", anchorX: 0.95, anchorY: 0.76, radius: 48, duration: 24, phase: 0.8 },
+  { label: "FAERS", color: "#0859D4", anchorX: 0.195, anchorY: 0.30, radius: 20, duration: 18, phase: 0 }, // anchorX 0.195, not 0.15: at 0.15 the word-hover converged chip lands on MicroscopeCard (top about 296 at 1440/H800); 0.195 parks it 13px past the card's right edge while keeping 15px drift clearance to the helix box
+  { label: "StrokeSense", color: "#177245", anchorX: 0.55, anchorY: 0.33, radius: 20, duration: 22, phase: 0.3 },
+  { label: "Code for Cure", color: "#A63A2E", anchorX: 0.30, anchorY: 0.695, radius: 20, duration: 16, phase: 0.55 },
+  { label: "Seoul 2026", color: "#7A5A00", anchorX: 0.80, anchorY: 0.695, radius: 20, duration: 24, phase: 0.8 },
 ];
 
 const FACT_PILLS: Array<{
@@ -116,10 +116,17 @@ const FACT_PILLS: Array<{
   style: React.CSSProperties;
   duration: number;
   delay: number;
+  cls?: string;
 }> = [
   {
+    /* Seoul pill at left 59% (de-overlap): reducing left fails
+       (stickers at S=900 share top 32% and span to x 407, while
+       helix/search/label at S=800 forbid x 388-806), so the pill
+       sits right of the label instead: 43.9px label gap and
+       83.4px posterwindow gap at 1440, 11.1px worst-phase
+       vertical gap to review at S=800. Top stays 32%. */
     text: "Hypertension Seoul 2026",
-    style: { top: "30%", right: "10%" },
+    style: { left: "59%", top: "32%" },
     duration: 10,
     delay: 0.5,
   },
@@ -131,9 +138,10 @@ const FACT_PILLS: Array<{
   },
   {
     text: "FAERS N = 6,601",
-    style: { top: "64%", left: "7%" },
+    style: { top: "62%", left: "7%" },
     duration: 12,
     delay: 0,
+    cls: "mv-diorama-pill-faers",
   },
 ];
 
@@ -183,24 +191,24 @@ const COLLAGE_ITEMS: Array<{
   tiltClass: string;
 }> = [
   { id: "docking", Card: DockingCard, style: { left: "2.5%", top: "3%" }, floatDuration: 11, floatDelay: 0.4, hideClass: "mv-collage-mobile-hide", tiltClass: "mv-tilt-card-a" },
-  { id: "helix", Card: DnaHelix, style: { left: "27%", top: "2%", width: 100 }, floatDuration: 14, floatDelay: 1.1, hideClass: "mv-collage-hide-mid mv-collage-mobile-hide mv-collage-hide-short", tiltClass: "" },
-  { id: "review", Card: ReviewCard, style: { right: "29%", top: "3%" }, floatDuration: 9, floatDelay: 0.8, hideClass: "mv-collage-mobile-hide mv-collage-hide-1000", tiltClass: "mv-tilt-card-b" },
+  { id: "helix", Card: DnaHelix, style: { left: "27%", top: "2%", width: 100 }, floatDuration: 14, floatDelay: 1.1, hideClass: "mv-collage-hide-mid mv-collage-mobile-hide mv-collage-hide-750", tiltClass: "" },
+  { id: "review", Card: ReviewCard, style: { right: "29%", top: "3%" }, floatDuration: 9, floatDelay: 0.8, hideClass: "mv-collage-mobile-hide mv-collage-hide-1000 mv-collage-review", tiltClass: "mv-tilt-card-b" },
   { id: "poster", Card: PosterCard, style: { right: "2.5%", top: "2%" }, floatDuration: 13, floatDelay: 0.2, hideClass: "mv-collage-mobile-hide mv-collage-hide-min-1400", tiltClass: "mv-tilt-card-c" },
   /* Mobile-only logo scatter (responsive fix): single PubMed tile
      opens the mobile stack, so the logos spread through the hero
      instead of piling in one row at the bottom. Hidden at 720px
      and above, so desktop is untouched. */
   { id: "m-pubmed", Card: DbPubmedFloat, style: {}, floatDuration: 12, floatDelay: 0, hideClass: "mv-collage-hide-min-720", tiltClass: "" },
-  { id: "faers", Card: FaersCard, style: { left: "2.5%", bottom: "4%" }, floatDuration: 12, floatDelay: 1.4, hideClass: "", tiltClass: "mv-tilt-card-b" },
+  { id: "faers", Card: FaersCard, style: { left: "2.5%", bottom: "2%" }, floatDuration: 12, floatDelay: 1.4, hideClass: "", tiltClass: "mv-tilt-card-b" },
   { id: "m-elsevier", Card: DbElsevierFloat, style: {}, floatDuration: 12, floatDelay: 0, hideClass: "mv-collage-hide-min-720", tiltClass: "" },
   { id: "gutaxis", Card: GutAxisCard, style: { left: "25%", bottom: "3%", width: 230 }, floatDuration: 16, floatDelay: 0.6, hideClass: "mv-collage-mobile-hide mv-collage-hide-1400", tiltClass: "mv-tilt-card-a" },
-  { id: "awards", Card: AwardsCard, style: { right: "25%", bottom: "4%" }, floatDuration: 15, floatDelay: 0.3, hideClass: "mv-collage-hide-mid mv-collage-mobile-hide mv-collage-hide-min-1400", tiltClass: "mv-tilt-card-c" },
-  { id: "stroke", Card: StrokeCard, style: { right: "2.5%", bottom: "5%" }, floatDuration: 9, floatDelay: 1.6, hideClass: "mv-collage-mobile-hide", tiltClass: "mv-tilt-card-b" },
+  { id: "awards", Card: AwardsCard, style: { right: "27%", bottom: "4%" }, floatDuration: 15, floatDelay: 0.3, hideClass: "mv-collage-hide-mid mv-collage-mobile-hide mv-collage-hide-min-1400", tiltClass: "mv-tilt-card-c" },
+  { id: "stroke", Card: StrokeCard, style: { right: "2.5%", bottom: "2%" }, floatDuration: 9, floatDelay: 1.6, hideClass: "mv-collage-mobile-hide", tiltClass: "mv-tilt-card-b" },
   { id: "search", Card: SearchWindow, style: { left: "36%", top: "2%" }, floatDuration: 12, floatDelay: 0.6, hideClass: "mv-collage-hide-1400", tiltClass: "mv-tilt-window-b" },
   { id: "posterwindow", Card: PosterWindow, style: { right: "2.5%", top: "11%" }, floatDuration: 14, floatDelay: 1.2, hideClass: "mv-collage-hide-1400", tiltClass: "mv-tilt-window-a" },
-  { id: "microscope", Card: MicroscopeCard, style: { left: "2.5%", bottom: "39%", width: 210 }, floatDuration: 13, floatDelay: 0.9, hideClass: "mv-collage-hide-1300", tiltClass: "mv-tilt-card-c" },
+  { id: "microscope", Card: MicroscopeCard, style: { left: "2.5%", bottom: "39%", width: 210 }, floatDuration: 13, floatDelay: 0.9, hideClass: "mv-collage-hide-1300 mv-collage-hide-microscope-800", tiltClass: "mv-tilt-card-c" },
   { id: "desk", Card: DeskCard, style: { left: "53%", bottom: "3%" }, floatDuration: 11, floatDelay: 1.5, hideClass: "mv-collage-hide-1400", tiltClass: "mv-tilt-card-c" },
-  { id: "notify", Card: NotifyBubble, style: { left: "2.5%", bottom: "25%" }, floatDuration: 9, floatDelay: 1.1, hideClass: "mv-collage-hide-720-1160", tiltClass: "mv-tilt-sticker-b" },
+  { id: "notify", Card: NotifyBubble, style: { left: "2.5%", bottom: "28%" }, floatDuration: 9, floatDelay: 1.1, hideClass: "mv-collage-hide-720-1160 mv-collage-hide-notify-850", tiltClass: "mv-tilt-sticker-b" },
   /* Mobile-only logo scatter, continued: Scopus then Cochrane
      close the mobile stack, preserving the desktop pairing
      (Cochrane under Scopus) with the tall portrait tile last. */
@@ -232,7 +240,7 @@ const COLLAGE_ITEMS: Array<{
      the helix box covering about 85% of helix ink, and left 66%
      sat inside the review card span (right 29%). */
   { id: "db-cochrane", Card: DbCochraneFloat, style: { left: "20%", top: "15%" }, floatDuration: 14, floatDelay: 2.1, hideClass: "mv-collage-mobile-hide mv-collage-hide-1400 mv-collage-hide-750", tiltClass: "mv-tilt-card-d" },
-  { id: "stickers", Card: Stickers, style: { left: "2.5%", top: "32%" }, floatDuration: 12, floatDelay: 1.8, hideClass: "mv-collage-hide-1300", tiltClass: "mv-tilt-sticker-b" },
+  { id: "stickers", Card: Stickers, style: { left: "2.5%", top: "32%" }, floatDuration: 12, floatDelay: 1.8, hideClass: "mv-collage-hide-1300 mv-collage-hide-stickers-950", tiltClass: "mv-tilt-sticker-b" },
 ];
 
 export default function Hero() {
@@ -639,6 +647,16 @@ export default function Hero() {
             display: none;
           }
         }
+        /* Tablet diorama hide (de-overlap): on mouse/trackpad
+           iPads the chips rest on cards by anchor geometry at
+           every tablet width, so the layer hides at 1160px and
+           below. Touch iPads already hide it via hover:none
+           above; desktop above 1160px is untouched. */
+        @media (max-width: 1160px) {
+          .mv-diorama {
+            display: none;
+          }
+        }
         @media (max-width: 900px) {
           .mv-diorama-pill {
             display: none;
@@ -763,6 +781,72 @@ export default function Hero() {
             display: none;
           }
         }
+        /* De-overlap height gates (float layout only): each rule
+           is scoped to min-width 720px so the mobile static stack
+           is untouched. Without that scope, the notify gate would
+           hide NotifyBubble from the mobile stack on phones with
+           viewport height at or below 850px, breaking the required
+           six-item stack. Notify hides below 850px viewport
+           height: with the landed bottom 28% move the notify/faers
+           gap is already worst-phase positive at 850, so the
+           transition is clean, and below 850 the hide gives
+           strict zero overlap where worst-phase overlap would
+           otherwise persist to 835. Stickers hide below 950px:
+           this kills stickers/microscope and stickers/helix at
+           short stages, and above 950 their gaps are wide (53.2px
+           rest at stage 980). Microscope hides below 800px: this
+           kills the residual docking/microscope worst-phase graze
+           (at most 6px) at 768. Tablet sets are unchanged:
+           notify, stickers, and microscope are already hidden at
+           tablet widths by hide-720-1160 and hide-1300, so these
+           gates are moot there. Logo visibility counts are
+           unaffected: no logo tile carries any of these classes. */
+        @media (min-width: 720px) and (max-height: 850px) {
+          .mv-collage-hide-notify-850 {
+            display: none;
+          }
+        }
+        @media (min-width: 720px) and (max-height: 950px) {
+          .mv-collage-hide-stickers-950 {
+            display: none;
+          }
+        }
+        @media (min-width: 720px) and (max-height: 800px) {
+          .mv-collage-hide-microscope-800 {
+            display: none;
+          }
+        }
+        /* FAERS pill height gate (cursor follow-up): no top value
+           clears microscope, notify, and the word at every height
+           (the stage-800 window is empty once tilt is counted, and
+           the short-stage windows demand 0.658 or higher), so the
+           pill hides at viewport heights 1090px and below, just
+           above the word worst-phase zero (1087.5) and the notify
+           worst-phase zero (1016). Above 1090 only sub-3px float
+           transients remain. Scoped like the sibling gates; the
+           mobile stack has no pills, and logo counts are untouched. */
+        @media (min-width: 720px) and (max-height: 1090px) {
+          .mv-diorama-pill-faers {
+            display: none;
+          }
+        }
+        /* Tablet review/poster graze (de-overlap): review right
+           29% to 31% at 1160px and below ONLY, as a width-scoped
+           override, NOT a base change. Desktop keeps right 29%
+           to protect the 18.6px review/search gap at 1440px.
+           !important is required because the item right is
+           inline. mv-collage-review is a positioning hook, not
+           a hide rule; it rides in the hideClass field because
+           that field is the only per-item class hook the render
+           provides. At 1024px the tilt-adjusted gap goes from
+           6px to about 26px; at 1160px from 42px to about 65px.
+           Below 720px review is hidden by mobile-hide, so the
+           override cannot leak into the mobile stack. */
+        @media (max-width: 1160px) {
+          .mv-collage-review {
+            right: 31% !important;
+          }
+        }
         /* Giant-word lockup below the fit boundary (responsive
            fix): the full word fits on one line only at 904px and
            above (0.896V - 18 <= V - 112), so below 904px the word
@@ -811,9 +895,10 @@ export default function Hero() {
             display: flex;
             flex-direction: column;
             align-items: center;
-            gap: 16px;
+            gap: 24px;
             width: 100%;
             overflow: visible;
+            margin-top: 16px;
           }
           .mv-collage-item {
             position: static;
@@ -912,7 +997,7 @@ export default function Hero() {
         {FACT_PILLS.map((pill) => (
           <span
             key={pill.text}
-            className="mv-diorama-pill"
+            className={`mv-diorama-pill${pill.cls ? ` ${pill.cls}` : ""}`}
             style={{
               ...pill.style,
               pointerEvents: "none",
