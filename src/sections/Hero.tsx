@@ -134,6 +134,7 @@ const FACT_PILLS: Array<{
     style: { bottom: "30%", right: "14%" },
     duration: 8,
     delay: 1.2,
+    cls: "mv-diorama-pill-cfc",
   },
   {
     text: "FAERS N = 6,601",
@@ -192,7 +193,7 @@ const COLLAGE_ITEMS: Array<{
   { id: "docking", Card: DockingCard, style: { left: "2.5%", top: "3%" }, floatDuration: 11, floatDelay: 0.4, hideClass: "mv-collage-mobile-hide", tiltClass: "mv-tilt-card-a" },
   { id: "helix", Card: DnaHelix, style: { left: "27%", top: "2%", width: 100 }, floatDuration: 14, floatDelay: 1.1, hideClass: "mv-collage-hide-mid mv-collage-mobile-hide mv-collage-hide-750", tiltClass: "" },
   { id: "review", Card: ReviewCard, style: { right: "29%", top: "3%" }, floatDuration: 9, floatDelay: 0.8, hideClass: "mv-collage-mobile-hide mv-collage-hide-1000 mv-collage-review", tiltClass: "mv-tilt-card-b" },
-  { id: "poster", Card: PosterCard, style: { right: "2.5%", top: "2%" }, floatDuration: 13, floatDelay: 0.2, hideClass: "mv-collage-mobile-hide mv-collage-hide-min-1400", tiltClass: "mv-tilt-card-c" },
+  { id: "poster", Card: PosterCard, style: { right: "2.5%", top: "2%" }, floatDuration: 13, floatDelay: 0.2, hideClass: "mv-collage-mobile-hide mv-collage-hide-min-1400 mv-collage-poster", tiltClass: "mv-tilt-card-c" },
   /* Mobile-only logo scatter (responsive fix): single PubMed tile
      opens the mobile stack, so the logos spread through the hero
      instead of piling in one row at the bottom. Hidden at 720px
@@ -236,7 +237,11 @@ const COLLAGE_ITEMS: Array<{
      (+1deg) alternates with Scopus card-c (-1deg) above it.
      Earlier slots failed and were rejected: left 29% sat inside
      the helix box covering about 85% of helix ink, and left 66%
-     sat inside the review card span (right 29%). */
+     sat inside the review card span (right 29%). Laptop
+     overrides (rearrangement): 1161-1300 stacks Cochrane at
+     62%/2% above Scopus 62%/19%, because review-new (left 36%)
+     occupies the old 40% column; 1301-1400 uses 21%/15%
+     (stylesheet, min-height 801px). */
   { id: "db-cochrane", Card: DbCochraneFloat, style: { left: "20%", top: "15%" }, floatDuration: 14, floatDelay: 2.1, hideClass: "mv-collage-mobile-hide mv-collage-hide-1400 mv-collage-hide-750 mv-collage-show-laptop-cochrane", tiltClass: "mv-tilt-card-d" },
   { id: "stickers", Card: Stickers, style: { left: "2.5%", top: "32%" }, floatDuration: 12, floatDelay: 1.8, hideClass: "mv-collage-hide-1300 mv-collage-hide-stickers-950", tiltClass: "mv-tilt-sticker-b" },
 ];
@@ -329,6 +334,22 @@ export default function Hero() {
     const section = sectionRef.current;
     const word = wordRef.current;
     if (!section || !word) return;
+    /* Rearrangement companion: the Seoul chip's laptop anchor
+       (poster move). In the 1161-1400px band the poster moves to
+       the bottom-right, and the Seoul chip at its 0.80 anchor
+       would sit on the poster's top corner for the whole drift
+       loop at short heights, so in that band only the chip's
+       drift center moves to 0.70 (the stylesheet moves its base
+       to right:30% by the same media query, so base and JS
+       anchor always agree). Above 1400px the chip must stay at
+       0.80: at 0.70 it would collide with the desk card
+       (above-1400 only). matchMedia is used, not innerWidth, so
+       the JS band is the identical media-query evaluation as
+       the CSS rule, scrollbar included. At or below 1160px the
+       diorama is hidden, so the band check is moot there. */
+    const seoulLaptopMql = window.matchMedia(
+      "(min-width: 1161px) and (max-width: 1400px)",
+    );
     const blends = CURSOR_CHIPS.map(() => 0);
     let raf = 0;
     let last = performance.now();
@@ -363,11 +384,32 @@ export default function Hero() {
         const el = chipRefs.current[i];
         if (!el) return;
         const chipW0 = el.offsetWidth;
+        const effAnchorX =
+          chip.label === "Seoul 2026" && seoulLaptopMql.matches
+            ? 0.70
+            : chip.anchorX;
         const anchorX =
-          chip.anchorX > 0.5
-            ? chip.anchorX * stageRect.width - chipW0
-            : chip.anchorX * stageRect.width;
-        const anchorY = chip.anchorY * stageRect.height;
+          effAnchorX > 0.5
+            ? effAnchorX * stageRect.width - chipW0
+            : effAnchorX * stageRect.width;
+        /* Rearrangement companion: at laptop widths the
+           StrokeSense chip drops from the 0.33 lane to 0.45 so
+           it clears the review card's new top-center-left home
+           (left 36%, top 2%), which it would otherwise overlap
+           at short stages. The stylesheet moves the chip's base
+           top to 45% in the same band; window.innerWidth (not
+           stageRect.width) is used here so the JS lane matches
+           the CSS media query exactly. Above 1400px the 0.33
+           lane stays, because 0.45 would touch review-OLD at
+           VH 650 worst-phase. At or below 1160px the diorama
+           is hidden, so the band check is moot there. */
+        const effAnchorY =
+          chip.label === "StrokeSense" &&
+          window.innerWidth > 1160 &&
+          window.innerWidth <= 1400
+            ? 0.45
+            : chip.anchorY;
+        const anchorY = effAnchorY * stageRect.height;
         const angle =
           2 * Math.PI * (elapsed / chip.duration + chip.phase + scrollPhase);
         const driftX = chip.radius * Math.cos(angle);
@@ -769,13 +811,26 @@ export default function Hero() {
             display: block;
           }
         }
-        /* Laptop logo positions (F2): 1161-1300px and 1301-1400px
-           bands. These only reposition tiles that F3's show-rules
-           already reveal; they write no display rule, so hide-750
-           and the 1400px gates still govern visibility. Positions
-           are inline, hence !important. Scopus and Elsevier share
-           .mv-collage-show-laptop, so they are told apart by their
-           tilt child (Scopus: card-c, Elsevier: card-a). The
+        /* Laptop logo positions (rearrangement): 1161-1300px and
+           1301-1400px bands. These only reposition tiles that
+           F3's show-rules already reveal; they write no display
+           rule, so hide-750 and the 1400px gates still govern
+           visibility. Positions are inline, hence !important.
+           Scopus and Elsevier share .mv-collage-show-laptop, so
+           they are told apart by their tilt child (Scopus:
+           card-c, Elsevier: card-a). Rearrangement change: the
+           old 40% column is dead because review-new (left 36%,
+           top 2%) occupies it, so in 1161-1300px Cochrane and
+           Scopus stack in a 62% column (Cochrane top 2%,
+           Scopus top 19%, the balanced optimum between
+           Cochrane bottom and the Seoul pill top: worst gaps
+           2.0px stack-internal and 2.6px Scopus-pill at stage
+           550 only, 7px-plus at VH 680, 15px-plus above VH
+           751; Scopus stays at 19% when Cochrane hides, no
+           collapse). In 1301-1400px Cochrane keeps 21%/15%
+           (clear of review-new) and Scopus alone takes 62%/2%
+           (the old 36% slot collided with review-new and the
+           24% alternative collided with the helix box). The
            1301-1400 Cochrane block is min-height 801px scoped:
            the slot overlaps the FAERS chip drift box by 6px at
            stage 600 (VH 700), so the new position applies only at
@@ -783,39 +838,28 @@ export default function Hero() {
            its inline position when shown. */
         @media (min-width: 1161px) and (max-width: 1300px) {
           .mv-collage-show-laptop-cochrane {
-            left: 40% !important;
+            left: 62% !important;
             top: 2% !important;
           }
           .mv-collage-show-laptop:has(> .mv-tilt-card-c) {
-            left: 40% !important;
-            top: 17.5% !important;
+            left: 62% !important;
+            top: 19% !important;
           }
           .mv-collage-show-laptop:has(> .mv-tilt-card-a) {
             left: 27% !important;
             bottom: 5% !important;
           }
         }
-        /* Blocker fix B1: at 17.5% the Scopus slot between
-           Cochrane bottom and label top is still too short at
-           the shortest stages, so Scopus hides below VH 687 in
-           1161-1300px only. Worst-phase label gap at first
-           shown height (VH 687) is +3.2px and grows 0.325px
-           per px of viewport height; Cochrane-above worst gap
-           at its first appearance (VH 751) is +9.4px and the
-           StrokeSense-chip-below worst gap at VH 687 is
-           +18.1px, so 687 is the binding height. The 3-class
-           selector beats the 2-class show-rule regardless of
-           order and :has(card-c) matches only Scopus; the
-           width scope keeps other bands and above-1400
-           untouched. */
-        @media (min-width: 1161px) and (max-width: 1300px) and (max-height: 686px) {
-          .mv-collage-show-laptop:has(> .mv-tilt-card-c).mv-collage-hide-1400 {
-            display: none;
-          }
-        }
+        /* B1 gate DELETED (rearrangement): the old 17.5% Scopus
+           slot between Cochrane bottom and label top is gone,
+           replaced by the 62%/19% stack slot, which has no
+           short-stage label squeeze (Scopus clears the label
+           in x by 41px-plus at every height). Scopus therefore
+           stays visible at ALL heights in 1161-1300px; no
+           display rule hides it here anymore. */
         @media (min-width: 1301px) and (max-width: 1400px) {
           .mv-collage-show-laptop:has(> .mv-tilt-card-c) {
-            left: 36% !important;
+            left: 62% !important;
             top: 2% !important;
           }
           .mv-collage-show-laptop:has(> .mv-tilt-card-a) {
@@ -1000,6 +1044,104 @@ export default function Hero() {
             right: 31% !important;
           }
         }
+        /* Rearrangement (review move + StrokeSense companion):
+           review takes a new top-center-left home: left 36% top
+           2% at 1161-1400px at all heights (the StrokeSense chip
+           drops to the 0.45 lane in the same band so it clears
+           the moved card), and left 44% top 2% at 1024-1160px but
+           only at viewport heights 850px and above (below that
+           the label binds, so review keeps its old right-31%
+           fallback; above 1400px and at or below 1000px width
+           review is unchanged). right:auto cancels the inline
+           right 29% (and the 31% rule above in the tablet band);
+           !important is required because the item position is
+           inline. The chip rule moves only the StrokeSense
+           chip's base top to 45% in 1161-1400px; the rAF tick
+           uses the same 0.45 anchor in that band so drift and
+           converge stay consistent. Both blocks are width-scoped
+           so nothing leaks into the mobile stack. */
+        @media (min-width: 1161px) and (max-width: 1400px) {
+          .mv-collage-review {
+            left: 36% !important;
+            right: auto !important;
+            top: 2% !important;
+          }
+          .mv-diorama-chip[data-chip="StrokeSense"] {
+            top: 45% !important;
+          }
+        }
+        @media (min-width: 1024px) and (max-width: 1160px) and (min-height: 850px) {
+          .mv-collage-review {
+            left: 44% !important;
+            right: auto !important;
+            top: 2% !important;
+          }
+        }
+        /* Rearrangement (poster move + pointer-layer companions):
+           poster takes the freed bottom-right slot (right 2.5%,
+           bottom 2%). At 1161-1400px it moves at all heights; the
+           Seoul chip (anchor 0.80 to 0.70, base right 30% below)
+           and the Code for Cure pill (bottom 30% to 45% below)
+           move in the same band so the pointer layer stays clear
+           of the moved card. At 1024-1160px poster moves only at
+           viewport heights 810px and above, and at 720-1000px
+           only at 790px and above; below those heights it keeps
+           the verified top-right slot (frame/glyph crossings
+           bind there, and the diorama is hidden at 1160px and
+           below so no chip/pill companion is needed in those
+           bands). The 1001-1023px strip keeps top-right (no
+           band claims it). Above 1400px poster stays hidden
+           (hide-min-1400): PosterWindow already shows the same
+           poster content there. !important is required because
+           the item top is inline; right stays 2.5% inline.
+           mv-collage-poster is a positioning hook, not a hide
+           rule; it rides in the hideClass field like
+           mv-collage-review. Below 720px poster is hidden by
+           mobile-hide, so these min-width-720px rules cannot
+           leak into the mobile stack. */
+        @media (min-width: 1161px) and (max-width: 1400px) {
+          .mv-collage-poster {
+            top: auto !important;
+            bottom: 2% !important;
+          }
+        }
+        @media (min-width: 1024px) and (max-width: 1160px) and (min-height: 810px) {
+          .mv-collage-poster {
+            top: auto !important;
+            bottom: 2% !important;
+          }
+        }
+        @media (min-width: 720px) and (max-width: 1000px) and (min-height: 790px) {
+          .mv-collage-poster {
+            top: auto !important;
+            bottom: 2% !important;
+          }
+        }
+        /* Seoul chip laptop base (poster companion): moves the
+           chip's CSS base from right:20% to right:30% in the
+           laptop band only, matching the JS anchor 0.70 in the
+           same band (see the cursor effect). Above 1400px the
+           base stays right:20% (anchor 0.80), clear of the desk
+           card. The data-chip hook rides the render like the
+           sibling StrokeSense rule. !important is required
+           because the chip base right is inline. */
+        @media (min-width: 1161px) and (max-width: 1400px) {
+          .mv-diorama-chip[data-chip="Seoul 2026"] {
+            right: 30% !important;
+          }
+        }
+        /* Code for Cure pill laptop position (poster companion):
+           bottom 30% to 45% in the laptop band only, so the pill
+           clears the poster's new bottom-right slot at every
+           stage (pill bottom 0.55S vs poster top 0.98S-212 worst:
+           clear for all S >= 550). Above 1400px the pill stays
+           at bottom 30% (status quo). !important is required
+           because the pill bottom is inline. */
+        @media (min-width: 1161px) and (max-width: 1400px) {
+          .mv-diorama-pill-cfc {
+            bottom: 45% !important;
+          }
+        }
         /* Giant-word lockup below the fit boundary (responsive
            fix): the full word fits on one line only at 904px and
            above (0.896V - 18 <= V - 112), so below 904px the word
@@ -1102,6 +1244,7 @@ export default function Hero() {
               chipRefs.current[chipIndex] = el;
             }}
             className="mv-diorama-chip"
+            data-chip={chip.label}
             style={{
               /* Right-anchored chips hang from the right edge so
                  they are never clipped by the stage edge. */
