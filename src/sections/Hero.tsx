@@ -191,7 +191,7 @@ const COLLAGE_ITEMS: Array<{
   tiltClass: string;
 }> = [
   { id: "docking", Card: DockingCard, style: { left: "2.5%", top: "3%" }, floatDuration: 11, floatDelay: 0.4, hideClass: "mv-collage-mobile-hide", tiltClass: "mv-tilt-card-a" },
-  { id: "helix", Card: DnaHelix, style: { left: "27%", top: "2%", width: 100 }, floatDuration: 14, floatDelay: 1.1, hideClass: "mv-collage-hide-mid mv-collage-mobile-hide mv-collage-hide-750", tiltClass: "" },
+  { id: "helix", Card: DnaHelix, style: { left: "27%", top: "2%", width: 100 }, floatDuration: 14, floatDelay: 1.1, hideClass: "mv-collage-hide-mid mv-collage-mobile-hide mv-collage-hide-750 mv-mini-exclude", tiltClass: "" },
   { id: "review", Card: ReviewCard, style: { right: "29%", top: "3%" }, floatDuration: 9, floatDelay: 0.8, hideClass: "mv-collage-mobile-hide mv-collage-hide-1000 mv-collage-review", tiltClass: "mv-tilt-card-b" },
   { id: "poster", Card: PosterCard, style: { right: "2.5%", top: "2%" }, floatDuration: 13, floatDelay: 0.2, hideClass: "mv-collage-mobile-hide mv-collage-hide-min-1400 mv-collage-poster", tiltClass: "mv-tilt-card-c" },
   /* Mobile-only logo scatter (responsive fix): single PubMed tile
@@ -205,9 +205,9 @@ const COLLAGE_ITEMS: Array<{
   { id: "awards", Card: AwardsCard, style: { right: "27%", bottom: "4%" }, floatDuration: 15, floatDelay: 0.3, hideClass: "mv-collage-hide-mid mv-collage-mobile-hide mv-collage-hide-min-1400 mv-collage-show-tablet-awards", tiltClass: "mv-tilt-card-c" },
   { id: "search", Card: SearchWindow, style: { left: "36%", top: "2%" }, floatDuration: 12, floatDelay: 0.6, hideClass: "mv-collage-hide-1400 mv-mini-exclude", tiltClass: "mv-tilt-window-b" },
   { id: "posterwindow", Card: PosterWindow, style: { right: "2.5%", top: "11%" }, floatDuration: 14, floatDelay: 1.2, hideClass: "mv-collage-hide-1400 mv-mini-exclude mv-collage-show-tablet-pw", tiltClass: "mv-tilt-window-a" },
-  { id: "microscope", Card: MicroscopeCard, style: { left: "2.5%", bottom: "39%", width: 210 }, floatDuration: 13, floatDelay: 0.9, hideClass: "mv-collage-hide-1300 mv-collage-hide-microscope-800", tiltClass: "mv-tilt-card-c" },
+  { id: "microscope", Card: MicroscopeCard, style: { left: "2.5%", bottom: "39%", width: 210 }, floatDuration: 13, floatDelay: 0.9, hideClass: "mv-collage-hide-1300 mv-collage-hide-microscope-800 mv-mini-exclude", tiltClass: "mv-tilt-card-c" },
   { id: "desk", Card: DeskCard, style: { left: "53%", bottom: "3%" }, floatDuration: 11, floatDelay: 1.5, hideClass: "mv-collage-hide-1400 mv-mini-exclude", tiltClass: "mv-tilt-card-c" },
-  { id: "notify", Card: NotifyBubble, style: { left: "2.5%", bottom: "28%" }, floatDuration: 9, floatDelay: 1.1, hideClass: "mv-collage-hide-720-1160 mv-collage-hide-notify-850 mv-collage-show-tablet-notify", tiltClass: "mv-tilt-sticker-b" },
+  { id: "notify", Card: NotifyBubble, style: { left: "2.5%", bottom: "28%" }, floatDuration: 9, floatDelay: 1.1, hideClass: "mv-collage-hide-720-1160 mv-collage-hide-notify-850 mv-collage-show-tablet-notify mv-mini-exclude", tiltClass: "mv-tilt-sticker-b" },
   /* Mobile-only logo scatter, continued: Scopus then Cochrane
      close the mobile stack, preserving the desktop pairing
      (Cochrane under Scopus) with the tall portrait tile last. */
@@ -242,8 +242,8 @@ const COLLAGE_ITEMS: Array<{
      62%/2% above Scopus 62%/19%, because review-new (left 36%)
      occupies the old 40% column; 1301-1400 uses 21%/15%
      (stylesheet, min-height 801px). */
-  { id: "db-cochrane", Card: DbCochraneFloat, style: { left: "20%", top: "15%" }, floatDuration: 14, floatDelay: 2.1, hideClass: "mv-collage-mobile-hide mv-collage-hide-1400 mv-collage-hide-750 mv-collage-show-laptop-cochrane", tiltClass: "mv-tilt-card-d" },
-  { id: "stickers", Card: Stickers, style: { left: "2.5%", top: "32%" }, floatDuration: 12, floatDelay: 1.8, hideClass: "mv-collage-hide-1300 mv-collage-hide-stickers-950 mv-collage-show-tablet-stickers", tiltClass: "mv-tilt-sticker-b" },
+  { id: "db-cochrane", Card: DbCochraneFloat, style: { left: "20%", top: "15%" }, floatDuration: 14, floatDelay: 2.1, hideClass: "mv-collage-mobile-hide mv-collage-hide-1400 mv-collage-hide-750 mv-collage-show-laptop-cochrane mv-mini-exclude", tiltClass: "mv-tilt-card-d" },
+  { id: "stickers", Card: Stickers, style: { left: "2.5%", top: "32%" }, floatDuration: 12, floatDelay: 1.8, hideClass: "mv-collage-hide-1300 mv-collage-hide-stickers-950 mv-collage-show-tablet-stickers mv-mini-exclude", tiltClass: "mv-tilt-sticker-b" },
 ];
 
 export default function Hero() {
@@ -311,18 +311,20 @@ export default function Hero() {
 
   /* Phone zoom-out miniature (mobile-mirror task): below a 720px
      layout width the hero renders as a frozen 1161-1400
-     tall-stage miniature (1160x980 design stage, equivalent to
-     VH 1080, all gates open) scaled to the section width. The
-     scale is JS-measured from section clientWidth so it is
-     continuous with viewport width (320 -> ~0.276, 390 -> ~0.336,
-     719 -> ~0.620); the section height is set from the same
-     value via --mv-mini-h, and .mv-hero-mini is the single
-     source of truth for the miniature styles (see the
-     stylesheet). ResizeObserver fires on mount and on every
-     resize, so the 719/720 seam is explicit: null at 720px and
-     above (normal float layout), a number below. */
+     SHORT-stage miniature (1160x600 design stage, equivalent to
+     VH ~700, matching the user's short desktop window: helix,
+     Cochrane, notify, stickers and microscope hidden) scaled to
+     the section width. The scale is JS-measured from section
+     clientWidth so it is continuous with viewport width
+     (320 -> ~0.276, 390 -> ~0.336, 719 -> ~0.620); the section
+     height is set from the same value via --mv-mini-h, and
+     .mv-hero-mini is the single source of truth for the
+     miniature styles (see the stylesheet). ResizeObserver fires
+     on mount and on every resize, so the 719/720 seam is
+     explicit: null at 720px and above (normal float layout),
+     a number below. */
   const MINI_STAGE_W = 1160;
-  const MINI_STAGE_H = 980;
+  const MINI_STAGE_H = 600;
   const [miniScale, setMiniScale] = useState<number | null>(() =>
     typeof window !== "undefined" && window.innerWidth < 720
       ? window.innerWidth / MINI_STAGE_W
@@ -1397,10 +1399,10 @@ export default function Hero() {
         }
         /* Phone zoom-out miniature (mobile-mirror task): below a
            720px layout width the hero renders as a frozen
-           1161-1400 tall-stage miniature on a 1160x980 design
-           stage (equivalent to VH 1080, all gates open) scaled
-           to the section width by the JS-measured transform
-           scale on .mv-mini. .mv-hero-mini is the single
+           1161-1400 SHORT-stage miniature on a 1160x600 design
+           stage (equivalent to VH ~700, matching the user's
+           short desktop window) scaled to the section width by
+           the JS-measured transform scale on .mv-mini. .mv-hero-mini is the single
            source of truth (JS gates on section clientWidth),
            so these rules are class-scoped, not media-scoped:
            that keeps the 719/720 seam explicit and
@@ -1409,13 +1411,17 @@ export default function Hero() {
            .mv-mini is display:contents at desktop/tablet, so
            the wrapper is layout-neutral there: label/frame stay
            flex items of the section and the collage keeps the
-           section as its containing block. Frozen anchors:
-           review 36%/2%, poster bottom-right, Scopus/Cochrane
-           62% stack, Elsevier 27%/bottom 5%. Wide-band items
-           (search, posterwindow, gutaxis, desk) are excluded
-           via .mv-mini-exclude and the m-* twins via
-           hide-min-720, so no logo appears twice. Chips/pills
-           stay hidden (existing diorama rules untouched).
+           section as its containing block. Frozen anchors
+           (SHORT state): review 36%/2%, poster bottom-right,
+           Scopus 62%/19% (stack NOT collapsed: Cochrane's
+           62%/2% slot above stays empty, as at 1161-1300),
+           Elsevier 27%/bottom 5%. Excluded via
+           .mv-mini-exclude: wide-band items (search,
+           posterwindow, gutaxis, desk) plus the short-window
+           hidden set (helix, db-cochrane, notify, stickers,
+           microscope); the m-* twins via hide-min-720, so no
+           logo appears twice. Chips/pills stay hidden
+           (existing diorama rules untouched).
            Float and tilt are restored (the 719px block zeroes
            them for the old stack); the reduced-motion override
            at the end re-kills them when requested. */
@@ -1435,7 +1441,7 @@ export default function Hero() {
           justify-content: center;
           position: relative;
           width: 1160px;
-          height: 980px;
+          height: 600px;
           padding: 80px 24px;
           box-sizing: border-box;
         }
@@ -1605,7 +1611,7 @@ export default function Hero() {
         ))}
       </div>
       {/* Phone zoom-out miniature wrapper: display:contents at
-          desktop/tablet (layout-neutral), the 1160x980 design
+          desktop/tablet (layout-neutral), the 1160x600 design
           stage below 720px (see the miniature stylesheet). */}
       <div
         className="mv-mini"
