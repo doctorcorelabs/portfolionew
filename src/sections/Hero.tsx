@@ -1496,12 +1496,22 @@ export default function Hero() {
            bottom 30% to 45% in the laptop band only, so the pill
            clears the poster's new bottom-right slot at every
            stage (pill bottom 0.55S vs poster top 0.98S-212 worst:
-           clear for all S >= 550). Above 1400px the pill stays
-           at bottom 30% (status quo). !important is required
+           clear for all S >= 550). Above 1400px the pill moves
+           to bottom 15% / right 5% (wide rule below, min-width
+           1401px). !important is required
            because the pill bottom is inline. */
         @media (min-width: 1161px) and (max-width: 1400px) {
           .mv-diorama-pill-cfc {
             bottom: 45% !important;
+          }
+        }
+        /* CFC pill wide position (Seoul-chip vs CFC-pill fix):
+           above 1400px only; laptop (bottom 45%) and tablet
+           (right 40%/30%) untouched by construction. */
+        @media (min-width: 1401px) {
+          .mv-diorama-pill-cfc {
+            bottom: 15% !important;
+            right: 5% !important;
           }
         }
         /* Tablet native mirror (768/1024 bands): stickers, notify,
