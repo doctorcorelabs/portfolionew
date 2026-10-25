@@ -140,6 +140,16 @@ export default function Contact() {
           opacity: 1;
           transform: translate(-50%, -50%) scale(1);
         }
+        /* Mailto pill on narrow phones: smaller type and side
+           padding so the address breaks into cleaner lines.
+           !important beats the inline pill style below 480px. */
+        @media (max-width: 480px) {
+          .contact-mv-root .contact-mv-mailto {
+            font-size: 16px !important;
+            padding-left: 24px !important;
+            padding-right: 24px !important;
+          }
+        }
         @media (max-width: 1023px) {
           .contact-watermark {
             font-size: 170px;
@@ -400,7 +410,7 @@ export default function Contact() {
         <a
           href={`mailto:${EMAIL}`}
           style={styles.action}
-          className="contact-mv-fade contact-mv-pill"
+          className="contact-mv-fade contact-mv-pill contact-mv-mailto"
         >
           {EMAIL}
         </a>

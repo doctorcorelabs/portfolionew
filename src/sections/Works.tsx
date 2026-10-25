@@ -268,6 +268,11 @@ export default function Works() {
         color: INK,
         fontFamily: DISPLAY,
         padding: "80px 24px 200px",
+        /* Clips the header's from-right pre-reveal slide (translateX
+           48px), which otherwise extends page scrollWidth below
+           1208px. Mirrors Manifesto and Contact, which are safe
+           for exactly this reason. The animation itself is kept. */
+        overflow: "hidden",
       }}
     >
       <style>{`
@@ -384,6 +389,10 @@ export default function Works() {
           .wk-giant { font-size: 56px; }
           .wk-route { left: 34px; }
           .wk-traveler { left: 34px; }
+          /* Meta column: 220px min-width overflows the 184px mobile
+             row content area at 320px viewport, so it drops to 0
+             below 700px (220px is kept above 700px). */
+          .wk-meta { min-width: 0 !important; }
         }
         .wk-row:hover, .wk-row:focus-within { background-color: #EFF4FE; }
         .wk-row.wk-in { animation: wkRise 500ms cubic-bezier(0.22, 1, 0.36, 1) forwards; }
@@ -512,6 +521,7 @@ export default function Works() {
                 {row.index}
               </span>
               <span
+                className="wk-meta"
                 style={{
                   fontFamily: MONO,
                   fontSize: 12,

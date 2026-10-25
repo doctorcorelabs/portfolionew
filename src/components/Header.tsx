@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { Link } from "react-router-dom";
 
 const INK = "#010101";
@@ -16,6 +17,7 @@ const NAV_LINKS = [
 ];
 
 export default function Header() {
+  const [menuOpen, setMenuOpen] = useState(false);
   return (
     <>
       <style>{`
@@ -61,9 +63,84 @@ export default function Header() {
         .hdr-cta-pulse {
           animation: hdr-cta-glow 5s ease-in-out infinite alternate;
         }
+        /* Wordmark and fixed CTA sizes live here (not inline) so the
+           narrow-phone rule below can override them. Desktop values
+           are unchanged: wordmark 20px, CTA 14px with 10px 18px. */
+        .hdr-logo {
+          font-size: 20px;
+        }
+        .hdr-cta-pulse {
+          font-size: 14px;
+          padding: 10px 18px;
+        }
+        /* Mobile menu button and panel: hidden by default, shown only
+           at 720px and below. The button sits in its own row under the
+           logo row so the fixed CTA (top band) never covers it. */
+        .hdr-menu-btn {
+          display: none;
+        }
+        .hdr-mobile-nav {
+          display: none;
+        }
         @media (max-width: 720px) {
           .onlines-nav { display: none; }
           .onlines-cta-spacer { display: none; }
+          .hdr-menu-btn {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            width: 100%;
+            min-height: 44px;
+            padding: 0 24px;
+            background: #ffffff;
+            border: 0;
+            border-top: 1px solid ${HAIRLINE};
+            color: ${INK};
+            cursor: pointer;
+            font-family: 'Inter', -apple-system, 'Segoe UI', Roboto, sans-serif;
+            font-size: 15px;
+            font-weight: 600;
+            text-align: left;
+          }
+          .hdr-menu-btn:focus-visible {
+            outline: 2px solid ${BLUE};
+            outline-offset: -2px;
+          }
+          .hdr-mobile-nav {
+            display: block;
+            border-top: 1px solid ${HAIRLINE};
+          }
+          .hdr-mobile-nav a.hdr-mobile-link {
+            display: flex;
+            align-items: center;
+            min-height: 44px;
+            padding: 0 24px;
+            color: ${GREY};
+            font-family: 'Inter', -apple-system, 'Segoe UI', Roboto, sans-serif;
+            font-size: 15px;
+            text-decoration: none;
+          }
+        }
+        /* Belt and braces: a menu opened on a phone must vanish if the
+           viewport is widened past the phone breakpoint. */
+        @media (min-width: 721px) {
+          .hdr-menu-btn { display: none; }
+          .hdr-mobile-nav { display: none; }
+        }
+        /* Narrow phones 320-400px: shrink the wordmark and the CTA pill
+           so the fixed CTA clears the wordmark tail with a positive gap.
+           At 320px: logo right about 137px, CTA left about 146px. */
+        @media (max-width: 400px) {
+          .hdr-logo { font-size: 18px; }
+          .hdr-cta-pulse { font-size: 12px; padding: 8px 12px; }
+        }
+        /* Tablets 721-1023px: taller nav tap targets (about 37px) while
+           keeping the dotted underline 3px below the text. */
+        @media (min-width: 721px) and (max-width: 1023px) {
+          .onlines-nav a.hdr-nav-link {
+            padding: 8px 0 11px;
+            background-position: 0 calc(100% - 8px);
+          }
         }
       `}</style>
       <header
@@ -85,9 +162,9 @@ export default function Header() {
         >
           <Link
             to="/"
+            className="hdr-logo"
             style={{
               fontFamily: "'Inter', -apple-system, 'Segoe UI', Roboto, sans-serif",
-              fontSize: 20,
               fontWeight: 700,
               letterSpacing: "-0.02em",
               color: INK,
@@ -103,7 +180,8 @@ export default function Header() {
             style={{
               display: "flex",
               alignItems: "center",
-              gap: 24,
+              columnGap: 24,
+              rowGap: 8,
               flexWrap: "wrap",
               justifyContent: "flex-end",
             }}
@@ -130,6 +208,41 @@ export default function Header() {
             style={{ width: 200, flexShrink: 0 }}
           />
         </div>
+        <button
+          type="button"
+          className="hdr-menu-btn"
+          aria-expanded={menuOpen}
+          aria-controls="hdr-mobile-nav"
+          onClick={() => setMenuOpen((open) => !open)}
+        >
+          <span
+            aria-hidden="true"
+            style={{ display: "flex", flexDirection: "column", gap: 4 }}
+          >
+            <span style={{ display: "block", width: 18, height: 2, background: INK }} />
+            <span style={{ display: "block", width: 18, height: 2, background: INK }} />
+            <span style={{ display: "block", width: 18, height: 2, background: INK }} />
+          </span>
+          Menu
+        </button>
+        {menuOpen && (
+          <nav
+            id="hdr-mobile-nav"
+            aria-label="Mobile"
+            className="hdr-mobile-nav"
+          >
+            {NAV_LINKS.map((link) => (
+              <Link
+                key={link.to}
+                to={link.to}
+                className="hdr-mobile-link"
+                onClick={() => setMenuOpen(false)}
+              >
+                {link.label}
+              </Link>
+            ))}
+          </nav>
+        )}
       </header>
       <a
         href={`mailto:${EMAIL}`}
@@ -142,9 +255,7 @@ export default function Header() {
           background: BLUE,
           color: "#ffffff",
           fontFamily: "'Inter', -apple-system, 'Segoe UI', Roboto, sans-serif",
-          fontSize: 14,
           fontWeight: 600,
-          padding: "10px 18px",
           textDecoration: "none",
         }}
       >

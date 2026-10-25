@@ -11,7 +11,7 @@
  * the overshoot curve. Award and presentation clusters render as
  * small blue dots with a visible count label (dots are decorative;
  * the count label carries the information, so nothing is
- * hover-dependent). On mobile (900px and below) the route becomes
+ * hover-dependent). On mobile (1100px and below) the route becomes
  * a vertical dashed line on the left with stations stacked beside
  * it.
  *
@@ -216,7 +216,7 @@ const REVEAL_CSS = `
 .journey-node-mobile {
   display: none;
 }
-@media (max-width: 900px) {
+@media (max-width: 1100px) {
   .journey-grid {
     display: block;
   }

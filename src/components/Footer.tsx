@@ -170,7 +170,7 @@ export default function Footer() {
 const styles: Record<string, React.CSSProperties> = {
   footer: {
     background: "#FFFFFF",
-    color: "rgba(66, 66, 66, 0.6)",
+    color: "rgba(66, 66, 66, 0.85)",
     borderTop: "1px solid #E0E0E0",
     padding: "40px 24px",
   },
@@ -197,7 +197,7 @@ const styles: Record<string, React.CSSProperties> = {
     fontSize: 11,
     letterSpacing: "0.08em",
     textTransform: "uppercase",
-    color: "rgba(66, 66, 66, 0.6)",
+    color: "rgba(66, 66, 66, 0.85)",
     textDecoration: "none",
     overflowWrap: "anywhere",
   },

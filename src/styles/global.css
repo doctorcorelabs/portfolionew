@@ -19,6 +19,18 @@
 
 html {
   scroll-behavior: smooth;
+  /* White canvas: styles.css sets html to light grey (#f3f4f6), and
+     this file loads after it, so this rule wins. Any overflow band
+     now paints white instead of grey. */
+  background: #FFFFFF;
+}
+
+/* Safety net against horizontal spill from any section. Clip, not
+   hidden, so the Quote section sticky pinning keeps working and the
+   fixed CTA is unaffected. */
+html,
+body {
+  overflow-x: clip;
 }
 
 body {

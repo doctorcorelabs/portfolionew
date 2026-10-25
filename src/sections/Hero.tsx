@@ -56,7 +56,6 @@ import MicroscopeCard from "../components/hero-v8/MicroscopeCard";
 import DeskCard from "../components/hero-v8/DeskCard";
 import NotifyBubble from "../components/hero-v8/NotifyBubble";
 import DbLogoFloat from "../components/hero-v8/DbLogoFloat";
-import DbLogoRow from "../components/hero-v8/DbLogoRow";
 import Stickers from "../components/hero-v8/Stickers";
 
 const INK = "#010101";
@@ -138,15 +137,16 @@ const FACT_PILLS: Array<{
   },
 ];
 
-/* Hero collage (decorative only, never content): 19 items, 18 visible
+/* Hero collage (decorative only, never content): 22 items, 18 visible
  * on desktop. The 8 v7 cards keep their positions; 6 v8 mockups join
  * them (2 windows, 2 photos, 1 bubble, 1 sticker row); the v9 dark
  * database card is gone, replaced in v10 by 4 free-floating database
  * logo tiles (1 visible at 720-1400px, PubMed only, all heights;
  * 4 above 1400px at viewport heights above 750px: PubMed,
  * Cochrane, Elsevier, Scopus; 3 above 1400px on viewports at or
- * below 750px height, where Cochrane hides via hide-750) plus 1
- * mobile-only logo row. All
+ * below 750px height, where Cochrane hides via hide-750) plus 4
+ * mobile-only single logo tiles interleaved in the stack (see the
+ * static-stack paragraph below). All
  * positions sit in the top and bottom bands of the hero, and never
  * over the centered label or the word center point. The faint helix
  * motif may tuck under the frame edge on mid-height stages, and the
@@ -160,9 +160,11 @@ const FACT_PILLS: Array<{
  * (stylesheet classes only, so the mobile stack can zero them).
  * DOM order is paint order inside the layer: cards first, windows
  * above cards, stickers last and topmost. On narrow screens the layer
- * drops into a static stack below the word showing only FaersCard,
- * NotifyBubble, and DbLogoRow, in that order, tilts zeroed and
- * floats off. */
+ * drops into a static stack below the word showing, in order,
+ * PubMed, FaersCard, Elsevier, NotifyBubble, Scopus, Cochrane
+ * (the four logos are mobile-only single tiles, hide-min-720, so
+ * the desktop floats are untouched and no logo appears twice),
+ * tilts zeroed and floats off. */
 /* Free-floating database logo tiles (v10): DbLogoFloat takes a brand
    prop, but COLLAGE_ITEMS renders <item.Card /> with no props, so
    each brand gets a thin module-level wrapper here (never inline in
@@ -182,17 +184,28 @@ const COLLAGE_ITEMS: Array<{
 }> = [
   { id: "docking", Card: DockingCard, style: { left: "2.5%", top: "3%" }, floatDuration: 11, floatDelay: 0.4, hideClass: "mv-collage-mobile-hide", tiltClass: "mv-tilt-card-a" },
   { id: "helix", Card: DnaHelix, style: { left: "27%", top: "2%", width: 100 }, floatDuration: 14, floatDelay: 1.1, hideClass: "mv-collage-hide-mid mv-collage-mobile-hide mv-collage-hide-short", tiltClass: "" },
-  { id: "review", Card: ReviewCard, style: { right: "27%", top: "3%" }, floatDuration: 9, floatDelay: 0.8, hideClass: "mv-collage-mobile-hide mv-collage-hide-1000", tiltClass: "mv-tilt-card-b" },
+  { id: "review", Card: ReviewCard, style: { right: "29%", top: "3%" }, floatDuration: 9, floatDelay: 0.8, hideClass: "mv-collage-mobile-hide mv-collage-hide-1000", tiltClass: "mv-tilt-card-b" },
   { id: "poster", Card: PosterCard, style: { right: "2.5%", top: "2%" }, floatDuration: 13, floatDelay: 0.2, hideClass: "mv-collage-mobile-hide mv-collage-hide-min-1400", tiltClass: "mv-tilt-card-c" },
+  /* Mobile-only logo scatter (responsive fix): single PubMed tile
+     opens the mobile stack, so the logos spread through the hero
+     instead of piling in one row at the bottom. Hidden at 720px
+     and above, so desktop is untouched. */
+  { id: "m-pubmed", Card: DbPubmedFloat, style: {}, floatDuration: 12, floatDelay: 0, hideClass: "mv-collage-hide-min-720", tiltClass: "" },
   { id: "faers", Card: FaersCard, style: { left: "2.5%", bottom: "4%" }, floatDuration: 12, floatDelay: 1.4, hideClass: "", tiltClass: "mv-tilt-card-b" },
+  { id: "m-elsevier", Card: DbElsevierFloat, style: {}, floatDuration: 12, floatDelay: 0, hideClass: "mv-collage-hide-min-720", tiltClass: "" },
   { id: "gutaxis", Card: GutAxisCard, style: { left: "25%", bottom: "3%", width: 230 }, floatDuration: 16, floatDelay: 0.6, hideClass: "mv-collage-mobile-hide mv-collage-hide-1400", tiltClass: "mv-tilt-card-a" },
   { id: "awards", Card: AwardsCard, style: { right: "25%", bottom: "4%" }, floatDuration: 15, floatDelay: 0.3, hideClass: "mv-collage-hide-mid mv-collage-mobile-hide mv-collage-hide-min-1400", tiltClass: "mv-tilt-card-c" },
   { id: "stroke", Card: StrokeCard, style: { right: "2.5%", bottom: "5%" }, floatDuration: 9, floatDelay: 1.6, hideClass: "mv-collage-mobile-hide", tiltClass: "mv-tilt-card-b" },
   { id: "search", Card: SearchWindow, style: { left: "36%", top: "2%" }, floatDuration: 12, floatDelay: 0.6, hideClass: "mv-collage-hide-1400", tiltClass: "mv-tilt-window-b" },
   { id: "posterwindow", Card: PosterWindow, style: { right: "2.5%", top: "11%" }, floatDuration: 14, floatDelay: 1.2, hideClass: "mv-collage-hide-1400", tiltClass: "mv-tilt-window-a" },
-  { id: "microscope", Card: MicroscopeCard, style: { left: "2.5%", bottom: "39%", width: 210 }, floatDuration: 13, floatDelay: 0.9, hideClass: "mv-collage-hide-mid", tiltClass: "mv-tilt-card-c" },
+  { id: "microscope", Card: MicroscopeCard, style: { left: "2.5%", bottom: "39%", width: 210 }, floatDuration: 13, floatDelay: 0.9, hideClass: "mv-collage-hide-1300", tiltClass: "mv-tilt-card-c" },
   { id: "desk", Card: DeskCard, style: { left: "53%", bottom: "3%" }, floatDuration: 11, floatDelay: 1.5, hideClass: "mv-collage-hide-1400", tiltClass: "mv-tilt-card-c" },
   { id: "notify", Card: NotifyBubble, style: { left: "2.5%", bottom: "25%" }, floatDuration: 9, floatDelay: 1.1, hideClass: "mv-collage-hide-720-1160", tiltClass: "mv-tilt-sticker-b" },
+  /* Mobile-only logo scatter, continued: Scopus then Cochrane
+     close the mobile stack, preserving the desktop pairing
+     (Cochrane under Scopus) with the tall portrait tile last. */
+  { id: "m-scopus", Card: DbScopusFloat, style: {}, floatDuration: 12, floatDelay: 0, hideClass: "mv-collage-hide-min-720", tiltClass: "" },
+  { id: "m-cochrane", Card: DbCochraneFloat, style: {}, floatDuration: 12, floatDelay: 0, hideClass: "mv-collage-hide-min-720", tiltClass: "" },
   { id: "db-pubmed", Card: DbPubmedFloat, style: { left: "43%", bottom: "5%" }, floatDuration: 13, floatDelay: 0.5, hideClass: "mv-collage-mobile-hide", tiltClass: "mv-tilt-card-b" },
   { id: "db-elsevier", Card: DbElsevierFloat, style: { left: "70%", bottom: "5%" }, floatDuration: 11, floatDelay: 1.3, hideClass: "mv-collage-mobile-hide mv-collage-hide-1400", tiltClass: "mv-tilt-card-a" },
   { id: "db-scopus", Card: DbScopusFloat, style: { left: "20%", top: "3%" }, floatDuration: 15, floatDelay: 0.9, hideClass: "mv-collage-mobile-hide mv-collage-hide-1400", tiltClass: "mv-tilt-card-c" },
@@ -217,10 +230,9 @@ const COLLAGE_ITEMS: Array<{
      (+1deg) alternates with Scopus card-c (-1deg) above it.
      Earlier slots failed and were rejected: left 29% sat inside
      the helix box covering about 85% of helix ink, and left 66%
-     sat inside the review card span (right 27%). */
+     sat inside the review card span (right 29%). */
   { id: "db-cochrane", Card: DbCochraneFloat, style: { left: "20%", top: "15%" }, floatDuration: 14, floatDelay: 2.1, hideClass: "mv-collage-mobile-hide mv-collage-hide-1400 mv-collage-hide-750", tiltClass: "mv-tilt-card-d" },
-  { id: "db-row", Card: DbLogoRow, style: {}, floatDuration: 12, floatDelay: 0, hideClass: "mv-collage-hide-min-720", tiltClass: "" },
-  { id: "stickers", Card: Stickers, style: { left: "2.5%", top: "32%" }, floatDuration: 12, floatDelay: 1.8, hideClass: "mv-collage-hide-mid", tiltClass: "mv-tilt-sticker-b" },
+  { id: "stickers", Card: Stickers, style: { left: "2.5%", top: "32%" }, floatDuration: 12, floatDelay: 1.8, hideClass: "mv-collage-hide-1300", tiltClass: "mv-tilt-sticker-b" },
 ];
 
 export default function Hero() {
@@ -702,6 +714,15 @@ export default function Hero() {
             display: none;
           }
         }
+        /* Narrow-desktop tuck guard (desktop R1): microscope and
+           stickers sit mostly behind the giant word at 1180-1280px,
+           so they hide at 1300px and below and return at 1301px
+           and above, where glyph overlap is 35% or less. */
+        @media (max-width: 1300px) {
+          .mv-collage-hide-1300 {
+            display: none;
+          }
+        }
         @media (max-width: 1400px) {
           .mv-collage-hide-1400 {
             display: none;
@@ -712,7 +733,7 @@ export default function Hero() {
             display: none;
           }
         }
-        @media (min-width: 1400px) {
+        @media (min-width: 1401px) {
           .mv-collage-hide-min-1400 {
             display: none;
           }
@@ -742,9 +763,47 @@ export default function Hero() {
             display: none;
           }
         }
+        /* Giant-word lockup below the fit boundary (responsive
+           fix): the full word fits on one line only at 904px and
+           above (0.896V - 18 <= V - 112), so below 904px the word
+           is capped at 64-72px and breaks at the <wbr/> between
+           "daivan" and "labs." instead of mid-word: two lines
+           on narrow phones, one line once the viewport is wide
+           enough for "daivanlabs." at 72px. The 903px threshold keeps this rule exactly
+           inert at 904px and above (inline clamp, 180px cap, and
+           frame fit unchanged there). !important is required
+           because the h1 font size is set inline. */
+        @media (max-width: 903px) {
+          .mv-word {
+            font-size: clamp(64px, 18vw, 72px) !important;
+          }
+        }
+        /* 100svh fallback for older browsers: a browser without
+           dvh support ignores the second line and keeps svh.
+           The mobile block below still wins at 719px and below
+           (height auto), since it comes later at equal
+           importance. */
+        .mv-hero {
+          height: calc(100svh - 100px) !important;
+          height: calc(100dvh - 100px) !important;
+        }
         @media (max-width: 719px) {
           .mv-hero {
             height: auto !important;
+          }
+          /* Mobile frame breathing room: 8px extra per side so
+             the dashed border does not read as sitting on the
+             screen edge. Side padding drops 32px to 24px to
+             compensate, so frame content stays V - 112 exactly
+             as the word lockup math assumes ("daivan" at 64px
+             needs 200px; at 320px content is 208px, slack 8px).
+             Without the padding compensation the content would
+             shrink to V - 128 (192px at 320px) and the word
+             would break mid-word again. */
+          .mv-frame {
+            width: calc(100% - 16px) !important;
+            margin: 0 auto;
+            padding: 28px 24px !important;
           }
           .mv-collage {
             position: static;
@@ -968,7 +1027,7 @@ export default function Hero() {
             overflowWrap: "break-word",
           }}
         >
-          daivanlabs.
+          daivan<wbr />labs.
         </h1>
       </div>
       <div

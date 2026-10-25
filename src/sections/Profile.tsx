@@ -466,7 +466,7 @@ export default function Profile() {
                   fontFamily: MONO,
                   fontSize: 13,
                   color: "#666666",
-                  minWidth: 320,
+                  minWidth: "min(320px, 100%)",
                 }}
               >
                 {row.label}
@@ -478,6 +478,7 @@ export default function Profile() {
                   letterSpacing: "-0.01em",
                   color: "#010101",
                   margin: 0,
+                  overflowWrap: "anywhere",
                 }}
               >
                 {row.value}
