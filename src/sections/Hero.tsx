@@ -104,11 +104,89 @@ const CURSOR_CHIPS: Array<{
   duration: number;
   phase: number;
 }> = [
-  { label: "FAERS", color: "#0859D4", anchorX: 0.195, anchorY: 0.30, radius: 20, duration: 18, phase: 0 }, // anchorX 0.195, not 0.15: at 0.15 the word-hover converged chip lands on MicroscopeCard (top about 296 at 1440/H800); 0.195 parks it 13px past the card's right edge while keeping 15px drift clearance to the helix box
-  { label: "StrokeSense", color: "#177245", anchorX: 0.55, anchorY: 0.33, radius: 20, duration: 22, phase: 0.3 },
-  { label: "Code for Cure", color: "#A63A2E", anchorX: 0.30, anchorY: 0.695, radius: 20, duration: 16, phase: 0.55 },
-  { label: "Seoul 2026", color: "#7A5A00", anchorX: 0.80, anchorY: 0.695, radius: 20, duration: 24, phase: 0.8 },
+  { label: "FAERS", color: "#0859D4", anchorX: 0.195, anchorY: 0.30, radius: 20, duration: 12, phase: 0 }, // anchorX 0.195, not 0.15: at 0.15 the word-hover converged chip lands on MicroscopeCard (top about 296 at 1440/H800); 0.195 parks it 13px past the card's right edge while keeping 15px drift clearance to the helix box
+  { label: "StrokeSense", color: "#177245", anchorX: 0.55, anchorY: 0.33, radius: 20, duration: 14, phase: 0.3 },
+  { label: "Code for Cure", color: "#A63A2E", anchorX: 0.30, anchorY: 0.695, radius: 20, duration: 11, phase: 0.55 },
+  { label: "Seoul 2026", color: "#7A5A00", anchorX: 0.80, anchorY: 0.695, radius: 20, duration: 15, phase: 0.8 },
 ];
+
+/* Tablet cursor lanes (cursor-consistency, fixer 2; sub-band
+   split, follow-up agent). Three keys, not two: portrait is
+   split at the 903px word-cap boundary (the max-width 903px
+   rule caps the word at 64-72px; at 904px and above the word
+   is clamp(72px, 16vw, 180px) = 144-160px, which moves the
+   glyph band down onto the old portrait lanes). Portrait-narrow
+   (720-903px) keeps fixer 2's portrait lanes exactly, including
+   the integration CFC anchorY 0.45 that fixed the label park
+   there; portrait-wide (904-1000px) restores CFC anchorY 0.38
+   (fully clear at 904-1000 before the integration tweak) and
+   moves Seoul anchorY 0.67 -> 0.685 (the 0.67 lane touches
+   glyph ink at 1000x650: box 1.7px / 2.75s drift-only; 0.685
+   clears glyphs by 6.6px box and keeps FAERS chip-chip worst
+   clear by 3.2px - see docs/cursor-consistency/08-subband-
+   split.md). All other portrait-wide lanes are identical to
+   portrait-narrow. Landscape (1001-1160px) unchanged. The
+   section loop and the chip JSX both read this table by
+   tabletSubBand, so JS anchor == CSS base and converge
+   targets stay correct on hover tablets. Desktop anchors and
+   companions are untouched. */
+const TABLET_ANCHORS: Record<
+  "portrait-narrow" | "portrait-wide" | "landscape",
+  Record<string, { anchorX: number; anchorY: number; radius: number }>
+> = {
+  "portrait-narrow": {
+    FAERS: { anchorX: 0.42, anchorY: 0.78, radius: 20 },
+    StrokeSense: { anchorX: 0.02, anchorY: 0.38, radius: 14 },
+    "Code for Cure": { anchorX: 0.24, anchorY: 0.45, radius: 14 },
+    "Seoul 2026": { anchorX: 0.59, anchorY: 0.67, radius: 20 },
+  },
+  "portrait-wide": {
+    FAERS: { anchorX: 0.42, anchorY: 0.78, radius: 20 },
+    StrokeSense: { anchorX: 0.02, anchorY: 0.38, radius: 14 },
+    "Code for Cure": { anchorX: 0.24, anchorY: 0.38, radius: 14 },
+    "Seoul 2026": { anchorX: 0.59, anchorY: 0.685, radius: 20 },
+  },
+  landscape: {
+    FAERS: { anchorX: 0.30, anchorY: 0.78, radius: 24 },
+    StrokeSense: { anchorX: 0.38, anchorY: 0.70, radius: 24 },
+    "Code for Cure": { anchorX: 0.68, anchorY: 0.6825, radius: 24 },
+    "Seoul 2026": { anchorX: 0.52, anchorY: 0.78, radius: 24 },
+  },
+};
+
+/* Miniature cursor chips (cursor-consistency; fixer 3 renders
+   these inside .mv-mini). Same 4 chips, same colors, phases,
+   and durations as CURSOR_CHIPS (derived, so they stay in sync),
+   but the desktop 1161-1400 SHORT-state anchors (the miniature
+   freezes that state: StrokeSense 0.45, Seoul 0.70; integration
+   tweaks: FAERS anchorX 0.26, StrokeSense 0.60/0.34) and radius
+   40 design px. The miniature loop below writes transforms in
+   design px so the wrapper scale applies them; drift-only, no
+   converge, no word-rect mapping. Rendered inside .mv-mini as
+   .mv-mini-chip spans (cursor-consistency, fixer 3), base
+   left/right/top % from anchorX/anchorY (right-anchored when
+   anchorX > 0.5, same pattern as the section chips), ref
+   miniChipRefs, aria-hidden. Hidden at 720px and above by the
+   base .mv-mini-chip display:none (the section layer owns
+   those widths); the miniature loop only runs below 720px. */
+const MINI_CURSOR_CHIPS = CURSOR_CHIPS.map((chip) => ({
+  ...chip,
+  radius: 40,
+  // Integration tweaks (QA-verified, miniature-only): FAERS
+  // anchorX 0.195 -> 0.26 clears the docking rest park;
+  // StrokeSense (0.55, 0.45) -> (0.60, 0.34) clears the
+  // word-glyph rest park. Desktop CURSOR_CHIPS and tablet
+  // anchors are untouched.
+  anchorY: chip.label === "StrokeSense" ? 0.34 : chip.anchorY,
+  anchorX:
+    chip.label === "Seoul 2026"
+      ? 0.70
+      : chip.label === "FAERS"
+        ? 0.26
+        : chip.label === "StrokeSense"
+          ? 0.60
+          : chip.anchorX,
+}));
 
 const FACT_PILLS: Array<{
   text: string;
@@ -252,6 +330,7 @@ export default function Hero() {
   const frameRef = useRef<HTMLDivElement | null>(null);
   const wordRef = useRef<HTMLHeadingElement | null>(null);
   const chipRefs = useRef<Array<HTMLSpanElement | null>>([]);
+  const miniChipRefs = useRef<Array<HTMLSpanElement | null>>([]);
   const wordHoveredRef = useRef(false);
   const [visible, setVisible] = useState(false);
   /* Selected/active state: lands only once the 1s frame fade ends. */
@@ -349,45 +428,151 @@ export default function Hero() {
     return () => observer.disconnect();
   }, []);
 
+  /* Cursor band + hover capability, cached (cursor-consistency):
+     matchMedia objects are created once here, listeners keep the
+     state/ref in sync, and the loops read them - never a
+     per-frame query. Bands: desktop above 1160px, tablet
+     720-1160px, miniature below 720px. Section clientWidth is
+     NOT used for banding: at the classic-scrollbar seam it
+     disagrees with CSS by the scrollbar width, while matchMedia
+     matches the CSS evaluation exactly. Band is state (the
+     loops start/stop on band change, so no loop ever schedules
+     rAF where its chips are hidden); hover capability is a ref
+     (converge just reads it per frame, no restart needed when
+     a mouse is plugged in or out). */
+  const [heroBand, setHeroBand] = useState<
+    "desktop" | "tablet" | "miniature"
+  >(() => {
+    if (
+      typeof window === "undefined" ||
+      typeof window.matchMedia === "undefined"
+    ) {
+      return "desktop";
+    }
+    if (window.matchMedia("(min-width: 1161px)").matches) return "desktop";
+    if (window.matchMedia("(min-width: 720px)").matches) return "tablet";
+    return "miniature";
+  });
+  /* Tablet sub-band (cursor-consistency, fixer 2; split by the
+     sub-band follow-up): portrait-narrow 720-903px vs
+     portrait-wide 904-1000px vs landscape 1001-1160px, from
+     cached matchMedia like heroBand (never window.innerWidth,
+     so it agrees with CSS at the scrollbar seam). The 903/904
+     boundary is exactly the word-cap rule's boundary
+     (max-width 903px), so the lane switch and the word-size
+     jump happen at the same width. Read only when heroBand
+     is tablet; stale elsewhere, harmless. */
+  const [tabletSubBand, setTabletSubBand] = useState<
+    "portrait-narrow" | "portrait-wide" | "landscape"
+  >(() => {
+    if (
+      typeof window === "undefined" ||
+      typeof window.matchMedia === "undefined"
+    ) {
+      return "landscape";
+    }
+    if (window.matchMedia("(min-width: 720px) and (max-width: 903px)").matches)
+      return "portrait-narrow";
+    if (
+      window.matchMedia("(min-width: 904px) and (max-width: 1000px)").matches
+    )
+      return "portrait-wide";
+    return "landscape";
+  });
+  const hoverCapableRef = useRef(false);
+  useEffect(() => {
+    if (
+      typeof window === "undefined" ||
+      typeof window.matchMedia === "undefined"
+    ) {
+      return;
+    }
+    const desktopMql = window.matchMedia("(min-width: 1161px)");
+    const tabletMql = window.matchMedia(
+      "(min-width: 720px) and (max-width: 1160px)",
+    );
+    const portraitNarrowMql = window.matchMedia(
+      "(min-width: 720px) and (max-width: 903px)",
+    );
+    const portraitWideMql = window.matchMedia(
+      "(min-width: 904px) and (max-width: 1000px)",
+    );
+    const hoverMql = window.matchMedia("(hover: hover) and (pointer: fine)");
+    const update = () => {
+      if (desktopMql.matches) setHeroBand("desktop");
+      else if (tabletMql.matches) setHeroBand("tablet");
+      else setHeroBand("miniature");
+      setTabletSubBand(
+        portraitNarrowMql.matches
+          ? "portrait-narrow"
+          : portraitWideMql.matches
+            ? "portrait-wide"
+            : "landscape",
+      );
+      hoverCapableRef.current = hoverMql.matches;
+    };
+    update();
+    desktopMql.addEventListener("change", update);
+    tabletMql.addEventListener("change", update);
+    portraitNarrowMql.addEventListener("change", update);
+    portraitWideMql.addEventListener("change", update);
+    hoverMql.addEventListener("change", update);
+    return () => {
+      desktopMql.removeEventListener("change", update);
+      tabletMql.removeEventListener("change", update);
+      portraitNarrowMql.removeEventListener("change", update);
+      portraitWideMql.removeEventListener("change", update);
+      hoverMql.removeEventListener("change", update);
+    };
+  }, []);
+
   /* The rAF loop reads hover through a ref so the frame callback
      never goes stale when React state changes. */
   useEffect(() => {
     wordHoveredRef.current = wordHovered;
   }, [wordHovered]);
 
-  /* Cursor drift + converge loop. Runs only on hover-capable
-     fine-pointer devices without reduced motion (the chips are
-     display:none otherwise, so this is belt and braces). Positions
-     are written straight to each chip's transform every frame; no
-     React state changes per frame. The loop pauses its DOM writes
-     while the hero is offscreen; rAF itself pauses when the tab is
-     hidden. Scroll modulates the loop phase by up to a quarter loop
-     (forward on scroll down, back on scroll up). */
+  /* Cursor drift + converge loop (cursor-consistency). Runs only
+     in bands where section chips are visible (desktop + tablet;
+     the miniature band has its own loop below), never under
+     reduced motion (chips sit static at base, see stylesheet).
+     Band + hover capability come from the cached matchMedia
+     refs above, never per-frame queries. Per chip, display:none
+     chips are skipped via offsetWidth 0 (no DOM write). Touch:
+     drift-only (converge target forced 0, no tap-to-converge);
+     hover-capable: drift + converge (halo 20px, tau 0.22s).
+     Dart-dwell: theta = psi + 0.35*sin(2*psi) varies speed
+     0.3x-1.7x with the bounding box unchanged. Radius per band:
+     desktop chip.radius (20, hard limit), tablet per-chip from
+     TABLET_ANCHORS (portrait 20/14/14/20, landscape 24).
+     Tablet anchors come from TABLET_ANCHORS, never the
+     laptop companions (those are desktop-only). Mouse
+     parallax stays +-8px (collage effect, untouched). Scroll
+     modulates phase by up to 0.25 loop. Offscreen skips writes;
+     tab-hidden pauses via rAF. */
   useEffect(() => {
     if (
       typeof window === "undefined" ||
-      !window.matchMedia("(hover: hover) and (pointer: fine)").matches ||
-      window.matchMedia("(prefers-reduced-motion: reduce)").matches
+      window.matchMedia("(prefers-reduced-motion: reduce)").matches ||
+      heroBand === "miniature"
     ) {
       return;
     }
     const section = sectionRef.current;
     const word = wordRef.current;
     if (!section || !word) return;
-    /* Rearrangement companion: the Seoul chip's laptop anchor
-       (poster move). In the 1161-1400px band the poster moves to
-       the bottom-right, and the Seoul chip at its 0.80 anchor
-       would sit on the poster's top corner for the whole drift
-       loop at short heights, so in that band only the chip's
-       drift center moves to 0.70 (the stylesheet moves its base
-       to right:30% by the same media query, so base and JS
-       anchor always agree). Above 1400px the chip must stay at
-       0.80: at 0.70 it would collide with the desk card
-       (above-1400 only). matchMedia is used, not innerWidth, so
-       the JS band is the identical media-query evaluation as
-       the CSS rule, scrollbar included. At or below 1160px the
-       diorama is hidden, so the band check is moot there. */
-    const seoulLaptopMql = window.matchMedia(
+    /* Rearrangement companions, unified band evaluation
+       (cursor-consistency): ONE matchMedia object serves both
+       Seoul (anchorX 0.70) and StrokeSense (anchorY 0.45) in
+       the 1161-1400px band. Previously Seoul used matchMedia
+       while StrokeSense used window.innerWidth, which disagree
+       at the classic-scrollbar seam (viewport 1161-1175 with a
+       15px scrollbar: innerWidth says laptop, clientWidth says
+       tablet). matchMedia matches the CSS evaluation exactly,
+       scrollbar included. Above 1400px both stay at base
+       anchors. In the tablet band the companions are skipped
+       entirely: TABLET_ANCHORS supplies the anchors instead. */
+    const laptopMql = window.matchMedia(
       "(min-width: 1161px) and (max-width: 1400px)",
     );
     const blends = CURSOR_CHIPS.map(() => 0);
@@ -414,46 +599,51 @@ export default function Hero() {
         0,
         1,
       ) * 0.25;
-      const wordRect = word.getBoundingClientRect();
-      const wordLeft = wordRect.left - stageRect.left - 20;
-      const wordRight = wordRect.right - stageRect.left + 20;
-      const wordTop = wordRect.top - stageRect.top - 20;
-      const wordBottom = wordRect.bottom - stageRect.top + 20;
-      const hovering = wordHoveredRef.current;
+      const canHover = hoverCapableRef.current;
+      const wordRect = canHover ? word.getBoundingClientRect() : null;
+      const wordLeft = wordRect ? wordRect.left - stageRect.left - 20 : 0;
+      const wordRight = wordRect ? wordRect.right - stageRect.left + 20 : 0;
+      const wordTop = wordRect ? wordRect.top - stageRect.top - 20 : 0;
+      const wordBottom = wordRect ? wordRect.bottom - stageRect.top + 20 : 0;
+      const hovering = canHover && wordHoveredRef.current;
       CURSOR_CHIPS.forEach((chip, i) => {
         const el = chipRefs.current[i];
-        if (!el) return;
+        if (!el || el.offsetWidth === 0) return;
         const chipW0 = el.offsetWidth;
-        const effAnchorX =
-          chip.label === "Seoul 2026" && seoulLaptopMql.matches
+        /* Tablet lanes (fixer 2): TABLET_ANCHORS by sub-band.
+           This MUST match the JSX inline style exactly, or
+           converge targets break on hover tablets (the loop
+           assumes JS anchor == CSS base). Desktop path keeps
+           the laptop companions, untouched. */
+        const tabletAnchor =
+          heroBand === "tablet"
+            ? TABLET_ANCHORS[tabletSubBand][chip.label]
+            : undefined;
+        const effAnchorX = tabletAnchor
+          ? tabletAnchor.anchorX
+          : chip.label === "Seoul 2026" && laptopMql.matches
             ? 0.70
             : chip.anchorX;
         const anchorX =
           effAnchorX > 0.5
             ? effAnchorX * stageRect.width - chipW0
             : effAnchorX * stageRect.width;
-        /* Rearrangement companion: at laptop widths the
-           StrokeSense chip drops from the 0.33 lane to 0.45 so
-           it clears the review card's new top-center-left home
-           (left 36%, top 2%), which it would otherwise overlap
-           at short stages. The stylesheet moves the chip's base
-           top to 45% in the same band; window.innerWidth (not
-           stageRect.width) is used here so the JS lane matches
-           the CSS media query exactly. Above 1400px the 0.33
-           lane stays, because 0.45 would touch review-OLD at
-           VH 650 worst-phase. At or below 1160px the diorama
-           is hidden, so the band check is moot there. */
-        const effAnchorY =
-          chip.label === "StrokeSense" &&
-          window.innerWidth > 1160 &&
-          window.innerWidth <= 1400
+        const effAnchorY = tabletAnchor
+          ? tabletAnchor.anchorY
+          : chip.label === "StrokeSense" && laptopMql.matches
             ? 0.45
             : chip.anchorY;
         const anchorY = effAnchorY * stageRect.height;
-        const angle =
+        const psi =
           2 * Math.PI * (elapsed / chip.duration + chip.phase + scrollPhase);
-        const driftX = chip.radius * Math.cos(angle);
-        const driftY = chip.radius * 0.7 * Math.sin(angle);
+        const theta = psi + 0.35 * Math.sin(2 * psi);
+        const r = tabletAnchor ? tabletAnchor.radius : chip.radius;
+        const driftX = r * Math.cos(theta);
+        const driftY = r * 0.7 * Math.sin(theta);
+        if (!canHover) {
+          el.style.transform = `translate(${driftX.toFixed(1)}px, ${driftY.toFixed(1)}px)`;
+          return;
+        }
         const chipW = el.offsetWidth;
         const chipH = el.offsetHeight;
         /* Nearest point on the expanded word rect to the chip's
@@ -477,7 +667,7 @@ export default function Hero() {
         const convergeX = nx - chipW / 2 - anchorX;
         const convergeY = ny - chipH / 2 - anchorY;
         const target = hovering ? 1 : 0;
-        blends[i] += (target - blends[i]) * (1 - Math.exp(-dt / 0.3));
+        blends[i] += (target - blends[i]) * (1 - Math.exp(-dt / 0.22));
         const b = blends[i];
         const eased = b * b * (3 - 2 * b);
         const fx = driftX + (convergeX - driftX) * eased;
@@ -487,7 +677,67 @@ export default function Hero() {
     };
     raf = requestAnimationFrame(tick);
     return () => cancelAnimationFrame(raf);
-  }, []);
+  }, [heroBand, tabletSubBand]);
+
+  /* Miniature cursor loop (cursor-consistency; fixer 3 wires the
+     chips). Runs ONLY below 720px (heroBand miniature), never
+     under reduced motion. Design coordinates: the miniature
+     stage is 1160x600 design px, and chip layout inside .mv-mini
+     is unscaled (the wrapper scale is a transform, so
+     offsetWidth reads design px and translate() in design px is
+     scaled by the wrapper). Drift-only: no converge, no
+     word-rect mapping, and no anchor math here (base position
+     comes from the CSS left/top % fixer 3 sets). Radius 40
+     design px, durations/phases from MINI_CURSOR_CHIPS (synced
+     to CURSOR_CHIPS). Scroll modulates phase by up to 0.25
+     loop, same as the section loop. Offscreen skips writes;
+     tab-hidden pauses via rAF. The MINI_CURSOR_CHIPS spans
+     render inside .mv-mini (fixer 3); this loop needs no
+     other wiring. */
+  useEffect(() => {
+    if (
+      typeof window === "undefined" ||
+      window.matchMedia("(prefers-reduced-motion: reduce)").matches ||
+      heroBand !== "miniature"
+    ) {
+      return;
+    }
+    const section = sectionRef.current;
+    if (!section) return;
+    let raf = 0;
+    const start = performance.now();
+    const clamp = (v: number, lo: number, hi: number) =>
+      Math.min(hi, Math.max(lo, v));
+    const tick = (now: number) => {
+      raf = requestAnimationFrame(tick);
+      const stageRect = section.getBoundingClientRect();
+      if (
+        stageRect.bottom < 0 ||
+        stageRect.top > window.innerHeight ||
+        stageRect.width === 0
+      ) {
+        return;
+      }
+      const elapsed = (now - start) / 1000;
+      const scrollPhase = clamp(
+        -stageRect.top / Math.max(1, stageRect.height),
+        0,
+        1,
+      ) * 0.25;
+      MINI_CURSOR_CHIPS.forEach((chip, i) => {
+        const el = miniChipRefs.current[i];
+        if (!el || el.offsetWidth === 0) return;
+        const psi =
+          2 * Math.PI * (elapsed / chip.duration + chip.phase + scrollPhase);
+        const theta = psi + 0.35 * Math.sin(2 * psi);
+        const driftX = chip.radius * Math.cos(theta);
+        const driftY = chip.radius * 0.7 * Math.sin(theta);
+        el.style.transform = `translate(${driftX.toFixed(1)}px, ${driftY.toFixed(1)}px)`;
+      });
+    };
+    raf = requestAnimationFrame(tick);
+    return () => cancelAnimationFrame(raf);
+  }, [heroBand]);
 
   /* Collage pointer parallax (collage layer only, mouse devices
      only): rAF-throttled mousemove translates the whole collage
@@ -613,6 +863,12 @@ export default function Hero() {
     setDragging(false);
   };
 
+  /* Chip base anchor for the JSX: tablet lanes come from
+     TABLET_ANCHORS (same table the loop reads, so JS anchor ==
+     CSS base); desktop uses the chip's own anchors. */
+  const chipBaseAnchor = (chip: (typeof CURSOR_CHIPS)[number]) =>
+    heroBand === "tablet" ? TABLET_ANCHORS[tabletSubBand][chip.label] : chip;
+
   return (
     <section
       ref={sectionRef}
@@ -725,16 +981,26 @@ export default function Hero() {
           from { opacity: 0; }
           to { opacity: 1; }
         }
+        /* Touch (cursor-consistency): pills stay hidden on touch
+           exactly as before, but the container no longer hides:
+           chips must show on touch (drift-only, no converge),
+           and the tablet revival (fixer 2) needs a visible
+           container on touch tablets. Pill outcome is unchanged
+           (hidden on touch before via container, hidden now via
+           this pill rule); only chips change, from hidden to
+           drift-only. */
         @media (hover: none) {
-          .mv-diorama {
+          .mv-diorama-pill {
             display: none;
           }
         }
         /* Tablet diorama hide (de-overlap): on mouse/trackpad
            iPads the chips rest on cards by anchor geometry at
            every tablet width, so the layer hides at 1160px and
-           below. Touch iPads already hide it via hover:none
-           above; desktop above 1160px is untouched. */
+           below until fixer 2 revives it with new lanes. Touch
+           iPads hide pills via hover:none above (chips show
+           drift-only once revived); desktop above 1160px is
+           untouched. */
         @media (max-width: 1160px) {
           .mv-diorama {
             display: none;
@@ -758,9 +1024,17 @@ export default function Hero() {
             animation: none !important;
           }
         }
+        /* Reduced motion (cursor-consistency): chips and pills
+           go STATIC, not hidden (the loop never runs, so chips
+           sit at base and pills at base). animation none kills
+           the chip entrance fade (inline, so !important) and
+           the pill float; positions are untouched. Per-chip
+           hide bands for static parks live after the tablet
+           block below. */
         @media (prefers-reduced-motion: reduce) {
-          .mv-diorama {
-            display: none;
+          .mv-diorama-chip,
+          .mv-diorama-pill {
+            animation: none !important;
           }
         }
         /* Hero collage layer: between the grid and the word/frame
@@ -1309,13 +1583,114 @@ export default function Hero() {
             display: block;
           }
         }
-        /* Reduced-motion guard: the tablet block above would
-           otherwise resurrect the diorama for reduced-motion
-           users (the earlier guard sits before it in source
-           order). This repeats the existing desktop behavior
-           for every width. */
+        /* Tablet chip revival (cursor-consistency, fixer 2):
+           the container and all 4 chips show native-size in
+           every tablet band (720-767, 768-1000, 1001-1023,
+           1024-1160). Specificity 0,3,0 beats both the 1160
+           container hide (0,1,0) and the tablet block's chip
+           hide (0,1,0), and source order is after the tablet
+           block. The :not(.mv-hero-mini) scope is REQUIRED at
+           the scrollbar seam: at viewport 720-734 with a
+           classic scrollbar, clientWidth drops below 720 so the
+           miniature path is active (section carries
+           mv-hero-mini, heroBand miniature, miniature loop) -
+           without the scope this block would revive native-size
+           section chips over the miniature. Fixer 3 owns below
+           720px with mini chips; the seam miniature must not
+           get section chips. Base left/right/top % come from
+           the JSX inline style (TABLET_ANCHORS), not from CSS,
+           so the loop's converge math stays consistent. */
+        @media (min-width: 720px) and (max-width: 1160px) {
+          .mv-hero:not(.mv-hero-mini) .mv-diorama {
+            display: block;
+          }
+          .mv-hero:not(.mv-hero-mini) .mv-diorama-chip {
+            display: flex;
+          }
+        }
+        /* Strip pill hides (fixer 2, brief item 4): the strips
+           720-767 and 1001-1023 have no tablet pill show rules
+           today, and reviving the container must not revive
+           pills there. The 720-767 half is redundant with the
+           max-width 900px pill hide but explicit; the
+           1001-1023 half is strictly necessary (without it the
+           FAERS pill would show at VH above 1090 and the Seoul
+           and CFC pills would show on hover-capable devices).
+           No pill show rule is extended into the strips. */
+        @media (min-width: 720px) and (max-width: 767px), (min-width: 1001px) and (max-width: 1023px) {
+          .mv-hero:not(.mv-hero-mini) .mv-diorama-pill {
+            display: none;
+          }
+        }
+        /* Reduced-motion static parks (cursor-consistency): the
+           post-tablet guard that hid the whole diorama is GONE
+           (static-visible decision). In its place, per-chip hide
+           bands for the desktop sizes where a STATIC chip parks
+           on a card (measured from component geometry, tilted
+           bboxes, float 0; model in docs/cursor-consistency/
+           04-implementation.md). These are reduced-motion-only
+           and desktop-only (all carry min-width 1161px), so
+           normal motion and fixer 2's tablet lanes are
+           untouched. Boundaries are hairline-positive just
+           outside each band (gap 0.1-0.4px at the first shown
+           size). Caveat: collage float (CSS, untouched) still
+           bobs cards under reduced motion, so at VH just above
+           a band edge a card can transiently graze a static chip
+           (Seoul-awards to ~VH 703, CFC-gutaxis to ~VH 861);
+           killing collage float under reduced motion is a
+           separate round, not this one. */
+        @media (prefers-reduced-motion: reduce) and (min-width: 1161px) and (max-width: 1380px) and (max-height: 803px) {
+          [data-chip="FAERS"] {
+            display: none;
+          }
+        }
+        @media (prefers-reduced-motion: reduce) and (min-width: 1301px) and (max-width: 2190px) and (min-height: 951px) {
+          [data-chip="FAERS"] {
+            display: none;
+          }
+        }
+        @media (prefers-reduced-motion: reduce) and (min-width: 1161px) and (max-width: 1400px) and (max-height: 680px) {
+          [data-chip="Seoul 2026"] {
+            display: none;
+          }
+        }
+        @media (prefers-reduced-motion: reduce) and (min-width: 1401px) and (max-width: 1600px) and (max-height: 708px) {
+          [data-chip="Seoul 2026"] {
+            display: none;
+          }
+        }
+        @media (prefers-reduced-motion: reduce) and (min-width: 1401px) and (max-width: 1990px) and (max-height: 846px) {
+          [data-chip="StrokeSense"] {
+            display: none;
+          }
+        }
+        @media (prefers-reduced-motion: reduce) and (min-width: 1401px) and (max-height: 824px) {
+          [data-chip="Code for Cure"] {
+            display: none;
+          }
+        }
+        /* Reduced-motion pill hide (cursor-consistency, fixer
+           2, parent decision, brief item 5): fixer 1's
+           static-visible change made pills static-visible under
+           reduced motion as a side effect, which exposes the
+           pre-existing Seoul-pill vs review-old park (P1, rest
+           overlap below VH about 834 at 1440x800) and the CFC
+           pill vs PosterWindow park (rest zero VH about 746)
+           statically - a regression for reduced-motion users.
+           This restores pre-fixer-1 behavior for pills ONLY:
+           pills hidden everywhere under reduced motion, chips
+           stay static-visible per fixer 1's bands above.
+           Specificity: the CFC/FAERS selectors (0,2,0) beat the
+           tablet block's pill show rules (0,2,0) by source
+           order (this block is after them); the base selector
+           covers the Seoul pill (no extra class). It targets
+           .mv-diorama-pill only, so fixer 1's [data-chip] hide
+           bands are untouched and desktop normal-motion pills
+           are untouched (rule is reduced-motion-scoped). */
         @media (prefers-reduced-motion: reduce) {
-          .mv-diorama {
+          .mv-diorama-pill.mv-diorama-pill-cfc,
+          .mv-diorama-pill.mv-diorama-pill-faers,
+          .mv-diorama-pill {
             display: none;
           }
         }
@@ -1420,8 +1795,10 @@ export default function Hero() {
            posterwindow, gutaxis, desk) plus the short-window
            hidden set (helix, db-cochrane, notify, stickers,
            microscope); the m-* twins via hide-min-720, so no
-           logo appears twice. Chips/pills stay hidden
-           (existing diorama rules untouched).
+           logo appears twice. Section diorama chips/pills stay
+           hidden in the miniature (existing diorama rules
+           untouched); the mv-mini-chip set renders the same 4
+           chips inside the stage instead (cursor-consistency).
            Float and tilt are restored (the 719px block zeroes
            them for the old stack); the reduced-motion override
            at the end re-kills them when requested. */
@@ -1509,11 +1886,37 @@ export default function Hero() {
         .mv-hero-mini .mv-collage-hide-min-720 {
           display: none !important;
         }
+        /* Miniature cursor chips (cursor-consistency, fixer 3).
+           Base is display:none so the spans never leak onto the
+           section at desktop/tablet, where .mv-mini is
+           display:contents and these absolute spans would
+           otherwise position against the section. The show rule
+           is class-scoped (.mv-hero-mini), NOT a min-width
+           media query, on purpose: at the 720-734
+           classic-scrollbar seam the miniature class is active
+           while the viewport is >= 720px, so a media hide would
+           wrongly hide chips that are live in the miniature.
+           Layout mirrors .mv-diorama-chip (flex row, arrow +
+           pill); the wrapper scale turns design px into
+           screen px. */
+        .mv-mini-chip {
+          display: none;
+        }
+        .mv-hero-mini .mv-mini-chip {
+          position: absolute;
+          display: flex;
+          align-items: center;
+          gap: 6px;
+          pointer-events: none;
+        }
         @media (prefers-reduced-motion: reduce) {
           .mv-hero-mini .mv-collage {
             animation: none !important;
           }
           .mv-hero-mini .mv-collage-float {
+            animation: none !important;
+          }
+          .mv-hero-mini .mv-mini-chip {
             animation: none !important;
           }
         }
@@ -1544,11 +1947,13 @@ export default function Hero() {
             data-chip={chip.label}
             style={{
               /* Right-anchored chips hang from the right edge so
-                 they are never clipped by the stage edge. */
-              ...(chip.anchorX > 0.5
-                ? { right: `${(1 - chip.anchorX) * 100}%` }
-                : { left: `${chip.anchorX * 100}%` }),
-              top: `${chip.anchorY * 100}%`,
+                 they are never clipped by the stage edge.
+                 Tablet lanes (fixer 2): same TABLET_ANCHORS
+                 the loop reads. */
+              ...(chipBaseAnchor(chip).anchorX > 0.5
+                ? { right: `${(1 - chipBaseAnchor(chip).anchorX) * 100}%` }
+                : { left: `${chipBaseAnchor(chip).anchorX * 100}%` }),
+              top: `${chipBaseAnchor(chip).anchorY * 100}%`,
               pointerEvents: "none",
               /* Transform is written per frame by the rAF loop;
                  only the entrance fade is a CSS animation. */
@@ -1741,6 +2146,69 @@ export default function Hero() {
           </div>
         ))}
       </div>
+      {/* Phone miniature cursor chips (cursor-consistency, fixer 3):
+          same 4 chips as the section layer, rendered inside
+          .mv-mini so the wrapper scale applies to them. Base
+          left/right/top % mirror the section pattern
+          (right-anchored when anchorX > 0.5); the miniature
+          loop writes translate() in design px per frame.
+          Hidden whenever .mv-hero-mini is absent (base rule in
+          the miniature stylesheet): at desktop/tablet .mv-mini
+          is display:contents, so without the base hide these
+          absolute spans would leak onto the section. */}
+      {MINI_CURSOR_CHIPS.map((chip, chipIndex) => (
+        <span
+          key={chip.label}
+          ref={(el) => {
+            miniChipRefs.current[chipIndex] = el;
+          }}
+          className="mv-mini-chip"
+          aria-hidden="true"
+          style={{
+            ...(chip.anchorX > 0.5
+              ? { right: `${(1 - chip.anchorX) * 100}%` }
+              : { left: `${chip.anchorX * 100}%` }),
+            top: `${chip.anchorY * 100}%`,
+            zIndex: 2,
+            pointerEvents: "none",
+            /* Transform is written per frame by the miniature
+               loop; only the entrance fade is a CSS animation
+               (opacity only, so it never fights the transform). */
+            animation: "mv-diorama-in 0.8s ease 2.2s both",
+          }}
+        >
+          <svg
+            width="14"
+            height="17"
+            viewBox="0 0 14 18"
+            aria-hidden="true"
+            style={{ display: "block", flexShrink: 0 }}
+          >
+            <path
+              d="M1 1 L1 16 L4.8 12.2 L7 16.8 L9.2 15.4 L7.2 11.2 L13 11.2 Z"
+              fill={chip.color}
+              stroke="#ffffff"
+              strokeWidth="0.75"
+            />
+          </svg>
+          <span
+            style={{
+              fontFamily: MONO_FONT,
+              fontSize: 11,
+              letterSpacing: "0.04em",
+              color: "#1D1D1F",
+              background: "#ffffff",
+              border: "1px solid #E0E0E0",
+              borderRadius: 999,
+              padding: "3px 8px",
+              whiteSpace: "nowrap",
+              boxShadow: "0 2px 8px rgba(1, 1, 1, 0.06)",
+            }}
+          >
+            {chip.label}
+          </span>
+        </span>
+      ))}
       </div>
     </section>
   );
