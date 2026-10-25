@@ -104,8 +104,8 @@ const CURSOR_CHIPS: Array<{
   duration: number;
   phase: number;
 }> = [
-  { label: "FAERS", color: "#0859D4", anchorX: 0.195, anchorY: 0.30, radius: 20, duration: 12, phase: 0 }, // anchorX 0.195, not 0.15: at 0.15 the word-hover converged chip lands on MicroscopeCard (top about 296 at 1440/H800); 0.195 parks it 13px past the card's right edge while keeping 15px drift clearance to the helix box
-  { label: "StrokeSense", color: "#177245", anchorX: 0.55, anchorY: 0.33, radius: 20, duration: 14, phase: 0.3 },
+  { label: "FAERS", color: "#0859D4", anchorX: 0.90, anchorY: 0.90, radius: 20, duration: 12, phase: 0 }, // desktop-parks, fixer 1: wide base moved to the bottom-right corner (0.90, 0.90), the only drift-clean wide region (sweep: aX 0.85-0.98 x aY 0.76-0.98); it clears search, posterwindow, desk, elsevier, and every other wide obstacle at rest and worst phase (binding: elsevier 74.0px, posterwindow rest 79.5px / worst 57.5px at 1401x650, measured height 355). The old (0.195, 0.30) parked on docking (H1) and stickers (H2). Laptop uses a separate companion (0.85, 0.04) in the loop + CSS below; the synthesis-adopted wide (0.37, 0.35) was REFUTED (it rest-parks fully inside search for S < 707 at all wide widths, see docs/desktop-parks/08-faers-fix.md). Converge residuals (hover-only, disclosed in 08): CFC pill, Seoul chip, posterwindow - drift is fully clean, converge is not; see 08 for ranges.
+  { label: "StrokeSense", color: "#177245", anchorX: 0.505, anchorY: 0.70, radius: 20, duration: 14, phase: 0.3 }, // desktop-parks, fixer 2: base moved (0.55, 0.33) -> (0.505, 0.70). The old base rest-parked on search (104px continuous at VH <= 800), rest-parked on the label (116x14.4 at VH 820-1028), and drift-touched review-old. The new base clears search, review-old, and the label in y at every S, and sits below the word baseline (glyph worst 4.3px at S=550). Laptop uses a separate anchorX companion (0.55) in the loop + CSS below; anchorY stays the base 0.70 there (the old 0.45 companion is deleted). Do not move anchorX to 0.51: it trades the desk worst margin (5.3px at W=1401) to ~0px. Do not cross 0.5: the chip is right-anchored above 0.5, and crossing flips rendered x by a full chip width.
   { label: "Code for Cure", color: "#A63A2E", anchorX: 0.30, anchorY: 0.695, radius: 20, duration: 11, phase: 0.55 },
   { label: "Seoul 2026", color: "#7A5A00", anchorX: 0.80, anchorY: 0.695, radius: 20, duration: 15, phase: 0.8 },
 ];
@@ -158,7 +158,7 @@ const TABLET_ANCHORS: Record<
    these inside .mv-mini). Same 4 chips, same colors, phases,
    and durations as CURSOR_CHIPS (derived, so they stay in sync),
    but the desktop 1161-1400 SHORT-state anchors (the miniature
-   freezes that state: StrokeSense 0.45, Seoul 0.70; integration
+   freezes that state: Seoul 0.70; integration
    tweaks: FAERS anchorX 0.26, StrokeSense 0.60/0.34) and radius
    40 design px. The miniature loop below writes transforms in
    design px so the wrapper scale applies them; drift-only, no
@@ -174,10 +174,23 @@ const MINI_CURSOR_CHIPS = CURSOR_CHIPS.map((chip) => ({
   radius: 40,
   // Integration tweaks (QA-verified, miniature-only): FAERS
   // anchorX 0.195 -> 0.26 clears the docking rest park;
-  // StrokeSense (0.55, 0.45) -> (0.60, 0.34) clears the
+  // StrokeSense (old desktop 0.55, 0.45) -> (0.60, 0.34) clears the
   // word-glyph rest park. Desktop CURSOR_CHIPS and tablet
   // anchors are untouched.
-  anchorY: chip.label === "StrokeSense" ? 0.34 : chip.anchorY,
+  // Desktop-parks, fixer 1: FAERS anchorY PINNED to 0.30. The
+  // desktop FAERS base moves to 0.90 and the laptop companion
+  // to 0.04, but the miniature freezes the short state where
+  // FAERS sits at 0.30; without the pin the miniature chip
+  // would follow the desktop base to 0.90, and no H-band could
+  // hide it (mini chips carry no data-chip). With the pin the
+  // miniature FAERS anchor (0.26, 0.30) is unchanged, so all
+  // miniature FAERS pairs keep their verified clearances.
+  anchorY:
+    chip.label === "StrokeSense"
+      ? 0.34
+      : chip.label === "FAERS"
+        ? 0.30
+        : chip.anchorY,
   anchorX:
     chip.label === "Seoul 2026"
       ? 0.70
@@ -563,7 +576,7 @@ export default function Hero() {
     if (!section || !word) return;
     /* Rearrangement companions, unified band evaluation
        (cursor-consistency): ONE matchMedia object serves both
-       Seoul (anchorX 0.70) and StrokeSense (anchorY 0.45) in
+       Seoul (anchorX 0.70) and StrokeSense (anchorX 0.55) in
        the 1161-1400px band. Previously Seoul used matchMedia
        while StrokeSense used window.innerWidth, which disagree
        at the classic-scrollbar seam (viewport 1161-1175 with a
@@ -623,15 +636,19 @@ export default function Hero() {
           ? tabletAnchor.anchorX
           : chip.label === "Seoul 2026" && laptopMql.matches
             ? 0.70
-            : chip.anchorX;
+            : chip.label === "FAERS" && laptopMql.matches
+              ? 0.85
+              : chip.label === "StrokeSense" && laptopMql.matches
+                ? 0.55
+                : chip.anchorX;
         const anchorX =
           effAnchorX > 0.5
             ? effAnchorX * stageRect.width - chipW0
             : effAnchorX * stageRect.width;
         const effAnchorY = tabletAnchor
           ? tabletAnchor.anchorY
-          : chip.label === "StrokeSense" && laptopMql.matches
-            ? 0.45
+          : chip.label === "FAERS" && laptopMql.matches
+            ? 0.04
             : chip.anchorY;
         const anchorY = effAnchorY * stageRect.height;
         const psi =
@@ -1370,8 +1387,10 @@ export default function Hero() {
         /* Rearrangement (review move + StrokeSense companion):
            review takes a new top-center-left home: left 36% top
            2% at 1161-1400px at all heights (the StrokeSense chip
-           drops to the 0.45 lane in the same band so it clears
-           the moved card), and left 44% top 2% at 1024-1160px but
+           takes an anchorX companion, right 45%, in the same band
+           with anchorY 0.70 from the new base, so it clears the
+           moved card and sits below the word baseline), and left
+           44% top 2% at 1024-1160px but
            only at viewport heights 850px and above (below that
            the label binds, so review keeps its old right-31%
            fallback; above 1400px and at or below 1000px width
@@ -1379,9 +1398,10 @@ export default function Hero() {
            right 29% (and the 31% rule above in the tablet band);
            !important is required because the item position is
            inline. The chip rule moves only the StrokeSense
-           chip's base top to 45% in 1161-1400px; the rAF tick
-           uses the same 0.45 anchor in that band so drift and
-           converge stay consistent. Both blocks are width-scoped
+           chip's base right to 45% in 1161-1400px (top stays 70%
+           from the base); the rAF tick uses the same 0.55 anchor
+           in that band so drift and converge stay consistent.
+           Both blocks are width-scoped
            so nothing leaks into the mobile stack. */
         @media (min-width: 1161px) and (max-width: 1400px) {
           .mv-collage-review {
@@ -1390,7 +1410,7 @@ export default function Hero() {
             top: 2% !important;
           }
           .mv-diorama-chip[data-chip="StrokeSense"] {
-            top: 45% !important;
+            right: 45% !important;
           }
         }
         @media (min-width: 1024px) and (max-width: 1160px) and (min-height: 850px) {
@@ -1451,6 +1471,25 @@ export default function Hero() {
         @media (min-width: 1161px) and (max-width: 1400px) {
           .mv-diorama-chip[data-chip="Seoul 2026"] {
             right: 30% !important;
+          }
+        }
+        /* FAERS chip laptop base (desktop-parks, fixer 1): moves
+           the chip's CSS base from right:10% top:90% (wide base
+           0.90/0.90) to right:15% top:4% in the laptop band
+           only, matching the JS anchors 0.85/0.04 in the same
+           band (see the cursor effect). Right-anchored, like
+           Seoul above (anchorX 0.85 > 0.5), so right % - never
+           left %, which would stretch the chip against the
+           inline right. The laptop anchor clears docking,
+           helix, review-new, poster, awards, pills, and chips
+           at rest and worst phase across 1161-1400 x S
+           550-1300 (docs/desktop-parks/08-faers-fix.md).
+           !important is required because the chip base right
+           and top are inline. */
+        @media (min-width: 1161px) and (max-width: 1400px) {
+          .mv-diorama-chip[data-chip="FAERS"] {
+            right: 15% !important;
+            top: 4% !important;
           }
         }
         /* Code for Cure pill laptop position (poster companion):
@@ -1622,33 +1661,33 @@ export default function Hero() {
             display: none;
           }
         }
-        /* Reduced-motion static parks (cursor-consistency): the
-           post-tablet guard that hid the whole diorama is GONE
-           (static-visible decision). In its place, per-chip hide
-           bands for the desktop sizes where a STATIC chip parks
-           on a card (measured from component geometry, tilted
-           bboxes, float 0; model in docs/cursor-consistency/
-           04-implementation.md). These are reduced-motion-only
-           and desktop-only (all carry min-width 1161px), so
-           normal motion and fixer 2's tablet lanes are
-           untouched. Boundaries are hairline-positive just
-           outside each band (gap 0.1-0.4px at the first shown
-           size). Caveat: collage float (CSS, untouched) still
-           bobs cards under reduced motion, so at VH just above
-           a band edge a card can transiently graze a static chip
+        /* Reduced-motion static parks (cursor-consistency, pruned
+           desktop-parks round): per-chip hide bands for the
+           desktop sizes where a STATIC chip parks on a card
+           (measured from component geometry, tilted bboxes,
+           float 0; model in docs/cursor-consistency/
+           04-implementation.md, re-verified in
+           docs/desktop-parks/10-hband-fix.md). These are
+           reduced-motion-only and desktop-only (all carry
+           min-width 1161px), so normal motion and fixer 2's
+           tablet lanes are untouched. Boundaries are
+           hairline-positive just outside each band (gap
+           0.1-0.4px at the first shown size). DELETED this
+           round (desktop-parks fixer 3): H1 FAERS/docking,
+           H2 FAERS/stickers, H5 StrokeSense/search - the new
+           FAERS (0.85/0.04 laptop, 0.90/0.90 wide) and
+           StrokeSense (0.55/0.70 companion, 0.505/0.70 base)
+           lanes have zero rest parks anywhere on the desktop
+           grid at chip heights 21 and 28, so the bands would
+           only hide clean chips. REMAINING: H3 Seoul/awards,
+           H4 Seoul/posterwindow, H6 Code for Cure/gutaxis
+           (Seoul/CFC unmoved, no card moves). Caveat: collage
+           float (CSS, untouched) still bobs cards under
+           reduced motion, so at VH just above a band edge a
+           card can transiently graze a static chip
            (Seoul-awards to ~VH 703, CFC-gutaxis to ~VH 861);
            killing collage float under reduced motion is a
            separate round, not this one. */
-        @media (prefers-reduced-motion: reduce) and (min-width: 1161px) and (max-width: 1380px) and (max-height: 803px) {
-          [data-chip="FAERS"] {
-            display: none;
-          }
-        }
-        @media (prefers-reduced-motion: reduce) and (min-width: 1301px) and (max-width: 2190px) and (min-height: 951px) {
-          [data-chip="FAERS"] {
-            display: none;
-          }
-        }
         @media (prefers-reduced-motion: reduce) and (min-width: 1161px) and (max-width: 1400px) and (max-height: 680px) {
           [data-chip="Seoul 2026"] {
             display: none;
@@ -1656,11 +1695,6 @@ export default function Hero() {
         }
         @media (prefers-reduced-motion: reduce) and (min-width: 1401px) and (max-width: 1600px) and (max-height: 708px) {
           [data-chip="Seoul 2026"] {
-            display: none;
-          }
-        }
-        @media (prefers-reduced-motion: reduce) and (min-width: 1401px) and (max-width: 1990px) and (max-height: 846px) {
-          [data-chip="StrokeSense"] {
             display: none;
           }
         }
