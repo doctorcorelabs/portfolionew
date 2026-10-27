@@ -1424,7 +1424,7 @@ export default function Hero() {
            poster takes the freed bottom-right slot (right 2.5%,
            bottom 2%). At 1161-1400px it moves at all heights; the
            Seoul chip (anchor 0.80 to 0.70, base right 30% below)
-           and the Code for Cure pill (bottom 30% to 45% below)
+           and the Code for Cure pill (bottom 30% to 74% below)
            move in the same band so the pointer layer stays clear
            of the moved card. At 1024-1160px poster moves only at
            viewport heights 810px and above, and at 720-1000px
@@ -1492,21 +1492,26 @@ export default function Hero() {
             top: 4% !important;
           }
         }
-        /* Code for Cure pill laptop position (poster companion):
-           bottom 30% to 45% in the laptop band only, so the pill
-           clears the poster's new bottom-right slot at every
-           stage (pill bottom 0.55S vs poster top 0.98S-212 worst:
-           clear for all S >= 550). Above 1400px the pill moves
-           to bottom 15% / right 5% (wide rule below, min-width
-           1401px). !important is required
+        /* Code for Cure pill laptop position (word-tail fix):
+           bottom 30% to 74% in the laptop band only, so the pill
+           sits fully ABOVE the glyph band: at S=550 the clean
+           window is bottom (66.42%, 82%) (frame needs > 66.42%,
+           FAERS chip binds above at < 82%), and 74% is the
+           maximin point (FAERS y 44.0px / frame gap 41.7px worst
+           at 1161x550). Poster clearance still holds (pill
+           bottom 0.26S vs poster top 0.98S-212 worst) but is no
+           longer binding; the word-tail park is gone, pill
+           above glyph top by 82.7px worst. Above 1400px the pill
+           moves to bottom 15% / right 5% (wide rule below,
+           min-width 1401px). !important is required
            because the pill bottom is inline. */
         @media (min-width: 1161px) and (max-width: 1400px) {
           .mv-diorama-pill-cfc {
-            bottom: 45% !important;
+            bottom: 74% !important;
           }
         }
         /* CFC pill wide position (Seoul-chip vs CFC-pill fix):
-           above 1400px only; laptop (bottom 45%) and tablet
+           above 1400px only; laptop (bottom 74%) and tablet
            (right 40%/30%) untouched by construction. */
         @media (min-width: 1401px) {
           .mv-diorama-pill-cfc {
