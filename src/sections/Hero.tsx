@@ -85,29 +85,30 @@ const HANDLE_STAGGER_STEP = 0.07;
  * 4 cursor chips with topic/project labels only (never person
  * names or invented team members), and 3 floating pills that
  * repeat real site facts already shown elsewhere on the site.
- * Chips drift on slow closed loops driven per frame by
- * requestAnimationFrame (no CSS transition on their transform, as
- * in the reference), and converge toward the nearest edge of the
- * giant word while it is hovered, easing back when the pointer
- * leaves. The chip layer sits above the word/frame layer so chips
- * stay visible while converged; it never intercepts pointer events
- * (pointer-events none everywhere), and it is hidden on touch
- * devices, below 900px (pills), and under prefers-reduced-motion.
- * Anchors are fractions of the stage size; radii and durations are
- * the deep-analysis spec ranges (docs/deep/01-hero-cursors.md). */
+ * Chips wander the stage on random-waypoint legs (150-400px at
+ * 75-105 px/s, ease-out bezier, 0.15-0.6s dwell between legs)
+ * driven per frame by requestAnimationFrame (no CSS transition
+ * on their transform, as in the reference). No converge:
+ * hovering the word does nothing to the chips, and scroll does
+ * not modulate them. The chip layer sits above the word/frame
+ * layer so chips stay visible while crossing it; it never
+ * intercepts pointer events (pointer-events none everywhere).
+ * Pills are hidden on touch devices and below 900px, and the
+ * whole layer sits static under prefers-reduced-motion.
+ * Anchors are fractions of the stage size; they are the spawn
+ * points and the reduced-motion rest positions, not orbit
+ * centers. */
 const CURSOR_CHIPS: Array<{
   label: string;
   color: string;
   anchorX: number;
   anchorY: number;
-  radius: number;
-  duration: number;
-  phase: number;
+  speed: number;
 }> = [
-  { label: "FAERS", color: "#0859D4", anchorX: 0.90, anchorY: 0.90, radius: 20, duration: 12, phase: 0 }, // desktop-parks, fixer 1: wide base moved to the bottom-right corner (0.90, 0.90), the only drift-clean wide region (sweep: aX 0.85-0.98 x aY 0.76-0.98); it clears search, posterwindow, desk, elsevier, and every other wide obstacle at rest and worst phase (binding: elsevier 74.0px, posterwindow rest 79.5px / worst 57.5px at 1401x650, measured height 355). The old (0.195, 0.30) parked on docking (H1) and stickers (H2). Laptop uses a separate companion (0.85, 0.04) in the loop + CSS below; the synthesis-adopted wide (0.37, 0.35) was REFUTED (it rest-parks fully inside search for S < 707 at all wide widths, see docs/desktop-parks/08-faers-fix.md). Converge residuals (hover-only, disclosed in 08): CFC pill, Seoul chip, posterwindow - drift is fully clean, converge is not; see 08 for ranges.
-  { label: "StrokeSense", color: "#177245", anchorX: 0.505, anchorY: 0.70, radius: 20, duration: 14, phase: 0.3 }, // desktop-parks, fixer 2: base moved (0.55, 0.33) -> (0.505, 0.70). The old base rest-parked on search (104px continuous at VH <= 800), rest-parked on the label (116x14.4 at VH 820-1028), and drift-touched review-old. The new base clears search, review-old, and the label in y at every S, and sits below the word baseline (glyph worst 4.3px at S=550). Laptop uses a separate anchorX companion (0.55) in the loop + CSS below; anchorY stays the base 0.70 there (the old 0.45 companion is deleted). Do not move anchorX to 0.51: it trades the desk worst margin (5.3px at W=1401) to ~0px. Do not cross 0.5: the chip is right-anchored above 0.5, and crossing flips rendered x by a full chip width.
-  { label: "Code for Cure", color: "#A63A2E", anchorX: 0.30, anchorY: 0.695, radius: 20, duration: 11, phase: 0.55 },
-  { label: "Seoul 2026", color: "#7A5A00", anchorX: 0.80, anchorY: 0.695, radius: 20, duration: 15, phase: 0.8 },
+  { label: "FAERS", color: "#0859D4", anchorX: 0.90, anchorY: 0.90, speed: 85 }, // desktop-parks, fixer 1: wide base moved to the bottom-right corner (0.90, 0.90), the only drift-clean wide region (sweep: aX 0.85-0.98 x aY 0.76-0.98); it clears search, posterwindow, desk, elsevier, and every other wide obstacle at rest and worst phase (binding: elsevier 74.0px, posterwindow rest 79.5px / worst 57.5px at 1401x650, measured height 355). The old (0.195, 0.30) parked on docking (H1) and stickers (H2). Laptop uses a separate companion (0.85, 0.04) in the loop + CSS below; the synthesis-adopted wide (0.37, 0.35) was REFUTED (it rest-parks fully inside search for S < 707 at all wide widths, see docs/desktop-parks/08-faers-fix.md). Cursor-motion round: converge dropped, so the old converge residuals (CFC pill, Seoul chip, posterwindow) are moot; the anchor is now the wander spawn point.
+  { label: "StrokeSense", color: "#177245", anchorX: 0.505, anchorY: 0.70, speed: 95 }, // desktop-parks, fixer 2: base moved (0.55, 0.33) -> (0.505, 0.70). The old base rest-parked on search (104px continuous at VH <= 800), rest-parked on the label (116x14.4 at VH 820-1028), and drift-touched review-old. The new base clears search, review-old, and the label in y at every S, and sits below the word baseline (glyph worst 4.3px at S=550). Laptop uses a separate anchorX companion (0.55) in the loop + CSS below; anchorY stays the base 0.70 there (the old 0.45 companion is deleted). Do not move anchorX to 0.51: it trades the desk worst margin (5.3px at W=1401) to ~0px. Do not cross 0.5: the chip is right-anchored above 0.5, and crossing flips rendered x by a full chip width.
+  { label: "Code for Cure", color: "#A63A2E", anchorX: 0.30, anchorY: 0.695, speed: 75 },
+  { label: "Seoul 2026", color: "#7A5A00", anchorX: 0.80, anchorY: 0.695, speed: 105 },
 ];
 
 /* Tablet cursor lanes (cursor-consistency, fixer 2; sub-band
@@ -127,42 +128,41 @@ const CURSOR_CHIPS: Array<{
    split.md). All other portrait-wide lanes are identical to
    portrait-narrow. Landscape (1001-1160px) unchanged. The
    section loop and the chip JSX both read this table by
-   tabletSubBand, so JS anchor == CSS base and converge
-   targets stay correct on hover tablets. Desktop anchors and
-   companions are untouched. */
+   tabletSubBand, so JS anchor == CSS base (spawn and transform
+   reference). Desktop anchors and companions are untouched. */
 const TABLET_ANCHORS: Record<
   "portrait-narrow" | "portrait-wide" | "landscape",
-  Record<string, { anchorX: number; anchorY: number; radius: number }>
+  Record<string, { anchorX: number; anchorY: number }>
 > = {
   "portrait-narrow": {
-    FAERS: { anchorX: 0.42, anchorY: 0.78, radius: 20 },
-    StrokeSense: { anchorX: 0.02, anchorY: 0.38, radius: 14 },
-    "Code for Cure": { anchorX: 0.24, anchorY: 0.45, radius: 14 },
-    "Seoul 2026": { anchorX: 0.59, anchorY: 0.67, radius: 20 },
+    FAERS: { anchorX: 0.42, anchorY: 0.78 },
+    StrokeSense: { anchorX: 0.02, anchorY: 0.38 },
+    "Code for Cure": { anchorX: 0.24, anchorY: 0.45 },
+    "Seoul 2026": { anchorX: 0.59, anchorY: 0.67 },
   },
   "portrait-wide": {
-    FAERS: { anchorX: 0.42, anchorY: 0.78, radius: 20 },
-    StrokeSense: { anchorX: 0.02, anchorY: 0.38, radius: 14 },
-    "Code for Cure": { anchorX: 0.24, anchorY: 0.38, radius: 14 },
-    "Seoul 2026": { anchorX: 0.59, anchorY: 0.685, radius: 20 },
+    FAERS: { anchorX: 0.42, anchorY: 0.78 },
+    StrokeSense: { anchorX: 0.02, anchorY: 0.38 },
+    "Code for Cure": { anchorX: 0.24, anchorY: 0.38 },
+    "Seoul 2026": { anchorX: 0.59, anchorY: 0.685 },
   },
   landscape: {
-    FAERS: { anchorX: 0.30, anchorY: 0.78, radius: 24 },
-    StrokeSense: { anchorX: 0.38, anchorY: 0.70, radius: 24 },
-    "Code for Cure": { anchorX: 0.68, anchorY: 0.6825, radius: 24 },
-    "Seoul 2026": { anchorX: 0.52, anchorY: 0.78, radius: 24 },
+    FAERS: { anchorX: 0.30, anchorY: 0.78 },
+    StrokeSense: { anchorX: 0.38, anchorY: 0.70 },
+    "Code for Cure": { anchorX: 0.68, anchorY: 0.6825 },
+    "Seoul 2026": { anchorX: 0.52, anchorY: 0.78 },
   },
 };
 
 /* Miniature cursor chips (cursor-consistency; fixer 3 renders
-   these inside .mv-mini). Same 4 chips, same colors, phases,
-   and durations as CURSOR_CHIPS (derived, so they stay in sync),
+   these inside .mv-mini). Same 4 chips, same colors and speeds
+   as CURSOR_CHIPS (derived, so they stay in sync),
    but the desktop 1161-1400 SHORT-state anchors (the miniature
    freezes that state: Seoul 0.70; integration
-   tweaks: FAERS anchorX 0.26, StrokeSense 0.60/0.34) and radius
-   40 design px. The miniature loop below writes transforms in
-   design px so the wrapper scale applies them; drift-only, no
-   converge, no word-rect mapping. Rendered inside .mv-mini as
+   tweaks: FAERS anchorX 0.26, StrokeSense 0.60/0.34).
+   The miniature loop below writes transforms in
+   design px so the wrapper scale applies them; wander in
+   design px, no converge, no word-rect mapping. Rendered inside .mv-mini as
    .mv-mini-chip spans (cursor-consistency, fixer 3), base
    left/right/top % from anchorX/anchorY (right-anchored when
    anchorX > 0.5, same pattern as the section chips), ref
@@ -171,7 +171,6 @@ const TABLET_ANCHORS: Record<
    those widths); the miniature loop only runs below 720px. */
 const MINI_CURSOR_CHIPS = CURSOR_CHIPS.map((chip) => ({
   ...chip,
-  radius: 40,
   // Integration tweaks (QA-verified, miniature-only): FAERS
   // anchorX 0.195 -> 0.26 clears the docking rest park;
   // StrokeSense (old desktop 0.55, 0.45) -> (0.60, 0.34) clears the
@@ -337,6 +336,152 @@ const COLLAGE_ITEMS: Array<{
   { id: "stickers", Card: Stickers, style: { left: "2.5%", top: "32%" }, floatDuration: 12, floatDelay: 1.8, hideClass: "mv-collage-hide-1300 mv-collage-hide-stickers-950 mv-collage-show-tablet-stickers mv-mini-exclude", tiltClass: "mv-tilt-sticker-b" },
 ];
 
+/* Waypoint wander (cursor-motion): shared helpers for the
+   section and miniature chip loops. Chips walk random-waypoint
+   legs instead of elliptical drift: each leg steps 150-400px
+   from the current position in a uniform random direction,
+   eased with the reference ease-out bezier, then dwells
+   0.15-0.6s before the next leg. Bounds keep the whole chip
+   box inside the stage with a 12px inset; a leg that would
+   leave the stage bounces (mirror across the violated edge,
+   up to 3 bounces) instead of piling waypoints on the edge,
+   and only the clamped fallback may shorten a leg. */
+const WANDER_INSET = 12;
+const WANDER_STEP_MIN = 150;
+const WANDER_STEP_MAX = 400;
+const WANDER_MIN_PREV = 80;
+const WANDER_DWELL_MIN = 0.15;
+const WANDER_DWELL_MAX = 0.6;
+const WANDER_MINI_STEP_MAX = 1175;
+
+type WanderChipState = {
+  pos: { x: number; y: number };
+  from: { x: number; y: number };
+  to: { x: number; y: number };
+  prevFrom: { x: number; y: number };
+  legStartMs: number;
+  legDurS: number;
+  dwellUntilMs: number;
+  mode: "move" | "dwell";
+};
+
+const wanderClamp = (v: number, lo: number, hi: number) =>
+  Math.min(hi, Math.max(lo, v));
+
+/* Cubic-bezier(0.22,1,0.36,1) evaluated in JS: the loop writes
+   transform per frame, so easing must be a function of
+   normalized leg time, not a CSS curve. Newton solve for x(u)
+   = t (8 iterations; x is monotonic here), bisection
+   fallback if the derivative ever nears zero. */
+const wanderBezierX = (u: number) =>
+  3 * (1 - u) * (1 - u) * u * 0.22 + 3 * (1 - u) * u * u * 0.36 + u * u * u;
+const wanderBezierY = (u: number) =>
+  3 * (1 - u) * (1 - u) * u + 3 * (1 - u) * u * u + u * u * u;
+const wanderBezierDX = (u: number) =>
+  3 * (1 - u) * (1 - u) * 0.22 +
+  6 * (1 - u) * u * (0.36 - 0.22) +
+  3 * u * u * (1 - 0.36);
+const easeWanderBezier = (t: number): number => {
+  if (t <= 0) return 0;
+  if (t >= 1) return 1;
+  let u = t;
+  for (let k = 0; k < 8; k++) {
+    const dx = wanderBezierDX(u);
+    if (Math.abs(dx) < 1e-6) break;
+    const next = u - (wanderBezierX(u) - t) / dx;
+    if (next < 0 || next > 1) break;
+    u = next;
+  }
+  if (Math.abs(wanderBezierX(u) - t) > 1e-4) {
+    let lo = 0;
+    let hi = 1;
+    for (let k = 0; k < 24; k++) {
+      const mid = (lo + hi) / 2;
+      if (wanderBezierX(mid) < t) lo = mid;
+      else hi = mid;
+    }
+    u = (lo + hi) / 2;
+  }
+  return wanderBezierY(u);
+};
+
+/* Fully-inside bounds for a chip box: top-left in
+   [inset, stage-chip-inset] per axis; if the stage is narrower
+   than the chip plus both insets, center that axis. */
+const wanderBounds = (
+  stageW: number,
+  stageH: number,
+  chipW: number,
+  chipH: number,
+) => {
+  const minX = WANDER_INSET;
+  const maxX = stageW - chipW - WANDER_INSET;
+  const minY = WANDER_INSET;
+  const maxY = stageH - chipH - WANDER_INSET;
+  return {
+    minX: maxX < minX ? (stageW - chipW) / 2 : minX,
+    maxX: maxX < minX ? (stageW - chipW) / 2 : maxX,
+    minY: maxY < minY ? (stageH - chipH) / 2 : minY,
+    maxY: maxY < minY ? (stageH - chipH) / 2 : maxY,
+  };
+};
+
+/* Local random walk: one leg from pos, uniform direction,
+   uniform step, bounced off the bounds (mirror across the
+   violated edge, up to 3 bounces). Accepted only if in bounds
+   and at least 80px from prevFrom (anti-ping-pong); after 12
+   tries the last candidate clamped into bounds wins. */
+const pickWanderTarget = (
+  pos: { x: number; y: number },
+  prevFrom: { x: number; y: number },
+  bounds: { minX: number; maxX: number; minY: number; maxY: number },
+  stepMin: number,
+  stepMax: number,
+) => {
+  let fallback = {
+    x: wanderClamp(pos.x, bounds.minX, bounds.maxX),
+    y: wanderClamp(pos.y, bounds.minY, bounds.maxY),
+  };
+  for (let attempt = 0; attempt < 12; attempt++) {
+    const dir = Math.random() * 2 * Math.PI;
+    const step = stepMin + Math.random() * (stepMax - stepMin);
+    let cx = pos.x + Math.cos(dir) * step;
+    let cy = pos.y + Math.sin(dir) * step;
+    for (let bounce = 0; bounce < 3; bounce++) {
+      let bounced = false;
+      if (cx < bounds.minX) {
+        cx = 2 * bounds.minX - cx;
+        bounced = true;
+      } else if (cx > bounds.maxX) {
+        cx = 2 * bounds.maxX - cx;
+        bounced = true;
+      }
+      if (cy < bounds.minY) {
+        cy = 2 * bounds.minY - cy;
+        bounced = true;
+      } else if (cy > bounds.maxY) {
+        cy = 2 * bounds.maxY - cy;
+        bounced = true;
+      }
+      if (!bounced) break;
+    }
+    fallback = {
+      x: wanderClamp(cx, bounds.minX, bounds.maxX),
+      y: wanderClamp(cy, bounds.minY, bounds.maxY),
+    };
+    if (
+      cx >= bounds.minX &&
+      cx <= bounds.maxX &&
+      cy >= bounds.minY &&
+      cy <= bounds.maxY &&
+      Math.hypot(cx - prevFrom.x, cy - prevFrom.y) >= WANDER_MIN_PREV
+    ) {
+      return { x: cx, y: cy };
+    }
+  }
+  return fallback;
+};
+
 export default function Hero() {
   const sectionRef = useRef<HTMLElement | null>(null);
   const collageRef = useRef<HTMLDivElement | null>(null);
@@ -344,7 +489,6 @@ export default function Hero() {
   const wordRef = useRef<HTMLHeadingElement | null>(null);
   const chipRefs = useRef<Array<HTMLSpanElement | null>>([]);
   const miniChipRefs = useRef<Array<HTMLSpanElement | null>>([]);
-  const wordHoveredRef = useRef(false);
   const [visible, setVisible] = useState(false);
   /* Selected/active state: lands only once the 1s frame fade ends. */
   const [frameActive, setFrameActive] = useState(false);
@@ -450,9 +594,7 @@ export default function Hero() {
      disagrees with CSS by the scrollbar width, while matchMedia
      matches the CSS evaluation exactly. Band is state (the
      loops start/stop on band change, so no loop ever schedules
-     rAF where its chips are hidden); hover capability is a ref
-     (converge just reads it per frame, no restart needed when
-     a mouse is plugged in or out). */
+     rAF where its chips are hidden). */
   const [heroBand, setHeroBand] = useState<
     "desktop" | "tablet" | "miniature"
   >(() => {
@@ -492,7 +634,6 @@ export default function Hero() {
       return "portrait-wide";
     return "landscape";
   });
-  const hoverCapableRef = useRef(false);
   useEffect(() => {
     if (
       typeof window === "undefined" ||
@@ -510,7 +651,6 @@ export default function Hero() {
     const portraitWideMql = window.matchMedia(
       "(min-width: 904px) and (max-width: 1000px)",
     );
-    const hoverMql = window.matchMedia("(hover: hover) and (pointer: fine)");
     const update = () => {
       if (desktopMql.matches) setHeroBand("desktop");
       else if (tabletMql.matches) setHeroBand("tablet");
@@ -522,46 +662,33 @@ export default function Hero() {
             ? "portrait-wide"
             : "landscape",
       );
-      hoverCapableRef.current = hoverMql.matches;
     };
     update();
     desktopMql.addEventListener("change", update);
     tabletMql.addEventListener("change", update);
     portraitNarrowMql.addEventListener("change", update);
     portraitWideMql.addEventListener("change", update);
-    hoverMql.addEventListener("change", update);
     return () => {
       desktopMql.removeEventListener("change", update);
       tabletMql.removeEventListener("change", update);
       portraitNarrowMql.removeEventListener("change", update);
       portraitWideMql.removeEventListener("change", update);
-      hoverMql.removeEventListener("change", update);
     };
   }, []);
 
-  /* The rAF loop reads hover through a ref so the frame callback
-     never goes stale when React state changes. */
-  useEffect(() => {
-    wordHoveredRef.current = wordHovered;
-  }, [wordHovered]);
-
-  /* Cursor drift + converge loop (cursor-consistency). Runs only
+  /* Cursor wander loop (cursor-motion). Runs only
      in bands where section chips are visible (desktop + tablet;
      the miniature band has its own loop below), never under
      reduced motion (chips sit static at base, see stylesheet).
-     Band + hover capability come from the cached matchMedia
-     refs above, never per-frame queries. Per chip, display:none
-     chips are skipped via offsetWidth 0 (no DOM write). Touch:
-     drift-only (converge target forced 0, no tap-to-converge);
-     hover-capable: drift + converge (halo 20px, tau 0.22s).
-     Dart-dwell: theta = psi + 0.35*sin(2*psi) varies speed
-     0.3x-1.7x with the bounding box unchanged. Radius per band:
-     desktop chip.radius (20, hard limit), tablet per-chip from
-     TABLET_ANCHORS (portrait 20/14/14/20, landscape 24).
-     Tablet anchors come from TABLET_ANCHORS, never the
-     laptop companions (those are desktop-only). Mouse
-     parallax stays +-8px (collage effect, untouched). Scroll
-     modulates phase by up to 0.25 loop. Offscreen skips writes;
+     Band comes from the cached matchMedia refs above, never
+     per-frame queries. Per chip, display:none chips are skipped
+     via offsetWidth 0 (no DOM write). Wander: each chip walks
+     random-waypoint legs (150-400px at its table speed, bezier
+     ease-out, 0.15-0.6s dwell), state effect-scoped so a band
+     change re-spawns at the anchors. No converge, no scroll
+     modulation, no touch special case: wander runs identically
+     on touch and hover devices. Mouse parallax stays +-8px
+     (collage effect, untouched). Offscreen skips writes;
      tab-hidden pauses via rAF. */
   useEffect(() => {
     if (
@@ -572,8 +699,7 @@ export default function Hero() {
       return;
     }
     const section = sectionRef.current;
-    const word = wordRef.current;
-    if (!section || !word) return;
+    if (!section) return;
     /* Rearrangement companions, unified band evaluation
        (cursor-consistency): ONE matchMedia object serves both
        Seoul (anchorX 0.70) and StrokeSense (anchorX 0.55) in
@@ -588,16 +714,15 @@ export default function Hero() {
     const laptopMql = window.matchMedia(
       "(min-width: 1161px) and (max-width: 1400px)",
     );
-    const blends = CURSOR_CHIPS.map(() => 0);
+    /* Wander state, effect-scoped: a band change restarts this
+       effect and re-spawns every chip at its anchor, so no
+       stale-waypoint leg ever runs. Indexed by CURSOR_CHIPS
+       order; never React state (per-frame writes must not
+       re-render). */
+    const wander: Array<WanderChipState | null> = CURSOR_CHIPS.map(() => null);
     let raf = 0;
-    let last = performance.now();
-    const start = last;
-    const clamp = (v: number, lo: number, hi: number) =>
-      Math.min(hi, Math.max(lo, v));
     const tick = (now: number) => {
       raf = requestAnimationFrame(tick);
-      const dt = Math.min(0.05, (now - last) / 1000);
-      last = now;
       const stageRect = section.getBoundingClientRect();
       if (
         stageRect.bottom < 0 ||
@@ -606,28 +731,15 @@ export default function Hero() {
       ) {
         return;
       }
-      const elapsed = (now - start) / 1000;
-      const scrollPhase = clamp(
-        -stageRect.top / Math.max(1, stageRect.height),
-        0,
-        1,
-      ) * 0.25;
-      const canHover = hoverCapableRef.current;
-      const wordRect = canHover ? word.getBoundingClientRect() : null;
-      const wordLeft = wordRect ? wordRect.left - stageRect.left - 20 : 0;
-      const wordRight = wordRect ? wordRect.right - stageRect.left + 20 : 0;
-      const wordTop = wordRect ? wordRect.top - stageRect.top - 20 : 0;
-      const wordBottom = wordRect ? wordRect.bottom - stageRect.top + 20 : 0;
-      const hovering = canHover && wordHoveredRef.current;
       CURSOR_CHIPS.forEach((chip, i) => {
         const el = chipRefs.current[i];
         if (!el || el.offsetWidth === 0) return;
-        const chipW0 = el.offsetWidth;
-        /* Tablet lanes (fixer 2): TABLET_ANCHORS by sub-band.
-           This MUST match the JSX inline style exactly, or
-           converge targets break on hover tablets (the loop
-           assumes JS anchor == CSS base). Desktop path keeps
-           the laptop companions, untouched. */
+        const chipW = el.offsetWidth;
+        const chipH = el.offsetHeight;
+        /* Anchor math, UNCHANGED (tablet lanes, laptop
+           companions, base): this MUST match the JSX inline
+           style exactly, or the spawn position and the
+           translate reference break. */
         const tabletAnchor =
           heroBand === "tablet"
             ? TABLET_ANCHORS[tabletSubBand][chip.label]
@@ -643,7 +755,7 @@ export default function Hero() {
                 : chip.anchorX;
         const anchorX =
           effAnchorX > 0.5
-            ? effAnchorX * stageRect.width - chipW0
+            ? effAnchorX * stageRect.width - chipW
             : effAnchorX * stageRect.width;
         const effAnchorY = tabletAnchor
           ? tabletAnchor.anchorY
@@ -651,63 +763,85 @@ export default function Hero() {
             ? 0.04
             : chip.anchorY;
         const anchorY = effAnchorY * stageRect.height;
-        const psi =
-          2 * Math.PI * (elapsed / chip.duration + chip.phase + scrollPhase);
-        const theta = psi + 0.35 * Math.sin(2 * psi);
-        const r = tabletAnchor ? tabletAnchor.radius : chip.radius;
-        const driftX = r * Math.cos(theta);
-        const driftY = r * 0.7 * Math.sin(theta);
-        if (!canHover) {
-          el.style.transform = `translate(${driftX.toFixed(1)}px, ${driftY.toFixed(1)}px)`;
-          return;
+        const bounds = wanderBounds(
+          stageRect.width,
+          stageRect.height,
+          chipW,
+          chipH,
+        );
+        let st = wander[i];
+        if (!st) {
+          st = {
+            pos: { x: anchorX, y: anchorY },
+            from: { x: anchorX, y: anchorY },
+            to: { x: anchorX, y: anchorY },
+            prevFrom: { x: anchorX, y: anchorY },
+            legStartMs: now,
+            legDurS: 0,
+            dwellUntilMs: now + 300 + 250 * i,
+            mode: "dwell",
+          };
+          wander[i] = st;
         }
-        const chipW = el.offsetWidth;
-        const chipH = el.offsetHeight;
-        /* Nearest point on the expanded word rect to the chip's
-           drifting center; if the center is already inside, push to
-           the nearest edge instead of collapsing onto the word. */
-        const cx = anchorX + chipW / 2 + driftX;
-        const cy = anchorY + chipH / 2 + driftY;
-        let nx = clamp(cx, wordLeft, wordRight);
-        let ny = clamp(cy, wordTop, wordBottom);
-        if (cx > wordLeft && cx < wordRight && cy > wordTop && cy < wordBottom) {
-          const dLeft = cx - wordLeft;
-          const dRight = wordRight - cx;
-          const dTop = cy - wordTop;
-          const dBottom = wordBottom - cy;
-          const min = Math.min(dLeft, dRight, dTop, dBottom);
-          if (min === dLeft) nx = wordLeft;
-          else if (min === dRight) nx = wordRight;
-          else if (min === dTop) ny = wordTop;
-          else ny = wordBottom;
+        st.pos.x = wanderClamp(st.pos.x, bounds.minX, bounds.maxX);
+        st.pos.y = wanderClamp(st.pos.y, bounds.minY, bounds.maxY);
+        st.to.x = wanderClamp(st.to.x, bounds.minX, bounds.maxX);
+        st.to.y = wanderClamp(st.to.y, bounds.minY, bounds.maxY);
+        if (st.mode === "dwell" && now >= st.dwellUntilMs) {
+          st.prevFrom = { ...st.from };
+          const target = pickWanderTarget(
+            st.pos,
+            st.prevFrom,
+            bounds,
+            WANDER_STEP_MIN,
+            WANDER_STEP_MAX,
+          );
+          st.from = { ...st.pos };
+          st.to = target;
+          st.legStartMs = now;
+          const dist = Math.hypot(target.x - st.pos.x, target.y - st.pos.y);
+          st.legDurS = Math.max(
+            0.1,
+            dist / (chip.speed * (0.9 + Math.random() * 0.2)),
+          );
+          st.mode = "move";
         }
-        const convergeX = nx - chipW / 2 - anchorX;
-        const convergeY = ny - chipH / 2 - anchorY;
-        const target = hovering ? 1 : 0;
-        blends[i] += (target - blends[i]) * (1 - Math.exp(-dt / 0.22));
-        const b = blends[i];
-        const eased = b * b * (3 - 2 * b);
-        const fx = driftX + (convergeX - driftX) * eased;
-        const fy = driftY + (convergeY - driftY) * eased;
-        el.style.transform = `translate(${fx.toFixed(1)}px, ${fy.toFixed(1)}px)`;
+        if (st.mode === "move") {
+          const t = (now - st.legStartMs) / 1000 / st.legDurS;
+          if (t >= 1) {
+            st.pos = { ...st.to };
+            st.mode = "dwell";
+            st.dwellUntilMs =
+              now +
+              (WANDER_DWELL_MIN +
+                Math.random() * (WANDER_DWELL_MAX - WANDER_DWELL_MIN)) *
+                1000;
+          } else {
+            const e = easeWanderBezier(t);
+            st.pos = {
+              x: st.from.x + (st.to.x - st.from.x) * e,
+              y: st.from.y + (st.to.y - st.from.y) * e,
+            };
+          }
+        }
+        el.style.transform = `translate(${(st.pos.x - anchorX).toFixed(1)}px, ${(st.pos.y - anchorY).toFixed(1)}px)`;
       });
     };
     raf = requestAnimationFrame(tick);
     return () => cancelAnimationFrame(raf);
   }, [heroBand, tabletSubBand]);
 
-  /* Miniature cursor loop (cursor-consistency; fixer 3 wires the
+  /* Miniature cursor loop (cursor-motion; fixer 3 wires the
      chips). Runs ONLY below 720px (heroBand miniature), never
      under reduced motion. Design coordinates: the miniature
      stage is 1160x600 design px, and chip layout inside .mv-mini
      is unscaled (the wrapper scale is a transform, so
      offsetWidth reads design px and translate() in design px is
-     scaled by the wrapper). Drift-only: no converge, no
-     word-rect mapping, and no anchor math here (base position
-     comes from the CSS left/top % fixer 3 sets). Radius 40
-     design px, durations/phases from MINI_CURSOR_CHIPS (synced
-     to CURSOR_CHIPS). Scroll modulates phase by up to 0.25
-     loop, same as the section loop. Offscreen skips writes;
+     scaled by the wrapper). Wander in design px: legs 150-400
+     visual px converted by the live miniScale (design step =
+     visual step / scale, capped at 1175 design px), speeds
+     table / scale so the eye sees 70-110 px/s, dwell 0.15-0.6s.
+     No converge, no word-rect mapping. Offscreen skips writes;
      tab-hidden pauses via rAF. The MINI_CURSOR_CHIPS spans
      render inside .mv-mini (fixer 3); this loop needs no
      other wiring. */
@@ -721,10 +855,13 @@ export default function Hero() {
     }
     const section = sectionRef.current;
     if (!section) return;
+    /* Wander state, effect-scoped like the section loop: a band
+       change restarts this effect and re-spawns every chip at
+       its MINI anchor, so no stale-waypoint leg ever runs. */
+    const wander: Array<WanderChipState | null> = MINI_CURSOR_CHIPS.map(
+      () => null,
+    );
     let raf = 0;
-    const start = performance.now();
-    const clamp = (v: number, lo: number, hi: number) =>
-      Math.min(hi, Math.max(lo, v));
     const tick = (now: number) => {
       raf = requestAnimationFrame(tick);
       const stageRect = section.getBoundingClientRect();
@@ -735,21 +872,88 @@ export default function Hero() {
       ) {
         return;
       }
-      const elapsed = (now - start) / 1000;
-      const scrollPhase = clamp(
-        -stageRect.top / Math.max(1, stageRect.height),
-        0,
-        1,
-      ) * 0.25;
       MINI_CURSOR_CHIPS.forEach((chip, i) => {
         const el = miniChipRefs.current[i];
         if (!el || el.offsetWidth === 0) return;
-        const psi =
-          2 * Math.PI * (elapsed / chip.duration + chip.phase + scrollPhase);
-        const theta = psi + 0.35 * Math.sin(2 * psi);
-        const driftX = chip.radius * Math.cos(theta);
-        const driftY = chip.radius * 0.7 * Math.sin(theta);
-        el.style.transform = `translate(${driftX.toFixed(1)}px, ${driftY.toFixed(1)}px)`;
+        const chipW = el.offsetWidth;
+        const chipH = el.offsetHeight;
+        /* MINI anchor top-left in design px: right-anchored
+           chips hang from the right edge of the 1160-wide
+           design stage, exactly like the JSX base %. */
+        const anchorX =
+          chip.anchorX > 0.5
+            ? chip.anchorX * MINI_STAGE_W - chipW
+            : chip.anchorX * MINI_STAGE_W;
+        const anchorY = chip.anchorY * MINI_STAGE_H;
+        const bounds = wanderBounds(MINI_STAGE_W, MINI_STAGE_H, chipW, chipH);
+        let st = wander[i];
+        if (!st) {
+          st = {
+            pos: { x: anchorX, y: anchorY },
+            from: { x: anchorX, y: anchorY },
+            to: { x: anchorX, y: anchorY },
+            prevFrom: { x: anchorX, y: anchorY },
+            legStartMs: now,
+            legDurS: 0,
+            dwellUntilMs: now + 300 + 250 * i,
+            mode: "dwell",
+          };
+          wander[i] = st;
+        }
+        st.pos.x = wanderClamp(st.pos.x, bounds.minX, bounds.maxX);
+        st.pos.y = wanderClamp(st.pos.y, bounds.minY, bounds.maxY);
+        st.to.x = wanderClamp(st.to.x, bounds.minX, bounds.maxX);
+        st.to.y = wanderClamp(st.to.y, bounds.minY, bounds.maxY);
+        if (st.mode === "dwell" && now >= st.dwellUntilMs) {
+          st.prevFrom = { ...st.from };
+          /* Scale read live per leg from the section rect
+             (visual width / design width); design step and
+             design speed both divide by it, so leg durations
+             match the desktop table and the eye sees table
+             visual px/s on the phone screen. */
+          const scale = stageRect.width / MINI_STAGE_W;
+          const stepMin = WANDER_STEP_MIN / scale;
+          const stepMax = Math.min(
+            WANDER_STEP_MAX / scale,
+            WANDER_MINI_STEP_MAX,
+          );
+          const target = pickWanderTarget(
+            st.pos,
+            st.prevFrom,
+            bounds,
+            stepMin,
+            stepMax,
+          );
+          st.from = { ...st.pos };
+          st.to = target;
+          st.legStartMs = now;
+          const dist = Math.hypot(target.x - st.pos.x, target.y - st.pos.y);
+          const designSpeed = chip.speed / scale;
+          st.legDurS = Math.max(
+            0.1,
+            dist / (designSpeed * (0.9 + Math.random() * 0.2)),
+          );
+          st.mode = "move";
+        }
+        if (st.mode === "move") {
+          const t = (now - st.legStartMs) / 1000 / st.legDurS;
+          if (t >= 1) {
+            st.pos = { ...st.to };
+            st.mode = "dwell";
+            st.dwellUntilMs =
+              now +
+              (WANDER_DWELL_MIN +
+                Math.random() * (WANDER_DWELL_MAX - WANDER_DWELL_MIN)) *
+                1000;
+          } else {
+            const e = easeWanderBezier(t);
+            st.pos = {
+              x: st.from.x + (st.to.x - st.from.x) * e,
+              y: st.from.y + (st.to.y - st.from.y) * e,
+            };
+          }
+        }
+        el.style.transform = `translate(${(st.pos.x - anchorX).toFixed(1)}px, ${(st.pos.y - anchorY).toFixed(1)}px)`;
       });
     };
     raf = requestAnimationFrame(tick);
@@ -1000,12 +1204,12 @@ export default function Hero() {
         }
         /* Touch (cursor-consistency): pills stay hidden on touch
            exactly as before, but the container no longer hides:
-           chips must show on touch (drift-only, no converge),
+           chips must show on touch (wander, no converge),
            and the tablet revival (fixer 2) needs a visible
            container on touch tablets. Pill outcome is unchanged
            (hidden on touch before via container, hidden now via
            this pill rule); only chips change, from hidden to
-           drift-only. */
+           wander. */
         @media (hover: none) {
           .mv-diorama-pill {
             display: none;
@@ -1016,7 +1220,7 @@ export default function Hero() {
            every tablet width, so the layer hides at 1160px and
            below until fixer 2 revives it with new lanes. Touch
            iPads hide pills via hover:none above (chips show
-           drift-only once revived); desktop above 1160px is
+           wander once revived); desktop above 1160px is
            untouched. */
         @media (max-width: 1160px) {
           .mv-diorama {
@@ -1166,7 +1370,7 @@ export default function Hero() {
            (the old 36% slot collided with review-new and the
            24% alternative collided with the helix box). The
            1301-1400 Cochrane block is min-height 801px scoped:
-           the slot overlaps the FAERS chip drift box by 6px at
+           the slot overlapped the FAERS chip's old drift box by 6px at
            stage 600 (VH 700), so the new position applies only at
            stage 701 and above; below that the tile falls back to
            its inline position when shown. */
@@ -1400,7 +1604,7 @@ export default function Hero() {
            inline. The chip rule moves only the StrokeSense
            chip's base right to 45% in 1161-1400px (top stays 70%
            from the base); the rAF tick uses the same 0.55 anchor
-           in that band so drift and converge stay consistent.
+           in that band so the anchor and base stay consistent.
            Both blocks are width-scoped
            so nothing leaks into the mobile stack. */
         @media (min-width: 1161px) and (max-width: 1400px) {
@@ -1653,7 +1857,7 @@ export default function Hero() {
            720px with mini chips; the seam miniature must not
            get section chips. Base left/right/top % come from
            the JSX inline style (TABLET_ANCHORS), not from CSS,
-           so the loop's converge math stays consistent. */
+           so the loop's anchor math stays consistent. */
         @media (min-width: 720px) and (max-width: 1160px) {
           .mv-hero:not(.mv-hero-mini) .mv-diorama {
             display: block;
