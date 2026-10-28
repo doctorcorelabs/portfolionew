@@ -20,7 +20,9 @@
  *   progress 0.8. Scrolling back up unpaints words in reverse.
  * - The mission line fades in only near the end of the runway:
  *   opacity 0 at progress <= 0.80, ramping to 1 at progress 0.85
- *   with a 14px rise over the same interval. The mission animation
+ *   with a 14px rise over the same interval. After it fades in,
+ *   three key phrases gain a pale blue marker wash in reading
+ *   order (0.85-0.90, 0.90-0.95, 0.95-1.00). The mission animation
  *   is a dot trail below the paragraph, a reading-light dot band
  *   behind it, and tap blooms in the background.
  * - The dashed vertical rule draws in step with progress (its height
@@ -153,6 +155,27 @@ export default function Quote() {
   }, [progress, reducedMotion]);
 
   const missionOpacity = progress <= 0.8 ? 0 : clamp01((progress - 0.8) / 0.05);
+
+  /* Marker sweep: a pale blue wash grows left to right behind three
+     key mission phrases in reading order, after the mission has fully
+     faded in: 0.85-0.90, 0.90-0.95, 0.95-1.00, easeOutCubic within each
+     window. Pure function of progress, no transition on the wash path,
+     so scrolling back reverses every sweep. The reducedMotion guard
+     forcing 1 is essential: in the static branch progress stays 0,
+     so without it the wash would render at 0. */
+  const markerGrowth = (start: number) =>
+    reducedMotion
+      ? 1
+      : 1 - Math.pow(1 - clamp01((progress - start) / 0.05), 3);
+  const markerWash = (growth: number): React.CSSProperties => ({
+    backgroundImage:
+      "linear-gradient(rgba(8, 89, 212, 0.12), rgba(8, 89, 212, 0.12))",
+    backgroundSize: `${growth * 100}% 100%`,
+    backgroundRepeat: "no-repeat",
+    backgroundPosition: "0 0",
+    boxDecorationBreak: "clone",
+    WebkitBoxDecorationBreak: "clone",
+  });
 
   /* Dot-field entrance: the base and offset dot layers fade from opacity 0 to
      full over the first 10 percent of scroll progress, then stay
@@ -291,7 +314,19 @@ export default function Quote() {
       >
         {"Through DaivanLabs, I work on "}
         <span style={{ color: BLUE }}>CodeCureConnect:</span>
-        {" code that becomes healthcare tools, and connections that carry them further toward higher health standards and lasting change in Indonesia. Curiosity and diverse experiences keep pointing me to the next problem worth solving."}
+        {" "}
+        <span style={markerWash(markerGrowth(0.85))}>
+          code that becomes healthcare tools
+        </span>
+        {", and "}
+        <span style={markerWash(markerGrowth(0.9))}>
+          connections that carry them further
+        </span>
+        {" toward "}
+        <span style={markerWash(markerGrowth(0.95))}>
+          higher health standards and lasting change in Indonesia
+        </span>
+        {". Curiosity and diverse experiences keep pointing me to the next problem worth solving."}
       </p>
     </div>
   );
