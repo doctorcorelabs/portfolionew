@@ -12,11 +12,11 @@
  *   overflow visible, so the content stays pinned while the
  *   visitor scrolls through the runway and no second scrollbar
  *   appears (no inner scroll container anywhere in this file).
- * - The H1 claim is split into 20 word spans. Each word starts pale
+ * - The H1 claim is split into 15 word spans. Each word starts pale
  *   grey and flips to full ink as scroll progress advances, with a
  *   0.35s color transition per word. Progress maps to words over the
  *   first 90 percent of the runway: word i (0-indexed) paints when
- *   progress >= ((i + 1) / 20) * 0.9, so the last word lands at
+ *   progress >= ((i + 1) / 15) * 0.9, so the last word lands at
  *   progress 0.9. Scrolling back up unpaints words in reverse.
  * - The mission line fades in only near the end of the runway:
  *   opacity 0 at progress <= 0.9, ramping linearly to 1 at progress 1.
@@ -24,8 +24,8 @@
  *   is progress * 100 percent of the content block), the top square
  *   node sits at the rule start, and the bottom node travels with the
  *   rule tip.
- * - Wording and bold key phrases are exactly the v2 claim; words are
- *   plain inline spans, so on narrow screens they wrap normally and
+ * - Wording and bold key phrases are the rewritten clerkship
+ *   narrative; words are plain inline spans, so on narrow screens they wrap normally and
  *   the mapping still works by word index.
  * - prefers-reduced-motion: the plain static quote renders instead
  *   (fully ink words, mission visible, no tall wrapper, no pinning),
@@ -44,28 +44,23 @@ const DISPLAY =
 const MONO =
   "'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, monospace";
 
-/** The H1 claim, split by word. bold marks the v2 bold key phrases. */
+/** The H1 claim, split by word. bold marks the key phrases. */
 const WORDS: { text: string; bold: boolean }[] = [
   { text: "I", bold: false },
   { text: "am", bold: false },
   { text: "a", bold: false },
-  { text: "medical", bold: false },
-  { text: "student", bold: false },
-  { text: "and", bold: false },
-  { text: "researcher", bold: false },
+  { text: "clinical", bold: false },
+  { text: "clerk", bold: false },
   { text: "in", bold: false },
-  { text: "Indonesia.", bold: false },
-  { text: "I", bold: false },
-  { text: "study", bold: false },
-  { text: "health", bold: true },
-  { text: "questions", bold: true },
+  { text: "Indonesia,", bold: false },
+  { text: "deeply", bold: false },
+  { text: "passionate", bold: false },
+  { text: "about", bold: false },
+  { text: "new", bold: true },
+  { text: "knowledge", bold: true },
   { text: "and", bold: false },
-  { text: "build", bold: false },
-  { text: "tools", bold: true },
-  { text: "around", bold: false },
-  { text: "them,", bold: false },
-  { text: "through", bold: false },
-  { text: "DaivanLabs.", bold: false },
+  { text: "diverse", bold: true },
+  { text: "experiences.", bold: true },
 ];
 
 function clamp01(value: number): number {
@@ -203,10 +198,11 @@ export default function Quote() {
             : `translateY(${(1 - missionOpacity) * 14}px)`,
       }}
     >
-      Founder, DaivanLabs.{" "}
-      <span style={{ color: BLUE }}>Code for Cure:</span> code that becomes
-      healthcare tools, and connections that carry them further, toward
-      sustainable health systems for Indonesia.
+      I aim to enhance health standards in Indonesia, bring about
+      sustainable change, and create lasting positive impacts. I founded
+      DaivanLabs on{" "}
+      <span style={{ color: BLUE }}>CodeCureConnect:</span> code that becomes
+      healthcare tools, and connections that carry them further.
     </p>
   );
 
