@@ -15,11 +15,13 @@
  * - The H1 claim is split into 15 word spans. Each word starts pale
  *   grey and flips to full ink as scroll progress advances, with a
  *   0.35s color transition per word. Progress maps to words over the
- *   first 90 percent of the runway: word i (0-indexed) paints when
- *   progress >= ((i + 1) / 15) * 0.9, so the last word lands at
- *   progress 0.9. Scrolling back up unpaints words in reverse.
+ *   first 80 percent of the runway: word i (0-indexed) paints when
+ *   progress >= ((i + 1) / 15) * 0.8, so the last word lands at
+ *   progress 0.8. Scrolling back up unpaints words in reverse.
  * - The mission line fades in only near the end of the runway:
- *   opacity 0 at progress <= 0.9, ramping linearly to 1 at progress 1.
+ *   opacity 0 at progress <= 0.8, ramping to 1 at progress 0.85
+ *   with a 14px rise over the same interval; four blue underline
+ *   bars then grow over 0.80-0.85, 0.85-0.90, 0.90-0.95, 0.95-1.00.
  * - The dashed vertical rule draws in step with progress (its height
  *   is progress * 100 percent of the content block), the top square
  *   node sits at the rule start, and the bottom node travels with the
@@ -117,7 +119,7 @@ export default function Quote() {
     };
   }, [reducedMotion]);
 
-  const missionOpacity = progress <= 0.9 ? 0 : (progress - 0.9) / 0.1;
+  const missionOpacity = progress <= 0.8 ? 0 : clamp01((progress - 0.8) / 0.05);
 
   /* Dot-field entrance: both dot layers fade from opacity 0 to
      full over the first 10 percent of scroll progress, then stay
@@ -158,7 +160,7 @@ export default function Quote() {
     >
       {WORDS.map((word, i) => {
         const painted =
-          reducedMotion || progress >= ((i + 1) / WORDS.length) * 0.9;
+          reducedMotion || progress >= ((i + 1) / WORDS.length) * 0.8;
         return (
           <span key={`w-${i}`}>
             <span
@@ -183,6 +185,26 @@ export default function Quote() {
     </h1>
   );
 
+  /* Mission underline bars: plain inline spans whose background
+     grows left to right over a 0.05 progress sub-window each
+     (easeOutCubic). Under reduced motion the spans carry no
+     background properties at all, so the static text is plain. */
+  const barGrowth = (start: number) =>
+    1 - (1 - clamp01((progress - start) / 0.05)) ** 3;
+  const barStyle = (start: number, blue = false): React.CSSProperties =>
+    reducedMotion
+      ? blue
+        ? { color: BLUE }
+        : {}
+      : {
+          ...(blue ? { color: BLUE } : {}),
+          backgroundImage: `linear-gradient(${BLUE}, ${BLUE})`,
+          backgroundRepeat: "no-repeat",
+          backgroundPosition: "0 100%",
+          backgroundSize: `${barGrowth(start) * 100}% 3px`,
+          paddingBottom: 3,
+        };
+
   const mission = (
     <p
       style={{
@@ -198,11 +220,15 @@ export default function Quote() {
             : `translateY(${(1 - missionOpacity) * 14}px)`,
       }}
     >
-      I aim to enhance health standards in Indonesia, bring about
-      sustainable change, and create lasting positive impacts. I founded
-      DaivanLabs on{" "}
-      <span style={{ color: BLUE }}>CodeCureConnect:</span> code that becomes
-      healthcare tools, and connections that carry them further.
+      I aim to{" "}
+      <span style={barStyle(0.8)}>enhance health standards in Indonesia</span>
+      {", bring about "}
+      <span style={barStyle(0.85)}>sustainable change</span>
+      {", and create "}
+      <span style={barStyle(0.9)}>lasting positive impacts</span>
+      {". I founded DaivanLabs on "}
+      <span style={barStyle(0.95, true)}>CodeCureConnect:</span>
+      {" code that becomes healthcare tools, and connections that carry them further."}
     </p>
   );
 
