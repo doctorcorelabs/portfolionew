@@ -57,6 +57,107 @@ const BODY = "#D8D8D8";
 const LABEL = "#98989C";
 const BLUE = "#0859D4";
 
+/* Bead position parameter (spec 2.1): five station windows derived
+   from scroll progress. Inside window k the bead travels from node
+   k - 1 to node k during the first half, then dwells on node k. */
+function beadStateFromProgress(p: number): {
+  beadIndex: number;
+  arrivalIdx: number;
+} {
+  const w = p * 5;
+  const k = Math.min(4, Math.floor(w));
+  const l = w - k;
+  const from = k === 0 ? 0 : k - 1;
+  const frac = l < 0.5 ? 1 - Math.pow(1 - l * 2, 3) : 1;
+  return {
+    beadIndex: from + frac * (k - from),
+    arrivalIdx: l >= 0.5 ? k : Math.max(0, k - 1),
+  };
+}
+
+/* Station seal (spec 3): 28x28 thin-outline line art beside the year
+   numeral. Closed shapes fill blue when active; open shapes stay
+   unfilled and bump stroke-width instead. */
+function JourneySeal({ index, active }: { index: number; active: boolean }) {
+  const stroke = active ? BLUE : "rgba(255, 255, 255, 0.6)";
+  const isOpen = index === 0 || index === 1;
+  const closedFill = active ? BLUE : "none";
+  const accentStroke = active ? PAPER : undefined;
+  return (
+    <span
+      aria-hidden="true"
+      className={active ? "journey-seal journey-seal-active" : "journey-seal"}
+    >
+      <svg
+        width={28}
+        height={28}
+        viewBox="0 0 28 28"
+        aria-hidden="true"
+        style={{
+          display: "block",
+          stroke,
+          strokeWidth: active && isOpen ? 2 : 1.5,
+          strokeLinecap: "round",
+          strokeLinejoin: "round",
+          fill: "none",
+        }}
+      >
+        {index === 0 && <path d="M6 24 V6 H22 V24" fill="none" />}
+        {index === 1 && <path d="M4 24 H10 V18 H16 V12 H22 V6" fill="none" />}
+        {index === 2 && (
+          <>
+            <circle
+              className="seal-closed"
+              cx={14}
+              cy={14}
+              r={9}
+              style={{ fill: closedFill }}
+            />
+            <ellipse
+              className="seal-ellipse"
+              cx={14}
+              cy={14}
+              rx={9}
+              ry={3.5}
+              style={{ fill: "none", stroke: accentStroke }}
+            />
+          </>
+        )}
+        {index === 3 && (
+          <>
+            <path
+              className="seal-closed"
+              d="M4 24 L14 6 L24 24 Z"
+              style={{ fill: closedFill }}
+            />
+            <rect
+              className="seal-apex"
+              x={11}
+              y={3}
+              width={6}
+              height={6}
+              style={{ fill: "none", stroke: accentStroke }}
+            />
+          </>
+        )}
+        {index === 4 && (
+          <>
+            <rect
+              className="seal-closed"
+              x={4}
+              y={10}
+              width={12}
+              height={12}
+              style={{ fill: closedFill }}
+            />
+            <rect x={12} y={4} width={12} height={12} fill="none" />
+          </>
+        )}
+      </svg>
+    </span>
+  );
+}
+
 type Station = {
   year: string;
   title: string;
@@ -70,7 +171,7 @@ const STATIONS: Station[] = [
     year: "2021",
     title: "Medicine begins",
     detail:
-      "Bachelor of Medicine, Faculty of Medicine, Universitas Islam Indonesia. GPA 3.91 out of 4.0. Guest speaker for the Blora Regency Government dialogue, Ngobrol Bareng Bupati.",
+      "Bachelor of Medicine, Faculty of Medicine, Universitas Islam Indonesia, GPA 3.91/4.0. Guest speaker, Blora Regency Government dialogue Ngobrol Bareng Bupati.",
     dots: [],
     dotCount: null,
   },
@@ -78,7 +179,7 @@ const STATIONS: Station[] = [
     year: "2023",
     title: "Scholarship, and first wins",
     detail:
-      "Beasiswa Unggulan Awardee, from the Ministry of Education, Culture, Research, and Technology. Active in SMART FK UII Scientific Division and BAPIN-ISMKI, public speaking educator at Seni.Bicara, and Master of Ceremony for the UII Faculty of Medicine General Assembly XVI.",
+      "Beasiswa Unggulan Awardee, Ministry of Education, Culture, Research, and Technology. SMART FK UII Scientific Division and BAPIN-ISMKI, public speaking educator at Seni.Bicara, Master of Ceremony, UII Faculty of Medicine General Assembly XVI.",
     dots: [
       "Beasiswa Unggulan Awardee",
       "1st Place, Scientific Essay, Scientific Fair SMART FK UII",
@@ -91,7 +192,7 @@ const STATIONS: Station[] = [
     year: "2024",
     title: "Certificates, papers, world stages",
     detail:
-      "20 certifications completed: WHO, UNITAR, Johns Hopkins, and Coursera. Four publications recorded. First-author ePoster at ENDO 2024 in Seoul, poster at ICKSH 2024, and oral presentation at MYHAM 2024, plus a Gold Medal at ISIF 2024. Speaker and mentor at KampusInovatif.id and INTIMATE SMART FK UII.",
+      "20 certifications: WHO, UNITAR, Johns Hopkins, Coursera. Four publications recorded. First-author ePoster, ENDO 2024 Seoul; poster, ICKSH 2024; oral presentation, MYHAM 2024; Gold Medal, ISIF 2024. Speaker and mentor, KampusInovatif.id and INTIMATE SMART FK UII.",
     dots: [
       "ePoster, ENDO 2024, Seoul",
       "Poster, ICKSH 2024",
@@ -104,7 +205,7 @@ const STATIONS: Station[] = [
     year: "2025",
     title: "A peak year, and a lab is born",
     detail:
-      "Most Outstanding Student UII 2025 and 3rd Most Outstanding Student LLDIKTI V 2025. DaivanLabs founded in June 2025. Summer school at Chulalongkorn (AASP-PECT). The Amomum cardamomum publication recorded this year.",
+      "Most Outstanding Student UII 2025; 3rd Most Outstanding Student LLDIKTI V 2025. DaivanLabs founded June 2025. Summer school, Chulalongkorn (AASP-PECT). Amomum cardamomum publication recorded this year.",
     dots: [
       "Most Outstanding Student UII 2025",
       "3rd Most Outstanding Student LLDIKTI V 2025",
@@ -124,7 +225,7 @@ const STATIONS: Station[] = [
     year: "2026",
     title: "Clinic, congress, and tools",
     detail:
-      "Clinical clerkship (koas), surgery rotation from 5 October 2026. Poster ABST-000034 at Hypertension Seoul 2026, Conrad Seoul, 5 to 7 November 2026: FAERS resistant hypertension study, N = 6,601 reports analysed. Results are hypothesis-generating: reporting disproportionality, not clinical risk or causality. StrokeSense and StrokeSense AI Lab built: upload results are AI interpretation of images, not measurement, and FAST output is an Observation Sheet with no score and no diagnosis. Cerclage Table 1 deep analysis completed 18 October 2026; no result numbers published. Five further 2026 papers followed: BPA and hormone-related disorders, Amomum cardamomum for breast cancer, Lytechinus variegatus peptides for obesity, miRNA diagnostics for endometrial cancer, and Echinometra lucunter peptides for lung cancer.",
+      "Clinical clerkship (koas), surgery rotation from 5 October 2026. Poster ABST-000034, Hypertension Seoul 2026, Conrad Seoul, 5-7 November 2026: FAERS resistant hypertension study, N = 6,601 reports analysed (hypothesis-generating: reporting disproportionality, not clinical risk or causality). StrokeSense and StrokeSense AI Lab: uploads are AI image interpretation, not measurement; FAST output is an Observation Sheet, no score, no diagnosis. Cerclage Table 1 analysis completed 18 October 2026, no result numbers published. Five further 2026 papers: BPA and hormone-related disorders; Amomum cardamomum, breast cancer; Lytechinus variegatus peptides, obesity; miRNA diagnostics, endometrial cancer; Echinometra lucunter peptides, lung cancer.",
     dots: [],
     dotCount: null,
   },
@@ -166,6 +267,7 @@ const REVEAL_CSS = `
   height: 0;
   border-top: 2px dashed rgba(255, 255, 255, 0.35);
   transform-origin: left center;
+  position: relative;
 }
 .mvM-armed .journey-line {
   transform: scaleX(0);
@@ -192,6 +294,7 @@ const REVEAL_CSS = `
   display: flex;
   align-items: center;
   justify-content: center;
+  position: relative;
 }
 .journey-node-dot {
   width: 16px;
@@ -257,6 +360,147 @@ const REVEAL_CSS = `
     top: 6px;
   }
 }
+/* Bead on the route (spec 2): 16px, same fill/border as node dots. */
+.journey-bead {
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: #0859D4;
+  border: 2px solid #FAFAFA;
+  box-sizing: border-box;
+  pointer-events: none;
+  position: absolute;
+}
+.journey-bead-desktop {
+  /* Grid-area placement: the bead is a direct .journey-grid child, so
+     its containing block is the route row (grid-row 2, 48px tall) and
+     top 50% centers it on the route. This keeps it OUTSIDE
+     .journey-line, whose scaleX(progress) draw transform used to squash
+     the bead horizontally and scale its left offset by progress. */
+  grid-column: 1 / -1;
+  grid-row: 2;
+  top: 50%;
+  transform: translate(-50%, -50%);
+}
+.journey-bead-mobile {
+  left: 7px;
+  transform: translate(-50%, -50%);
+}
+.mvM-armed:not(.mvM-in) .journey-bead {
+  opacity: 0;
+}
+/* One-shot arrival ring (spec 2.5), separate from the 2s pulse. */
+.journey-bead-ring {
+  position: absolute;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  animation: journey-bead-ring 450ms ease-out forwards;
+}
+.journey-bead-ring-desktop {
+  left: 50%;
+  top: 50%;
+}
+.journey-bead-ring-mobile {
+  left: 0;
+  top: 6px;
+  animation-name: journey-bead-ring-mobile;
+}
+@keyframes journey-bead-ring {
+  from {
+    transform: translate(-50%, -50%) scale(1);
+    opacity: 0.6;
+    box-shadow: 0 0 0 0 rgba(8, 89, 212, 0.45);
+  }
+  to {
+    transform: translate(-50%, -50%) scale(1.9);
+    opacity: 0;
+    box-shadow: 0 0 0 14px rgba(8, 89, 212, 0);
+  }
+}
+@keyframes journey-bead-ring-mobile {
+  from {
+    transform: scale(1);
+    opacity: 0.6;
+    box-shadow: 0 0 0 0 rgba(8, 89, 212, 0.45);
+  }
+  to {
+    transform: scale(1.9);
+    opacity: 0;
+    box-shadow: 0 0 0 14px rgba(8, 89, 212, 0);
+  }
+}
+/* Year numeral pop on bead arrival (spec 2.4). */
+.journey-year-pop {
+  animation: journey-bead-pop 450ms cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+@keyframes journey-bead-pop {
+  from {
+    transform: scale(0.9);
+  }
+  to {
+    transform: scale(1);
+  }
+}
+/* Station seals (spec 3). */
+.journey-seal {
+  flex-shrink: 0;
+}
+.journey-seal-active {
+  animation: journey-seal-snap 300ms cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+@keyframes journey-seal-snap {
+  from {
+    transform: scale(1.25);
+  }
+  to {
+    transform: scale(1);
+  }
+}
+.journey-seal path,
+.journey-seal circle,
+.journey-seal ellipse,
+.journey-seal rect {
+  transition: fill 300ms ease, stroke 300ms ease;
+}
+/* Stage lights (spec 4). */
+.journey-well {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  z-index: -1;
+  pointer-events: none;
+  background: radial-gradient(ellipse 70% 45% at 50% 28%, rgba(255, 255, 255, 0.10) 0%, rgba(8, 89, 212, 0.07) 45%, rgba(255, 255, 255, 0) 70%);
+  transition: opacity 800ms ease;
+}
+.mvM-armed:not(.mvM-in) .journey-well {
+  opacity: 0 !important;
+}
+.journey-glow {
+  position: absolute;
+  left: -13px;
+  width: 40px;
+  top: 0;
+  bottom: 0;
+  z-index: -1;
+  pointer-events: none;
+  background: radial-gradient(ellipse 50% 50% at 50% 50%, rgba(255, 255, 255, 0.10) 0%, rgba(8, 89, 212, 0.07) 50%, rgba(255, 255, 255, 0) 70%);
+  opacity: 1;
+}
+@media (max-width: 1100px) {
+  .journey-bead-desktop,
+  .journey-bead-ring-desktop,
+  .journey-well {
+    display: none;
+  }
+}
+@media (min-width: 1101px) {
+  .journey-bead-mobile,
+  .journey-bead-ring-mobile,
+  .journey-glow {
+    display: none;
+  }
+}
 @media (prefers-reduced-motion: reduce) {
   .mvM-armed .mvM-reveal {
     opacity: 1 !important;
@@ -283,6 +527,32 @@ const REVEAL_CSS = `
     transform: none !important;
     transition: none !important;
   }
+  .journey-bead {
+    display: none !important;
+  }
+  .journey-seal-active {
+    animation: none !important;
+  }
+  .journey-seal path,
+  .journey-seal circle,
+  .journey-seal ellipse,
+  .journey-seal rect {
+    transition: none !important;
+  }
+  .journey-well {
+    opacity: 0.3 !important;
+    transition: none !important;
+  }
+  .journey-glow {
+    opacity: 0.3 !important;
+    transition: none !important;
+  }
+  .journey-year-pop {
+    animation: none !important;
+  }
+  .journey-bead-ring {
+    animation: none !important;
+  }
 }
 `;
 
@@ -290,6 +560,7 @@ export default function Manifesto() {
   const sectionRef = useRef<HTMLElement | null>(null);
   const [progress, setProgress] = useState(0);
   const [activeIdx, setActiveIdx] = useState(-1);
+  const [beadTop, setBeadTop] = useState<number | null>(null);
   const [inView, setInView] = useState(false);
 
   useEffect(() => {
@@ -302,6 +573,7 @@ export default function Manifesto() {
     if (reduced) {
       section.classList.add("mvM-in");
       setProgress(1);
+      setActiveIdx(4);
       return;
     }
     let observer: IntersectionObserver | null = null;
@@ -345,6 +617,31 @@ export default function Manifesto() {
         });
       }
       setActiveIdx((prev) => (prev === best ? prev : best));
+      // Mobile bead position (spec 2.3): interpolate the measured
+      // mobile node centers by the same bead index. Runs inside the
+      // existing throttled update only; no new listener.
+      const grid = section.querySelector(".journey-grid");
+      if (grid) {
+        const gridRect = grid.getBoundingClientRect();
+        const centers: number[] = [];
+        grid.querySelectorAll(".journey-node-mobile").forEach((dot) => {
+          const r = dot.getBoundingClientRect();
+          centers.push(r.top + 8 - gridRect.top);
+        });
+        if (centers.length === 5) {
+          const b = beadStateFromProgress(p).beadIndex;
+          const i0 = Math.floor(b);
+          const i1 = Math.min(4, Math.ceil(b));
+          const top = centers[i0] + (b - i0) * (centers[i1] - centers[i0]);
+          setBeadTop((prev) =>
+            prev === null || Math.abs(prev - top) >= 0.5 ? top : prev,
+          );
+        } else {
+          setBeadTop((prev) => (prev === null ? prev : null));
+        }
+      } else {
+        setBeadTop((prev) => (prev === null ? prev : null));
+      }
     };
     const onScroll = () => {
       if (!raf) raf = requestAnimationFrame(update);
@@ -359,6 +656,8 @@ export default function Manifesto() {
       observer?.disconnect();
     };
   }, []);
+
+  const { beadIndex, arrivalIdx } = beadStateFromProgress(progress);
 
   return (
     <section
@@ -433,19 +732,45 @@ export default function Manifesto() {
             transitionDelay: "80ms",
           }}
         >
-          From starting medicine at UII in 2021 to the clinic and a Seoul
-          congress poster in 2026, in five year stations.
+          Medicine at UII in 2021, clinic and Seoul congress poster in 2026:
+          five stations.
         </p>
         </div>
         <div
           className="journey-grid"
           style={{ "--journey-progress": progress } as CSSProperties}
         >
+          {STATIONS.map((_, i) => (
+            <div
+              key={`well-${i}`}
+              aria-hidden="true"
+              className="journey-well"
+              style={{
+                left: `calc(${i} * ((100% - 96px) / 5 + 24px))`,
+                width: "calc((100% - 96px) / 5)",
+                opacity: activeIdx === i ? 1 : 0.3,
+              }}
+            />
+          ))}
           <div
             aria-hidden="true"
             className="journey-line"
             style={{ transform: `scaleX(${progress})` }}
           />
+          <span
+            aria-hidden="true"
+            className="journey-bead journey-bead-desktop"
+            style={{
+              left: `calc(${beadIndex} * ((100% - 96px) / 5 + 24px) + (100% - 96px) / 10)`,
+            }}
+          />
+          {beadTop !== null && (
+            <span
+              aria-hidden="true"
+              className="journey-bead journey-bead-mobile"
+              style={{ top: beadTop }}
+            />
+          )}
           {STATIONS.map((station, i) => {
             const onTop = i % 2 === 0;
             return (
@@ -464,6 +789,12 @@ export default function Manifesto() {
                     className="journey-node-dot"
                     style={{ transitionDelay: `${300 + i * 150}ms` }}
                   />
+                  {arrivalIdx === i && progress > 0 && (
+                    <span
+                      aria-hidden="true"
+                      className="journey-bead-ring journey-bead-ring-desktop"
+                    />
+                  )}
                 </div>
                 <article
                   className={
@@ -481,23 +812,47 @@ export default function Manifesto() {
                     transitionDelay: `${200 + i * 150}ms`,
                   }}
                 >
+                  {activeIdx === i && (
+                    <div aria-hidden="true" className="journey-glow" />
+                  )}
                   <span
                     aria-hidden="true"
                     className="journey-node-dot journey-node-mobile"
                     style={{ transitionDelay: `${300 + i * 150}ms` }}
                   />
-                  <p
+                  {arrivalIdx === i && progress > 0 && (
+                    <span
+                      aria-hidden="true"
+                      className="journey-bead-ring journey-bead-ring-mobile"
+                    />
+                  )}
+                  <div
                     style={{
-                      fontFamily: MONO,
-                      fontSize: "clamp(28px, 3vw, 40px)",
-                      fontWeight: 700,
-                      letterSpacing: "-0.02em",
-                      color: PAPER,
+                      display: "flex",
+                      alignItems: "center",
+                      gap: 10,
                       margin: "0 0 12px",
                     }}
                   >
-                    {station.year}
-                  </p>
+                    <p
+                      className={
+                        arrivalIdx === i
+                          ? "journey-year journey-year-pop"
+                          : "journey-year"
+                      }
+                      style={{
+                        fontFamily: MONO,
+                        fontSize: "clamp(28px, 3vw, 40px)",
+                        fontWeight: 700,
+                        letterSpacing: "-0.02em",
+                        color: PAPER,
+                        margin: 0,
+                      }}
+                    >
+                      {station.year}
+                    </p>
+                    <JourneySeal index={i} active={activeIdx === i} />
+                  </div>
                   <h3
                     style={{
                       fontSize: "clamp(22px, 2vw, 28px)",
