@@ -34,7 +34,6 @@ export interface Profile {
   subline: string;
   supportingLine: string;
   primaryCta: string;
-  secondaryCta: string;
   metaStrip: string[];
   principle: string;
   principleTranslation: string;
@@ -152,7 +151,6 @@ export const profile: Profile = {
     "I am Daivan Febri Juan Setiya, a clinical clerk (koas) and researcher in Indonesia, on surgery rotation since 5 October 2026. I study health questions and build tools around them, through DaivanLabs.",
   supportingLine: "Founder, DaivanLabs. Code for Cure.",
   primaryCta: "See the research",
-  secondaryCta: "Start a conversation",
   metaStrip: ["Medicine", "Research", "Public Health", "Cancer"],
   principle: "Ad maiora natus sum",
   principleTranslation: "born for greater things",

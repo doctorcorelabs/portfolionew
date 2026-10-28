@@ -1,12 +1,10 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 
 const INK = "#010101";
 const GREY = "#1d1d1f";
 const BLUE = "#0859D4";
 const HAIRLINE = "#e0e0e0";
-const EMAIL = "daivanfebrijuansetiya@gmail.com";
-
 const NAV_LINKS = [
   { to: "/research", label: "Research" },
   { to: "/awards", label: "Awards" },
@@ -18,14 +16,31 @@ const NAV_LINKS = [
 
 export default function Header() {
   const [menuOpen, setMenuOpen] = useState(false);
+  useEffect(() => {
+    if (!menuOpen) return;
+    const onKeyDown = (event: KeyboardEvent) => {
+      if (event.key === "Escape") setMenuOpen(false);
+    };
+    window.addEventListener("keydown", onKeyDown);
+    return () => window.removeEventListener("keydown", onKeyDown);
+  }, [menuOpen]);
+  useEffect(() => {
+    const query = window.matchMedia("(min-width: 721px)");
+    const onChange = () => {
+      if (query.matches) setMenuOpen(false);
+    };
+    onChange();
+    query.addEventListener("change", onChange);
+    return () => query.removeEventListener("change", onChange);
+  }, []);
   return (
     <>
       <style>{`
         /* Dotted-underline hover motif (site-wide 1px square-tile
            motif): a repeating-gradient rule under each nav link
            that draws left-to-right over 300ms on hover and on
-           keyboard focus. The wordmark and the fixed CTA are
-           untouched; only nav links carry this treatment. */
+           keyboard focus. The wordmark is untouched; only nav
+           links carry this treatment. */
         .onlines-nav a.hdr-nav-link {
           background-image: repeating-linear-gradient(to right, ${BLUE} 0 1px, transparent 1px 4px);
           background-size: 0% 1px;
@@ -43,39 +58,15 @@ export default function Header() {
           .onlines-nav a.hdr-nav-link {
             transition: none;
           }
-          .hdr-cta-pulse {
-            animation: none;
-          }
         }
-        /* Soft glow pulse for the fixed CTA pill only: the shadow
-           breathes from transparent to a soft blue glow over 5s,
-           ease-in-out, infinite alternate. Slow enough to read as
-           breathing, never flashing. Wordmark and nav links get no
-           pulse. */
-        @keyframes hdr-cta-glow {
-          from {
-            box-shadow: 0 0 0 rgba(8, 89, 212, 0);
-          }
-          to {
-            box-shadow: 0 0 24px rgba(8, 89, 212, 0.45);
-          }
-        }
-        .hdr-cta-pulse {
-          animation: hdr-cta-glow 5s ease-in-out infinite alternate;
-        }
-        /* Wordmark and fixed CTA sizes live here (not inline) so the
-           narrow-phone rule below can override them. Desktop values
-           are unchanged: wordmark 20px, CTA 14px with 10px 18px. */
+        /* Wordmark size lives here (not inline). Desktop value
+           unchanged: wordmark 20px. */
         .hdr-logo {
           font-size: 20px;
         }
-        .hdr-cta-pulse {
-          font-size: 14px;
-          padding: 10px 18px;
-        }
         /* Mobile menu button and panel: hidden by default, shown only
            at 720px and below. The button sits in its own row under the
-           logo row so the fixed CTA (top band) never covers it. */
+           logo row. */
         .hdr-menu-btn {
           display: none;
         }
@@ -84,7 +75,6 @@ export default function Header() {
         }
         @media (max-width: 720px) {
           .onlines-nav { display: none; }
-          .onlines-cta-spacer { display: none; }
           .hdr-menu-btn {
             display: flex;
             align-items: center;
@@ -120,6 +110,16 @@ export default function Header() {
             font-size: 15px;
             text-decoration: none;
           }
+          .hdr-mobile-nav a.hdr-mobile-link + a.hdr-mobile-link {
+            border-top: 1px solid ${HAIRLINE};
+          }
+          .hdr-mobile-nav a.hdr-mobile-link:hover {
+            color: ${BLUE};
+          }
+          .hdr-mobile-nav a.hdr-mobile-link:focus-visible {
+            outline: 2px solid ${BLUE};
+            outline-offset: -2px;
+          }
         }
         /* Belt and braces: a menu opened on a phone must vanish if the
            viewport is widened past the phone breakpoint. */
@@ -127,19 +127,24 @@ export default function Header() {
           .hdr-menu-btn { display: none; }
           .hdr-mobile-nav { display: none; }
         }
-        /* Narrow phones 320-400px: shrink the wordmark and the CTA pill
-           so the fixed CTA clears the wordmark tail with a positive gap.
-           At 320px: logo right about 137px, CTA left about 146px. */
-        @media (max-width: 400px) {
-          .hdr-logo { font-size: 18px; }
-          .hdr-cta-pulse { font-size: 12px; padding: 8px 12px; }
-        }
-        /* Tablets 721-1023px: taller nav tap targets (about 37px) while
+        /* Tablets 721-1160px: taller nav tap targets (about 44px) while
            keeping the dotted underline 3px below the text. */
-        @media (min-width: 721px) and (max-width: 1023px) {
+        @media (min-width: 721px) and (max-width: 1160px) {
           .onlines-nav a.hdr-nav-link {
-            padding: 8px 0 11px;
-            background-position: 0 calc(100% - 8px);
+            padding: 12px 0 13px;
+            background-position: 0 calc(100% - 10px);
+          }
+        }
+        /* Safety band 721-800px: slightly smaller links and gaps so the
+           single row fits with slack at the narrow end. The !important
+           flags are required because the nav font size and gap are set
+           inline below. */
+        @media (min-width: 721px) and (max-width: 800px) {
+          .onlines-nav a.hdr-nav-link {
+            font-size: 14px !important;
+          }
+          .onlines-nav {
+            column-gap: 20px !important;
           }
         }
       `}</style>
@@ -181,8 +186,7 @@ export default function Header() {
               display: "flex",
               alignItems: "center",
               columnGap: 24,
-              rowGap: 8,
-              flexWrap: "wrap",
+              flexWrap: "nowrap",
               justifyContent: "flex-end",
             }}
           >
@@ -202,11 +206,6 @@ export default function Header() {
               </Link>
             ))}
           </nav>
-          <div
-            className="onlines-cta-spacer"
-            aria-hidden="true"
-            style={{ width: 200, flexShrink: 0 }}
-          />
         </div>
         <button
           type="button"
@@ -223,7 +222,7 @@ export default function Header() {
             <span style={{ display: "block", width: 18, height: 2, background: INK }} />
             <span style={{ display: "block", width: 18, height: 2, background: INK }} />
           </span>
-          Menu
+          {menuOpen ? "Close" : "Menu"}
         </button>
         {menuOpen && (
           <nav
@@ -244,23 +243,6 @@ export default function Header() {
           </nav>
         )}
       </header>
-      <a
-        href={`mailto:${EMAIL}`}
-        className="hdr-cta-pulse"
-        style={{
-          position: "fixed",
-          top: 14,
-          right: "max(16px, calc((100vw - 1160px) / 2))",
-          zIndex: 100,
-          background: BLUE,
-          color: "#ffffff",
-          fontFamily: "'Inter', -apple-system, 'Segoe UI', Roboto, sans-serif",
-          fontWeight: 600,
-          textDecoration: "none",
-        }}
-      >
-        Start a conversation
-      </a>
     </>
   );
 }
