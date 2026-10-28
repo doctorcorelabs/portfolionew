@@ -254,7 +254,9 @@ export default function ResearchIndex() {
             <article style={rowStyle}>
               <p style={metaStyle}>
                 {item.kicker} | {item.status} | {item.year ?? "Year not recorded"}
-                {item.scopusJournal ? " | Scopus-indexed journal" : ""}
+                {item.scopusJournal
+                  ? ` | Scopus-indexed journal${item.scopusQuartile ? ` (${item.scopusQuartile})` : ""}`
+                  : ""}
               </p>
               <h3 style={titleStyle}>
                 <Link

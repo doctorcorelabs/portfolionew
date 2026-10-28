@@ -165,7 +165,9 @@ export default function ResearchDetail() {
       <Reveal delay={240}>
       <p className="research-meta">
         {item.status} | {item.venue} | {item.year ?? "Year not recorded"} | {item.role}
-        {item.scopusJournal ? " | Scopus-indexed journal" : ""}
+        {item.scopusJournal
+          ? ` | Scopus-indexed journal${item.scopusQuartile ? ` (${item.scopusQuartile})` : ""}`
+          : ""}
       </p>
       </Reveal>
       {item.coAuthors && item.coAuthors.length > 0 && (

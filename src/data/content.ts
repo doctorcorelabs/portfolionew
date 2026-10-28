@@ -94,6 +94,8 @@ export interface ResearchItem {
   visual?: "bpa" | "echinometra" | "amomum" | "lytechinus" | "mirna";
   /** True when the journal (not the individual article) is verified Scopus-indexed. */
   scopusJournal?: boolean;
+  /** Journal-level Scopus quartile, only when verified (for example "Q1"). Never rendered alone. */
+  scopusQuartile?: string;
   /** Present only on the FAERS item. */
   faers?: FaersData;
   /** Guardrail notes for components. Never render these as marketing copy. */
@@ -254,9 +256,10 @@ export const researchItems: ResearchItem[] = [
       "Docking cannot prove inhibition or efficacy, and the LC-MS identifications are putative database annotations, not confirmed structures. The study does not separate breast cancer subtypes, and experimental validation in cells and animals is still required.",
     visual: "amomum",
     scopusJournal: true,
+    scopusQuartile: "Q1",
     notes: [
       "F1000Research 14:1374, version 2 (peer review: 1 approved, 2 approved with reservations), updated 20 October 2026.",
-      "Journal verified Scopus-indexed (Active, coverage 2012-2026). This is a journal-level verification; the page does not claim the individual article is indexed.",
+      "Journal verified Scopus-indexed (Active, coverage 2012-2026, Q1). This is a journal-level verification; the page does not claim the individual article is indexed.",
       "This 2026 journal version is the same study as the old-site archive record amomum-cardamomum-breast-cancer-therapy; the old record is kept on the research index, but its Works row is dropped so the homepage shows the study once, as the 2026 version.",
     ],
   },
@@ -310,9 +313,10 @@ export const researchItems: ResearchItem[] = [
       "Heterogeneity was substantial (I-squared 77.30% for sensitivity, 81.99% for specificity) because platforms, sample types, and normalization methods differed. Most studies were retrospective case-control designs that can overstate accuracy, so prospective studies with standard protocols are still needed.",
     visual: "mirna",
     scopusJournal: true,
+    scopusQuartile: "Q1",
     notes: [
       "F1000Research 15:530, version 1 (peer review: 1 approved with reservations, 1 not approved), first published 16 April 2026.",
-      "Journal verified Scopus-indexed (Active, coverage 2012-2026). This is a journal-level verification; the page does not claim the individual article is indexed.",
+      "Journal verified Scopus-indexed (Active, coverage 2012-2026, Q1). This is a journal-level verification; the page does not claim the individual article is indexed.",
       "The paper's printed AUC confidence interval is not shown: it looks like a typesetting error in the paper. Search record counts from the PRISMA figure are not shown: they are not stated in extractable text.",
     ],
   },
