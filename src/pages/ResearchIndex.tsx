@@ -204,12 +204,12 @@ export default function ResearchIndex() {
           }}
         >
           <Link to="/" style={{ color: INK }}>
-            Beranda
+            Home
           </Link>{" "}
-          / Riset
+          / Research
         </nav>
 
-        <p style={metaStyle}>Indeks</p>
+        <p style={metaStyle}>Index</p>
         <h1
           style={{
             fontSize: "clamp(40px, 7vw, 84px)",
@@ -219,7 +219,7 @@ export default function ResearchIndex() {
             margin: "0 0 24px",
           }}
         >
-          Riset.
+          Research.
         </h1>
         <p
           style={{
@@ -231,6 +231,9 @@ export default function ResearchIndex() {
           Every study, tool, and publication in one index: featured work
           first, then the key projects and publications recorded on the old
           site. Entries link to a detail page only where one exists.
+          Five new 2026 publications, in Scopus-indexed journals, on BPA
+          endocrine disruption, marine peptides, and miRNA diagnostics,
+          appear as featured research above.
         </p>
         </Reveal>
 
@@ -251,6 +254,7 @@ export default function ResearchIndex() {
             <article style={rowStyle}>
               <p style={metaStyle}>
                 {item.kicker} | {item.status} | {item.year ?? "Year not recorded"}
+                {item.scopusJournal ? " | Scopus-indexed journal" : ""}
               </p>
               <h3 style={titleStyle}>
                 <Link

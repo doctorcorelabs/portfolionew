@@ -9,11 +9,11 @@ import { researchItems } from "../data/content";
  * mono metadata, blue accent only on interactive hover.
  *
  * Hero-scale visual layers (decorative, no new facts):
- * - A giant outlined index numeral (01-09) beside each row: display
+ * - A giant outlined index numeral (01-13) beside each row: display
  *   type with transparent fill and a 1px grey outline, faint,
  *   aria-hidden. Rows gain left padding to make room for it.
  * - One vertical dashed route line on the left of the list,
- *   connecting all 9 rows, drawing top-to-bottom (scaleY) when the
+ *   connecting all 13 rows, drawing top-to-bottom (scaleY) when the
  *   list scrolls into view.
  * - A per-row visual tag under the description: the row type taken
  *   from its existing meta label, in mono, plus one tiny abstract
@@ -64,6 +64,11 @@ type WorkRow = {
 };
 
 /* Featured rows come from content.ts (single source of truth). */
+const bpa = byId("bpa-hormone-disorders");
+const echinometra = byId("echinometra-lucunter-nsclc");
+const amomum = byId("amomum-cardamomum-breast-cancer");
+const lytechinus = byId("lytechinus-variegatus-obesity");
+const mirna = byId("mirna-endometrial-cancer");
 const faers = byId("faers-resistant-hypertension");
 const aiLab = byId("strokesense-ai-lab");
 const strokesense = byId("strokesense-education-first");
@@ -72,6 +77,46 @@ const cerclage = byId("cerclage-twin-pregnancies");
 const featuredRows: WorkRow[] = [
   {
     index: "01",
+    meta: "2026 - Systematic review and meta-analysis",
+    title: bpa.shortTitle,
+    line: "The plastic chemical linked to hormone disorders, tested across 22 studies.",
+    href: "/research/bpa-hormone-disorders",
+    linkLabel: "Read the paper",
+  },
+  {
+    index: "02",
+    meta: "2026 - Bioinformatics",
+    title: echinometra.shortTitle,
+    line: "One sea urchin peptide predicted to block four lung cancer drivers at once.",
+    href: "/research/echinometra-lucunter-nsclc",
+    linkLabel: "Read the paper",
+  },
+  {
+    index: "03",
+    meta: "2026 - Computational drug discovery",
+    title: amomum.shortTitle,
+    line: "From cardamom seeds to two computer-predicted breast cancer leads.",
+    href: "/research/amomum-cardamomum-breast-cancer",
+    linkLabel: "Read the paper",
+  },
+  {
+    index: "04",
+    meta: "2026 - In silico study",
+    title: lytechinus.shortTitle,
+    line: "One short sea urchin peptide, five obesity targets, all on screen.",
+    href: "/research/lytechinus-variegatus-obesity",
+    linkLabel: "Read the paper",
+  },
+  {
+    index: "05",
+    meta: "2026 - Diagnostic meta-analysis",
+    title: mirna.shortTitle,
+    line: "A blood test that could triage who really needs a biopsy.",
+    href: "/research/mirna-endometrial-cancer",
+    linkLabel: "Read the paper",
+  },
+  {
+    index: "06",
     meta: "2026 - Poster",
     title: faers.shortTitle,
     line: "Poster ABST-000034, Hypertension Seoul 2026. 6,601 FAERS reports analysed.",
@@ -79,7 +124,7 @@ const featuredRows: WorkRow[] = [
     linkLabel: "Read the study",
   },
   {
-    index: "02",
+    index: "07",
     meta: "2026 - Live tool",
     title: aiLab.shortTitle,
     line: "Interactive stroke education with an AI-assisted lab. Upload results are AI interpretation of images, not MediaPipe measurement. FAST output is an Observation Sheet with no score and no diagnosis.",
@@ -87,7 +132,7 @@ const featuredRows: WorkRow[] = [
     linkLabel: "Explore the project",
   },
   {
-    index: "03",
+    index: "08",
     meta: "2026 - Web project",
     title: strokesense.shortTitle,
     line: "Interactive stroke education, framed for learning only. No diagnostic claims are made for this project.",
@@ -95,7 +140,7 @@ const featuredRows: WorkRow[] = [
     linkLabel: "Explore the project",
   },
   {
-    index: "04",
+    index: "09",
     meta: "2026 - Manuscript in progress",
     title: cerclage.shortTitle,
     line: "Systematic review and meta-analysis. Table 1 deep analysis completed 18 Oct 2026. No result numbers are published yet.",
@@ -111,19 +156,15 @@ const featuredRows: WorkRow[] = [
  * version of the gut-axis paper is listed separately below, matching
  * the old-site source, which carries both versions. Detail slugs below
  * match the ids in src/data/content.ts oldPublications.
+ *
+ * The old-site Amomum row is intentionally absent here: the 2026
+ * journal version of the same study is now featured row 03, so the
+ * homepage shows the study once. The old record itself is NOT deleted:
+ * it stays reachable from the research index old-site list.
  */
 const archiveRows: WorkRow[] = [
   {
-    index: "05",
-    meta: "2025 - Journal research",
-    title:
-      "Exploration of Amomum cardamomum Seed-Derived Compounds: LC-MS Profiling, Network Pharmacology, and Computational Analyses for Innovative Multi-Targeted Breast Cancer Therapy",
-    line: "Breast cancer therapy from seed-derived compounds, studied computationally.",
-    href: "/research/amomum-cardamomum-breast-cancer-therapy",
-    linkLabel: "Read the study",
-  },
-  {
-    index: "06",
+    index: "10",
     meta: "2024 - Systematic review",
     title:
       "Peran Microbiome Gut Axis Dalam Perkembangan Dan Kekambuhan Chronic Myeloid Leukemia: Systematic Review",
@@ -132,7 +173,7 @@ const archiveRows: WorkRow[] = [
     linkLabel: "Read the study",
   },
   {
-    index: "07",
+    index: "11",
     meta: "2024 - Systematic review",
     title:
       "A Comparative Analysis Of Colonoscopy With Computer-Aided Detection And Standard Colonoscopy In The Detection Of Colorectal Adenomas And Polyps: A Systematic Review",
@@ -141,7 +182,7 @@ const archiveRows: WorkRow[] = [
     linkLabel: "Read the study",
   },
   {
-    index: "08",
+    index: "12",
     meta: "2024 - Systematic review",
     title:
       "The role of the microbiome gut axis in the development and relapse of chronic myeloid leukemia: Systematic review",
@@ -150,7 +191,7 @@ const archiveRows: WorkRow[] = [
     linkLabel: "Read the study",
   },
   {
-    index: "09",
+    index: "13",
     meta: "2024 - Conference paper, IC-CVD",
     title:
       "The Significant Roles of The Renin-Angiotensin-Aldosterone System Metabolism on the Development of Hypertension",

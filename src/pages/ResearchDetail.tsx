@@ -2,6 +2,7 @@ import React from "react";
 import { Link, useParams } from "react-router-dom";
 import { researchItems, oldPublications } from "../data/content";
 import FaersPlotSection from "../components/FaersPlotSection";
+import ResearchVisual from "../components/ResearchVisuals";
 
 /**
  * Research detail page, pattern: breadcrumb, abstract, method, results,
@@ -137,13 +138,14 @@ export default function ResearchDetail() {
 
   // Method is only stated where the source states it. The FAERS method
   // comes from its full title; the cerclage method comes from its kicker.
-  // For other items no separate method is recorded, and none is invented.
+  // Other items carry a methodText field when one is recorded, and none
+  // is invented for items without one.
   const methodText =
     item.id === "faers-resistant-hypertension"
       ? "Disproportionality and time-to-onset analysis on reports from the FDA Adverse Event Reporting System (FAERS)."
       : item.id === "cerclage-twin-pregnancies"
         ? "Systematic review and meta-analysis."
-        : null;
+        : (item.methodText ?? null);
 
   return (
     <main className="container research-detail">
@@ -163,6 +165,7 @@ export default function ResearchDetail() {
       <Reveal delay={240}>
       <p className="research-meta">
         {item.status} | {item.venue} | {item.year ?? "Year not recorded"} | {item.role}
+        {item.scopusJournal ? " | Scopus-indexed journal" : ""}
       </p>
       </Reveal>
       {item.coAuthors && item.coAuthors.length > 0 && (
@@ -205,6 +208,11 @@ export default function ResearchDetail() {
           </p>
           <FaersPlotSection />
         </>
+      ) : item.resultsText ? (
+        <>
+          <p>{item.resultsText}</p>
+          {item.visual ? <ResearchVisual kind={item.visual} /> : null}
+        </>
       ) : (
         <p>
           No results are recorded for this item in a verified source,
@@ -217,6 +225,8 @@ export default function ResearchDetail() {
       </Reveal>
       {item.faers ? (
         <p>{item.faers.honestyNote}</p>
+      ) : item.limitationsText ? (
+        <p>{item.limitationsText}</p>
       ) : (
         <p>
           Limitations for this item have not been written separately from

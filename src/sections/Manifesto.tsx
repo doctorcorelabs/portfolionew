@@ -124,7 +124,7 @@ const STATIONS: Station[] = [
     year: "2026",
     title: "Clinic, congress, and tools",
     detail:
-      "Clinical clerkship (koas), surgery rotation from 5 October 2026. Poster ABST-000034 at Hypertension Seoul 2026, Conrad Seoul, 5 to 7 November 2026: FAERS resistant hypertension study, N = 6,601 reports analysed. Results are hypothesis-generating: reporting disproportionality, not clinical risk or causality. StrokeSense and StrokeSense AI Lab built: upload results are AI interpretation of images, not measurement, and FAST output is an Observation Sheet with no score and no diagnosis. Cerclage Table 1 deep analysis completed 18 October 2026; no result numbers published.",
+      "Clinical clerkship (koas), surgery rotation from 5 October 2026. Poster ABST-000034 at Hypertension Seoul 2026, Conrad Seoul, 5 to 7 November 2026: FAERS resistant hypertension study, N = 6,601 reports analysed. Results are hypothesis-generating: reporting disproportionality, not clinical risk or causality. StrokeSense and StrokeSense AI Lab built: upload results are AI interpretation of images, not measurement, and FAST output is an Observation Sheet with no score and no diagnosis. Cerclage Table 1 deep analysis completed 18 October 2026; no result numbers published. Five further 2026 papers followed: BPA and hormone-related disorders, Amomum cardamomum for breast cancer, Lytechinus variegatus peptides for obesity, miRNA diagnostics for endometrial cancer, and Echinometra lucunter peptides for lung cancer.",
     dots: [],
     dotCount: null,
   },

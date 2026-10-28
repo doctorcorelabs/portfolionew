@@ -33,7 +33,7 @@ function HomePage() {
   return (
     <main>
       <Suspense
-        fallback={<p className="page-loading">Memuat bagian...</p>}
+        fallback={<p className="page-loading">Loading section...</p>}
       >
         <Hero />
         <Quote />

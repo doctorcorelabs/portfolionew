@@ -52,9 +52,9 @@ const COLUMNS: {
     number: "01",
     title: "Research",
     lines: [
-      "Systematic reviews of clinical questions, from PCOS and cancer to the gut microbiome.",
+      "Systematic reviews of clinical questions, from PCOS and cancer to the gut microbiome and endocrine disruption.",
       "Pharmacovigilance: disproportionality and time-to-onset analysis of FAERS reports.",
-      "In silico drug discovery, with collaborators, for tuberculosis and breast cancer.",
+      "In silico drug discovery, with collaborators, for tuberculosis, breast cancer, obesity, and lung cancer.",
     ],
     href: "/research",
     pillLabel: "View research",

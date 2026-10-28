@@ -24,7 +24,8 @@ export type ResearchStatus =
   | "poster accepted"
   | "live"
   | "manuscript in progress"
-  | "archive";
+  | "archive"
+  | "published";
 
 export interface Profile {
   name: string;
@@ -85,6 +86,14 @@ export interface ResearchItem {
   coAuthors?: string[];
   linkLabel: string;
   linkUrl?: string;
+  /** Discussion sections for detail pages. Rendered when present. */
+  methodText?: string;
+  resultsText?: string;
+  limitationsText?: string;
+  /** Key of the native SVG visual rendered in the Results section. */
+  visual?: "bpa" | "echinometra" | "amomum" | "lytechinus" | "mirna";
+  /** True when the journal (not the individual article) is verified Scopus-indexed. */
+  scopusJournal?: boolean;
   /** Present only on the FAERS item. */
   faers?: FaersData;
   /** Guardrail notes for components. Never render these as marketing copy. */
@@ -167,6 +176,146 @@ export const profile: Profile = {
 // ---------------------------------------------------------------------------
 
 export const researchItems: ResearchItem[] = [
+  {
+    id: "bpa-hormone-disorders",
+    kicker: "Systematic review and meta-analysis",
+    shortTitle: "Bisphenol A and hormone-related disorders",
+    fullTitle:
+      "Association of Bisphenol A exposure on hormone-associated benign and malignant disorders: A systematic review and meta-analysis",
+    description:
+      "Bisphenol A (BPA) is common in plastics and food packaging, and it can mimic estrogen in the body. This review asked whether higher BPA exposure is linked to hormone-related conditions such as PCOS, breast cancer, and endometrial disorders. Pooling 22 case-control studies, it found higher BPA levels in people with PCOS, breast cancer, and benign endometrial disorders than in controls, but results varied widely between studies, so this is evidence of association, not proof of causation.",
+    status: "published",
+    venue: "Toxicology Letters",
+    year: 2026,
+    role: "Co-author, 3rd of 8",
+    linkLabel: "Read the paper",
+    linkUrl: "https://doi.org/10.1016/j.toxlet.2026.113213",
+    methodText:
+      "The team searched PubMed and EBSCO from inception to February 2024 following PRISMA, with the protocol registered on PROSPERO (CRD42024530177). From 1095 records, 44 studies entered the qualitative synthesis and 22 case-control studies entered the meta-analysis, analyzed with a random-effects model in RevMan 5.4.",
+    resultsText:
+      "Pooled standardized mean differences showed higher BPA in cases for PCOS (1.19, 95% CI 0.70 to 1.67), benign endometrial disorders (0.94, 0.15 to 1.73), and breast cancer (0.68, 0.44 to 0.92). Endometrial cancer showed no clear difference (-0.28, -1.15 to 0.59, p 0.53). Heterogeneity was considerable (I-squared 93% for PCOS, 95% for benign endometrial disorders), so read the pooled numbers as averages over diverse studies, not precise effects.",
+    limitationsText:
+      "Small case and control groups, different sample types and lab methods, and possible publication bias limit confidence. Evidence on BPA analogs and prostate cancer was too thin to pool. Funded by the Faculty of Medicine UII Systematic Review Grant 2024.",
+    visual: "bpa",
+    scopusJournal: true,
+    notes: [
+      "Published 2026, Toxicology Letters 426, article 113213, online 19 October 2026.",
+      "Journal verified Scopus-indexed (coverage 1977-2026, Q2). This is a journal-level verification; the page does not claim the individual article is indexed.",
+    ],
+  },
+  {
+    id: "echinometra-lucunter-nsclc",
+    kicker: "Bioinformatics, multi-target",
+    shortTitle: "Sea urchin peptides against lung cancer",
+    fullTitle:
+      "Integrated Bioinformatics Analysis of Marine-Derived Peptides from Echinometra lucunter as Multi-Target Inhibitors in Non-Small Cell Lung Cancer",
+    description:
+      "Non-small cell lung cancer is often driven by several signaling pathways at once, so blocking one protein is rarely enough. This study screened 13 short peptides from the sea urchin Echinometra lucunter against four cancer drivers: EGFR, BRAF V600E, VEGFR2, and AKT1. One candidate, peptide A (FLMLVDGHN), bound more strongly than the reference inhibitor on all four targets, but this is simulation only and no lab test has confirmed it yet.",
+    status: "published",
+    venue: "Tropical Journal of Natural Product Research",
+    year: 2026,
+    role: "Co-author, 6th of 14",
+    linkLabel: "Read the paper",
+    linkUrl: "https://doi.org/10.26538/tjnpr/v10i9.40",
+    methodText:
+      "Peptide shapes were built in UCSF Chimera and MOE 2022.02, toxicity and half-life predicted with ToxinPred, PlifePred, and CellPPD, docking run in MOE with redocking validation (all RMSD under 2.0 A), and stability checked with 50 ns dynamics in YASARA.",
+    resultsText:
+      "Peptide A versus reference inhibitor: EGFR -10.17 vs -8.06 (erlotinib), BRAF V600E -10.60 vs -7.66 (vemurafenib), VEGFR2 -10.33 vs -8.43, AKT1 -11.79 vs -8.22 (ipatasertib) kcal/mol. Mean RMSD over 50 ns favored VEGFR2 (1.88 A) and EGFR (2.11 A) over AKT1 (2.99 A) and BRAF (3.17 A). All 13 peptides were predicted non-toxic and non-cell-penetrating, with blood half-life 714.01 to 852.11 seconds.",
+    limitationsText:
+      "Findings are entirely computational, and a 50 ns simulation cannot capture slower rearrangements, cell uptake, enzyme breakdown, or effects in a tumor environment. The non-cell-penetrating prediction also means delivery into cells would need formulation work.",
+    visual: "echinometra",
+    scopusJournal: true,
+    notes: [
+      "Published online 1 October 2026, Tropical Journal of Natural Product Research 10(9), pages 11744 to 11751.",
+      "Journal verified Scopus-indexed (Q3). This is a journal-level verification; the page does not claim the individual article is indexed.",
+      "For the VEGFR2 reference, the page names it neutrally as reference inhibitor because the paper text and table disagree on the name. The vemurafenib value used is the Table 4 value -7.66, not the text value -7.96.",
+      "Peptide M has no docking row in the paper, so only 12 peptides have reported docking scores.",
+    ],
+  },
+  {
+    id: "amomum-cardamomum-breast-cancer",
+    kicker: "Computational drug discovery",
+    shortTitle: "Java cardamom compounds for breast cancer",
+    fullTitle:
+      "Exploration of Compounds Identified from Amomum cardamomum Seed Extract: LC-MS Profiling, Network Pharmacology, and Computational Analyses for Innovative Multi-Targeted Breast Cancer Therapy",
+    description:
+      "Seeds of Amomum cardamomum (Java cardamom) may hit breast cancer from several angles at once. The team profiled the seed extract, mapped its compounds onto breast cancer biology, and tested the best candidates by computer simulation. Two compounds, C17 and C20, emerged as leads that bind and stay stable on four key cancer proteins. All of this is still prediction: no cell or animal test has confirmed it yet.",
+    status: "published",
+    venue: "F1000Research",
+    year: 2026,
+    role: "Co-author, 10th of 17",
+    linkLabel: "Read the paper",
+    linkUrl: "https://doi.org/10.12688/f1000research.168214.2",
+    methodText:
+      "LC-MS profiling identified 22 compounds, then network pharmacology (SwissTargetPrediction, STRING, Cytoscape, DAVID) narrowed them to 36 shared targets. Docking in MOE 2022.02 and 50 ns molecular dynamics in YASARA tested the leads against TNF, SRC, EGFR, and CASP3, with ADMET predicted by SwissADME and ProTox-II.",
+    resultsText:
+      "C20 beat its control on SRC (-8.58 vs -7.89 kcal/mol) and nearly matched erlotinib on EGFR (-6.43 vs -6.47); C17 beat its control on Casp3 (-6.70 vs -6.53) and nearly matched its control on TNF-alpha (-6.91 vs -7.00). Hub centrality ranked TNF (28.35) and SRC (27.13) far above EGFR (4.39) and CASP3 (2.87). Twenty of 22 compounds met Lipinski drug-likeness rules.",
+    limitationsText:
+      "Docking cannot prove inhibition or efficacy, and the LC-MS identifications are putative database annotations, not confirmed structures. The study does not separate breast cancer subtypes, and experimental validation in cells and animals is still required.",
+    visual: "amomum",
+    scopusJournal: true,
+    notes: [
+      "F1000Research 14:1374, version 2 (peer review: 1 approved, 2 approved with reservations), updated 20 October 2026.",
+      "Journal verified Scopus-indexed (Active, coverage 2012-2026). This is a journal-level verification; the page does not claim the individual article is indexed.",
+      "This 2026 journal version is the same study as the old-site archive record amomum-cardamomum-breast-cancer-therapy; the old record is kept on the research index, but its Works row is dropped so the homepage shows the study once, as the 2026 version.",
+    ],
+  },
+  {
+    id: "lytechinus-variegatus-obesity",
+    kicker: "In silico peptide study",
+    shortTitle: "Sea urchin peptides against obesity",
+    fullTitle:
+      "Integrated In silico Analysis of Multi-Target Marine-Derived Peptide from Lytechinus variegatus as a Potential Anti-Obesity Therapeutic",
+    description:
+      "Obesity involves appetite, fat metabolism, and energy balance together, so a single-target drug often falls short. This study tested 11 peptides from the sea urchin Lytechinus variegatus against five obesity targets at once, entirely by computer simulation. One candidate, peptide 7 (VDSAHA), bound more strongly than the reference inhibitor on every target. It is a promising lead on screen, not a treatment: lab and animal tests are still needed.",
+    status: "published",
+    venue: "Tropical Journal of Natural Product Research",
+    year: 2026,
+    role: "Co-author, 3rd of 13",
+    linkLabel: "Read the paper",
+    linkUrl: "https://doi.org/10.26538/tjnpr/v10i4.57",
+    methodText:
+      "Peptide structures were prepared in MOE 2022.02, ADME predicted with SwissADME, toxicity with ProTox v3.0, docking validated by redocking, dynamics run for 50 ns in YASARA, and membrane permeability modeled with the PerMM server.",
+    resultsText:
+      "Peptide 7 beat every reference inhibitor: FTO -8.95 vs -6.26, HPL -7.96 vs -6.44, PPARgamma -10.09 vs -9.12, PTP1B -7.84 vs -6.40, CB1 -10.72 vs -10.09 kcal/mol. Complexes stayed stable over 50 ns for FTO, PTP1B, and PPARgamma (about 1.0 to 1.5 A RMSD), less so for HPL (about 2.5 A) and CB1 (about 4.5 A). The catch: predicted oral bioavailability is poor, and the PerMM profile shows a steep energy barrier of about 35 kcal/mol at the membrane center, so delivery would be a problem to solve.",
+    limitationsText:
+      "Everything here is computational; enzyme breakdown, real membrane crossing, and safety in a living system are untested. Toxicity prediction places peptide 7 in ProTox Class 4 (harmful) with LD50 3000 mg/kg, so this page does not call it non-toxic.",
+    visual: "lytechinus",
+    scopusJournal: true,
+    notes: [
+      "Published online 1 May 2026, Tropical Journal of Natural Product Research 10(4), pages 8729 to 8740.",
+      "Journal verified Scopus-indexed (Q3). This is a journal-level verification; the page does not claim the individual article is indexed.",
+      "Peptide 7 was chosen for consistency across all five targets, not for the strongest score on each target.",
+    ],
+  },
+  {
+    id: "mirna-endometrial-cancer",
+    kicker: "Diagnostic meta-analysis",
+    shortTitle: "miRNA tests for endometrial cancer",
+    fullTitle:
+      "Diagnostic Performance of Micro-RNAs as Biomarkers for Endometrial Cancer: A Systematic Review and Meta-Analysis",
+    description:
+      "Endometrial cancer is usually confirmed by biopsy, an invasive step many women with bleeding would rather avoid. This meta-analysis asked how well tiny RNA molecules (miRNAs) measured in blood or tissue can flag the disease. Across 52 studies, miRNAs caught most cancers and kept false positives modest, with blood serum and multi-miRNA panels performing best. The honest framing is triage aid, not biopsy replacement: the underlying studies were mostly small and retrospective.",
+    status: "published",
+    venue: "F1000Research",
+    year: 2026,
+    role: "Co-author, 7th of 18",
+    linkLabel: "Read the paper",
+    linkUrl: "https://doi.org/10.12688/f1000research.179155.1",
+    methodText:
+      "The team searched PubMed/MEDLINE, ScienceDirect, Embase, and Web of Science to August 2025 under a PROSPERO protocol (CRD420261280267), following PRISMA 2020. Twelve articles covering 52 studies (1098 cases, 957 controls) were pooled with a bivariate random-effects model in Stata/BE 18.0, using histopathology as the reference standard.",
+    resultsText:
+      "Pooled sensitivity was 0.86 (0.82 to 0.89) and specificity 0.81 (0.75 to 0.85), with AUC 0.91 and diagnostic odds ratio 20.9. Panels beat single miRNAs (0.90/0.93 vs 0.85/0.75) and serum beat plasma (0.91/0.92 vs 0.71/0.81). In plain terms, at a 25% pre-test probability a positive test raises the probability to 60% while a negative test drops it to 5%.",
+    limitationsText:
+      "Heterogeneity was substantial (I-squared 77.30% for sensitivity, 81.99% for specificity) because platforms, sample types, and normalization methods differed. Most studies were retrospective case-control designs that can overstate accuracy, so prospective studies with standard protocols are still needed.",
+    visual: "mirna",
+    scopusJournal: true,
+    notes: [
+      "F1000Research 15:530, version 1 (peer review: 1 approved with reservations, 1 not approved), first published 16 April 2026.",
+      "Journal verified Scopus-indexed (Active, coverage 2012-2026). This is a journal-level verification; the page does not claim the individual article is indexed.",
+      "The paper's printed AUC confidence interval is not shown: it looks like a typesetting error in the paper. Search record counts from the PRISMA figure are not shown: they are not stated in extractable text.",
+    ],
+  },
   {
     id: "faers-resistant-hypertension",
     kicker: "Pharmacovigilance - FAERS analysis",
@@ -590,11 +739,11 @@ export const oldPublications: OldPublication[] = [
 export const researchFocus: ResearchFocus[] = [
   {
     name: "Systematic Review",
-    topics: "PCOS, Cancer, and Gut Microbiome.",
+    topics: "PCOS, Cancer, Gut Microbiome, and Endocrine Disruption.",
   },
   {
     name: "Drug Discovery",
-    topics: "In Silico studies for TB and Breast Cancer.",
+    topics: "In Silico studies for TB, Breast Cancer, Obesity, and Lung Cancer.",
   },
   {
     name: "Public Health",
