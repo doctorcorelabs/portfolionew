@@ -9,11 +9,11 @@ import { researchItems } from "../data/content";
  * mono metadata, blue accent only on interactive hover.
  *
  * Hero-scale visual layers (decorative, no new facts):
- * - A giant outlined index numeral (01-13) beside each row: display
+ * - A giant outlined index numeral (01-06) beside each row: display
  *   type with transparent fill and a 1px grey outline, faint,
  *   aria-hidden. Rows gain left padding to make room for it.
  * - One vertical dashed route line on the left of the list,
- *   connecting all 13 rows, drawing top-to-bottom (scaleY) when the
+ *   connecting all 6 rows, drawing top-to-bottom (scaleY) when the
  *   list scrolls into view.
  * - A per-row visual tag under the description: the row type taken
  *   from its existing meta label, in mono, plus one tiny abstract
@@ -28,13 +28,10 @@ import { researchItems } from "../data/content";
  * - The FAERS row shows ONLY N = 6,601 and the verified framing. NO ROR
  *   values appear in this file at all. The forest plot lives on the
  *   research detail page, not here.
- * - Old-site publications use their verbatim titles, year, and type only.
- *   No journal, DOI, or author list is invented for them, because none is
- *   recorded in the sources.
- * - The cerclage row carries NO result numbers.
- * - StrokeSense rows carry the honesty note: upload results are AI
- *   interpretation, not MediaPipe measurement, and FAST output is an
- *   Observation Sheet with no score and no diagnosis.
+ * - Rows removed from Works at the owner's request on 28 Oct 2026
+ *   (StrokeSense AI Lab, StrokeSense, cerclage, and the 4 old-site
+ *   archive rows) are NOT deleted from the site: their detail pages
+ *   stay reachable from the research index.
  */
 
 const INK = "#010101";
@@ -70,9 +67,6 @@ const amomum = byId("amomum-cardamomum-breast-cancer");
 const lytechinus = byId("lytechinus-variegatus-obesity");
 const mirna = byId("mirna-endometrial-cancer");
 const faers = byId("faers-resistant-hypertension");
-const aiLab = byId("strokesense-ai-lab");
-const strokesense = byId("strokesense-education-first");
-const cerclage = byId("cerclage-twin-pregnancies");
 
 const featuredRows: WorkRow[] = [
   {
@@ -123,85 +117,18 @@ const featuredRows: WorkRow[] = [
     href: "/research/faers-resistant-hypertension",
     linkLabel: "Read the study",
   },
-  {
-    index: "07",
-    meta: "2026 - Live tool",
-    title: aiLab.shortTitle,
-    line: "Interactive stroke education with an AI-assisted lab. Upload results are AI interpretation of images, not MediaPipe measurement. FAST output is an Observation Sheet with no score and no diagnosis.",
-    href: "/research/strokesense-ai-lab",
-    linkLabel: "Explore the project",
-  },
-  {
-    index: "08",
-    meta: "2026 - Web project",
-    title: strokesense.shortTitle,
-    line: "Interactive stroke education, framed for learning only. No diagnostic claims are made for this project.",
-    href: "/research/strokesense-education-first",
-    linkLabel: "Explore the project",
-  },
-  {
-    index: "09",
-    meta: "2026 - Manuscript in progress",
-    title: cerclage.shortTitle,
-    line: "Systematic review and meta-analysis. Table 1 deep analysis completed 18 Oct 2026. No result numbers are published yet.",
-    href: "/research/cerclage-twin-pregnancies",
-    linkLabel: "Read the study",
-  },
 ];
 
 /*
- * Old-site publications, defined locally because they are not in
- * content.ts. Titles are verbatim from the old-site CV (CV.md lines 39
- * to 43). Year and type are as recorded in research/01. The English
- * version of the gut-axis paper is listed separately below, matching
- * the old-site source, which carries both versions. Detail slugs below
- * match the ids in src/data/content.ts oldPublications.
- *
- * The old-site Amomum row is intentionally absent here: the 2026
- * journal version of the same study is now featured row 03, so the
- * homepage shows the study once. The old record itself is NOT deleted:
- * it stays reachable from the research index old-site list.
+ * Rows 07-13 were removed from Works at the owner's request on
+ * 28 Oct 2026: StrokeSense AI Lab, StrokeSense, cerclage, and the
+ * 4 old-site archive rows (gut-axis ID, colonoscopy, gut-axis EN,
+ * RAAS). Nothing is deleted from the site: every removed row's
+ * detail page stays reachable from the research index, and the
+ * old-site Amomum record stays there too (its 2026 journal version
+ * is featured row 03 above).
  */
-const archiveRows: WorkRow[] = [
-  {
-    index: "10",
-    meta: "2024 - Systematic review",
-    title:
-      "Peran Microbiome Gut Axis Dalam Perkembangan Dan Kekambuhan Chronic Myeloid Leukemia: Systematic Review",
-    line: "Gut microbiome axis in the development and relapse of chronic myeloid leukemia.",
-    href: "/research/gut-axis-chronic-myeloid-leukemia",
-    linkLabel: "Read the study",
-  },
-  {
-    index: "11",
-    meta: "2024 - Systematic review",
-    title:
-      "A Comparative Analysis Of Colonoscopy With Computer-Aided Detection And Standard Colonoscopy In The Detection Of Colorectal Adenomas And Polyps: A Systematic Review",
-    line: "Computer-aided detection versus standard colonoscopy for adenoma and polyp detection.",
-    href: "/research/colonoscopy-computer-aided-detection",
-    linkLabel: "Read the study",
-  },
-  {
-    index: "12",
-    meta: "2024 - Systematic review",
-    title:
-      "The role of the microbiome gut axis in the development and relapse of chronic myeloid leukemia: Systematic review",
-    line: "English version of the same gut-axis CML review.",
-    href: "/research/gut-axis-chronic-myeloid-leukemia-en",
-    linkLabel: "Read the study",
-  },
-  {
-    index: "13",
-    meta: "2024 - Conference paper, IC-CVD",
-    title:
-      "The Significant Roles of The Renin-Angiotensin-Aldosterone System Metabolism on the Development of Hypertension",
-    line: "Renin-angiotensin-aldosterone system metabolism in the development of hypertension.",
-    href: "/research/raas-hypertension-ic-cvd",
-    linkLabel: "Read the study",
-  },
-];
-
-const rows: WorkRow[] = [...featuredRows, ...archiveRows];
+const rows: WorkRow[] = featuredRows;
 
 /* Row type, taken from the existing meta label ("2026 - Poster" ->
    "Poster"). No new facts: the tag only repeats what meta says. */
@@ -644,10 +571,7 @@ export default function Works() {
           }}
         >
           FAERS results are hypothesis-generating: they measure reporting
-          disproportionality, not clinical risk or causality. Old-site
-          publications above are listed exactly as recorded on
-          daivanlabs.com. No journal name, DOI, or full author list is
-          recorded for them in the sources, so none is shown.
+          disproportionality, not clinical risk or causality.
         </p>
       </div>
     </section>
