@@ -41,6 +41,11 @@
  *   from-right wrapper (CSS owned by section-slide.css); it slides
  *   in when the section enters view.
  * - The blue drift blob from v4 is kept behind the content.
+ * - Balanced package (28 Oct 2026, docs/journey-balanced-package/
+ *   01-spec.md): Contour Drift rings behind the wells, one
+ *   line-drawn Instrument per station after its dotCount, and a
+ *   Step Forward wrapper that leans the active station's reading
+ *   content toward the route.
  * - prefers-reduced-motion: full static route, no draw animation,
  *   no pops, no pulse, slide static, no scroll listener.
  *   Touch: no hover-dependent content, no scroll hijack, no drag.
@@ -153,6 +158,115 @@ function JourneySeal({ index, active }: { index: number; active: boolean }) {
               style={{ fill: closedFill }}
             />
             <rect x={12} y={4} width={12} height={12} fill="none" />
+          </>
+        )}
+      </svg>
+    </span>
+  );
+}
+
+/* Station instrument (balanced-package spec 3): 72x72 thin-outline
+   line art in its own block after the dotCount. One blue accent per
+   asset, lit only when active; draw-on runs once per activation and
+   deactivation fades back to a fully drawn outline, never erased. */
+function JourneyInstrument({
+  index,
+  active,
+}: {
+  index: number;
+  active: boolean;
+}) {
+  const stroke = active ? PAPER : "rgba(255, 255, 255, 0.7)";
+  const accent = active ? BLUE : undefined;
+  return (
+    <span
+      aria-hidden="true"
+      className={
+        active
+          ? "journey-instrument journey-instrument-active"
+          : "journey-instrument"
+      }
+    >
+      <svg
+        width={72}
+        height={72}
+        viewBox="0 0 72 72"
+        aria-hidden="true"
+        style={{
+          display: "block",
+          stroke,
+          strokeWidth: 1.5,
+          strokeLinecap: "round",
+          strokeLinejoin: "round",
+          fill: "none",
+        }}
+      >
+        {index === 0 && (
+          <>
+            <path d="M36 14 V54" pathLength={100} style={{ stroke: accent }} />
+            <path
+              d="M36 18 C28 12 18 12 10 16 V50 C18 46 28 46 36 52"
+              pathLength={100}
+            />
+            <path
+              d="M36 18 C44 12 54 12 62 16 V50 C54 46 44 46 36 52"
+              pathLength={100}
+            />
+          </>
+        )}
+        {index === 1 && (
+          <>
+            <path
+              d="M36 6 L52 38 C52 52 46 62 36 62 C26 62 20 52 20 38 Z"
+              pathLength={100}
+            />
+            <path d="M36 20 V44" pathLength={100} style={{ stroke: accent }} />
+            <path d="M8 28 H16" pathLength={100} />
+            <path d="M6 40 H14" pathLength={100} />
+            <path d="M8 52 H16" pathLength={100} />
+          </>
+        )}
+        {index === 2 && (
+          <>
+            <circle cx={36} cy={36} r={22} pathLength={100} />
+            <ellipse
+              cx={36}
+              cy={36}
+              rx={30}
+              ry={10}
+              pathLength={100}
+              style={{ stroke: accent }}
+            />
+            <ellipse cx={36} cy={36} rx={10} ry={30} pathLength={100} />
+            <path d="M36 14 C48 24 48 48 36 58" pathLength={100} />
+          </>
+        )}
+        {index === 3 && (
+          <>
+            <path
+              d="M30 8 H42 V26 L58 56 Q60 62 54 62 H18 Q12 62 14 56 L30 26 Z"
+              pathLength={100}
+            />
+            <circle cx={28} cy={48} r={2.5} pathLength={100} />
+            <circle cx={44} cy={42} r={2.5} pathLength={100} />
+            <circle
+              cx={36}
+              cy={54}
+              r={3}
+              pathLength={100}
+              style={{
+                fill: active ? BLUE : "none",
+                stroke: active ? BLUE : "rgba(255, 255, 255, 0.7)",
+              }}
+            />
+          </>
+        )}
+        {index === 4 && (
+          <>
+            <path d="M12 8 H48 L62 18 V62 H12 Z" pathLength={100} />
+            <path d="M48 8 V18 H62" pathLength={100} style={{ stroke: accent }} />
+            <path d="M20 30 H54" pathLength={100} />
+            <path d="M20 40 H54" pathLength={100} />
           </>
         )}
       </svg>
@@ -486,11 +600,85 @@ const REVEAL_CSS = `
   background: radial-gradient(ellipse 50% 50% at 50% 50%, rgba(255, 255, 255, 0.10) 0%, rgba(8, 89, 212, 0.07) 50%, rgba(255, 255, 255, 0) 70%);
   opacity: 1;
 }
+/* Contour Drift rings (balanced-package spec 2): one 2400px SVG as a
+   direct .journey-grid child, so its negative z-index stays inside
+   the wrapper stacking context. Desktop anchor sits 120px beyond
+   the grid's right edge; only the left arcs cross the content. */
+.journey-rings {
+  position: absolute;
+  left: calc(100% + 120px);
+  top: 50%;
+  z-index: -2;
+  pointer-events: none;
+  transition: transform 800ms ease-out;
+}
+.mvM-armed:not(.mvM-in) .journey-rings {
+  opacity: 0;
+}
+/* Instruments (balanced-package spec 3): in-flow block after the
+   dotCount; draw-on runs only under the active class, and the base
+   style has no dash array, so deactivation fades back to a fully
+   drawn outline instead of erasing. */
+.journey-instrument {
+  display: block;
+  margin-top: 16px;
+  transition: opacity 300ms ease;
+}
+.journey-instrument path,
+.journey-instrument circle,
+.journey-instrument ellipse,
+.journey-instrument rect {
+  transition: fill 300ms ease, stroke 300ms ease;
+}
+.journey-instrument-active svg * {
+  stroke-dasharray: 100;
+  animation: journey-instrument-draw 700ms ease-out forwards;
+}
+@keyframes journey-instrument-draw {
+  from {
+    stroke-dashoffset: 100;
+  }
+  to {
+    stroke-dashoffset: 0;
+  }
+}
+/* Step Forward (balanced-package spec 4): the wrapper carries the
+   step transform so the article's reveal transform is untouched.
+   Above-route stations step down toward the route, below-route
+   stations step up. No transition delay: the wrapper must not
+   inherit the article's reveal delay. */
+.journey-step {
+  transition: transform 500ms cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+.journey-station-active .journey-step-top {
+  transform: translateY(12px);
+}
+.journey-station-active .journey-step-bottom {
+  transform: translateY(-12px);
+}
 @media (max-width: 1100px) {
   .journey-bead-desktop,
   .journey-bead-ring-desktop,
   .journey-well {
     display: none;
+  }
+  /* Rings re-anchor to the 7px vertical line at half size; only the
+     four largest rings show on mobile. */
+  .journey-rings {
+    left: 7px;
+    width: 1200px;
+    height: 1200px;
+  }
+  .journey-ring-0,
+  .journey-ring-1,
+  .journey-ring-2 {
+    display: none;
+  }
+  /* Step Forward mobile: every active wrapper steps 8px left toward
+     the vertical line, regardless of top/bottom. */
+  .journey-station-active .journey-step-top,
+  .journey-station-active .journey-step-bottom {
+    transform: translateX(-8px);
   }
 }
 @media (min-width: 1101px) {
@@ -551,6 +739,28 @@ const REVEAL_CSS = `
   }
   .journey-bead-ring {
     animation: none !important;
+  }
+  /* Balanced package: rings park at the middle scale, instruments
+     render fully drawn with no draw animation, the step never
+     moves (the branch sets activeIdx to 4, so without this the
+     2026 wrapper would step). */
+  .journey-rings {
+    transform: translate(-50%, -50%) scale(1.08) !important;
+    transition: none !important;
+  }
+  .journey-instrument-active svg * {
+    animation: none !important;
+  }
+  .journey-instrument,
+  .journey-instrument path,
+  .journey-instrument circle,
+  .journey-instrument ellipse,
+  .journey-instrument rect {
+    transition: none !important;
+  }
+  .journey-step {
+    transform: none !important;
+    transition: none !important;
   }
 }
 `;
@@ -658,6 +868,11 @@ export default function Manifesto() {
 
   const { beadIndex, arrivalIdx } = beadStateFromProgress(progress);
 
+  /* Contour Drift scale (balanced-package spec 2.2): window-quantized
+     from the existing progress state, no new state or listener. */
+  const ringWindow = Math.min(4, Math.floor(progress * 5));
+  const ringScale = 1 + 0.04 * ringWindow;
+
   return (
     <section
       id="manifesto"
@@ -738,6 +953,30 @@ export default function Manifesto() {
           className="journey-grid"
           style={{ "--journey-progress": progress } as CSSProperties}
         >
+          <svg
+            aria-hidden="true"
+            className="journey-rings"
+            width={2400}
+            height={2400}
+            viewBox="0 0 2400 2400"
+            style={{
+              transform: `translate(-50%, -50%) scale(${ringScale})`,
+            }}
+          >
+            {[300, 400, 500, 600, 700, 850, 1000].map((r, idx) => (
+              <circle
+                key={r}
+                className={`journey-ring-${idx}`}
+                cx={1200}
+                cy={1200}
+                r={r}
+                fill="none"
+                stroke="rgba(255, 255, 255, 0.06)"
+                strokeWidth={1}
+                vectorEffect="non-scaling-stroke"
+              />
+            ))}
+          </svg>
           {STATIONS.map((_, i) => (
             <div
               key={`well-${i}`}
@@ -824,6 +1063,13 @@ export default function Manifesto() {
                       className="journey-bead-ring journey-bead-ring-mobile"
                     />
                   )}
+                  <div
+                    className={
+                      onTop
+                        ? "journey-step journey-step-top"
+                        : "journey-step journey-step-bottom"
+                    }
+                  >
                   <div
                     style={{
                       display: "flex",
@@ -922,6 +1168,8 @@ export default function Manifesto() {
                       {station.dotCount}
                     </p>
                   )}
+                  <JourneyInstrument index={i} active={activeIdx === i} />
+                  </div>
                 </article>
               </Fragment>
             );
