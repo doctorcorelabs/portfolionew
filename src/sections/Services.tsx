@@ -45,8 +45,9 @@ const COLUMNS: {
   number: string;
   title: string;
   lines: string[];
-  href: string;
-  pillLabel: string;
+  /** Absent on the Tools card: the owner asked for no pill there. */
+  href?: string;
+  pillLabel?: string;
 }[] = [
   {
     number: "01",
@@ -64,11 +65,7 @@ const COLUMNS: {
     title: "Tools",
     lines: [
       "DaivanLabs, founded June 2025. Code for Cure: code, healthcare tools, connections.",
-      "StrokeSense AI Lab: interactive stroke education with an AI-assisted lab.",
-      "StrokeSense: education-first stroke learning, built for the public.",
     ],
-    href: "/research/strokesense-ai-lab",
-    pillLabel: "View StrokeSense AI Lab",
   },
   {
     number: "03",
@@ -76,7 +73,7 @@ const COLUMNS: {
     lines: [
       "Speaker and mentor at KampusInovatif.id, September 2024 to February 2025.",
       "Scientific division, SMART FK UII, including scientific essay mentoring.",
-      "Public speaking education at Seni.Bicara.",
+      "Mentor for international competition delegation teams at the Faculty of Medicine, Universitas Islam Indonesia, and for Beasiswa Unggulan and Mahasiswa Berprestasi (Pilmapres) programs.",
     ],
     href: "/experience",
     pillLabel: "View experience",
@@ -414,11 +411,13 @@ export default function Services() {
                     {line}
                   </p>
                 ))}
-                <div className="svc-pill">
-                  <Link to={column.href} aria-label={column.pillLabel}>
-                    View
-                  </Link>
-                </div>
+                {column.href && column.pillLabel ? (
+                  <div className="svc-pill">
+                    <Link to={column.href} aria-label={column.pillLabel}>
+                      View
+                    </Link>
+                  </div>
+                ) : null}
               </div>
             );
           })}
