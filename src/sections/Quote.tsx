@@ -15,11 +15,11 @@
  * - The H1 claim is split into 17 word spans. Each word starts pale
  *   grey and flips to full ink as scroll progress advances, with a
  *   0.35s color transition per word. Progress maps to words over the
- *   first 80 percent of the runway: word i (0-indexed) paints when
- *   progress >= ((i + 1) / 17) * 0.8, so the last word lands at
- *   progress 0.8. Scrolling back up unpaints words in reverse.
+ *   first 70 percent of the runway: word i (0-indexed) paints when
+ *   progress >= ((i + 1) / 17) * 0.7, so the last word lands at
+ *   progress 0.7. Scrolling back up unpaints words in reverse.
  * - The mission line fades in only near the end of the runway:
- *   opacity 0 at progress <= 0.8, ramping to 1 at progress 0.85
+ *   opacity 0 at progress <= 0.70, ramping to 1 at progress 0.78
  *   with a 14px rise over the same interval. The mission animation
  *   is a dot trail below the paragraph, a reading-light dot band
  *   behind it, and tap blooms in the background.
@@ -75,6 +75,8 @@ function clamp01(value: number): number {
 export default function Quote() {
   const wrapperRef = useRef<HTMLElement | null>(null);
   const stickyRef = useRef<HTMLDivElement | null>(null);
+  const ringRef = useRef<HTMLDivElement | null>(null);
+  const autoBloomFiredRef = useRef(false);
   const [cursorLit, setCursorLit] = useState(false);
   const [bloom, setBloom] = useState<{
     x: number;
@@ -127,7 +129,30 @@ export default function Quote() {
     };
   }, [reducedMotion]);
 
-  const missionOpacity = progress <= 0.8 ? 0 : clamp01((progress - 0.8) / 0.05);
+  /* P2 auto bloom: once per mount, when progress first reaches 1.0,
+     fire one bloom centered on the V6 target ring, reusing the
+     bloom state and the q-bloom class. The flag is set only after
+     both rects read successfully, so a failed measure can retry on
+     the next crossing of 1.0. No fire under reduced motion, no
+     re-fire on scroll back, and a tap before 1.0 does not consume
+     it; a later tap replaces it via the key remount. */
+  useEffect(() => {
+    if (reducedMotion) return;
+    if (progress < 1 || autoBloomFiredRef.current) return;
+    const ring = ringRef.current;
+    const sticky = stickyRef.current;
+    if (!ring || !sticky) return;
+    const ringRect = ring.getBoundingClientRect();
+    const stickyRect = sticky.getBoundingClientRect();
+    autoBloomFiredRef.current = true;
+    setBloom((prev) => ({
+      x: ringRect.left + ringRect.width / 2 - stickyRect.left,
+      y: ringRect.top + ringRect.height / 2 - stickyRect.top,
+      key: (prev?.key ?? 0) + 1,
+    }));
+  }, [progress, reducedMotion]);
+
+  const missionOpacity = progress <= 0.7 ? 0 : clamp01((progress - 0.7) / 0.08);
 
   /* Dot-field entrance: both dot layers fade from opacity 0 to
      full over the first 10 percent of scroll progress, then stay
@@ -182,7 +207,7 @@ export default function Quote() {
     >
       {WORDS.map((word, i) => {
         const painted =
-          reducedMotion || progress >= ((i + 1) / WORDS.length) * 0.8;
+          reducedMotion || progress >= ((i + 1) / WORDS.length) * 0.7;
         return (
           <span key={`w-${i}`}>
             <span
@@ -207,13 +232,16 @@ export default function Quote() {
     </h1>
   );
 
-  /* V13 reading-light band geometry: the band is 40 percent of the
-     mission block height and travels from the top (progress 0.8) to
-     the bottom (progress 1.0), so its top edge runs from 0 to 60
-     percent. The mask feathers about 8 percent on each side. */
-  const v13f = clamp01((progress - 0.8) / 0.2);
+  /* V13 reading-light band geometry: the band is 50 percent of the
+     mission block height and travels from the top (progress 0.70)
+     to the bottom (progress 1.0), so its top edge runs from 0 to 60
+     percent. At f = 1 the bottom edge is 110 percent, capped by the
+     mask at 100 percent, so the end-state visible band is the
+     bottom 40 percent of the mission block, denser than before.
+     The mask feathers about 8 percent on each side. */
+  const v13f = clamp01((progress - 0.7) / 0.3);
   const v13Top = v13f * 60;
-  const v13Bottom = v13Top + 40;
+  const v13Bottom = v13Top + 50;
   const v13FadeIn = Math.max(0, v13Top - 8);
   const v13FadeOut = Math.min(100, v13Bottom + 8);
   const v13Mask = `linear-gradient(to bottom, transparent 0%, transparent ${v13FadeIn}%, rgba(0, 0, 0, 1) ${v13Top}%, rgba(0, 0, 0, 1) ${v13Bottom}%, transparent ${v13FadeOut}%, transparent 100%)`;
@@ -232,13 +260,12 @@ export default function Quote() {
             zIndex: 0,
             pointerEvents: "none",
             /* Gated on the mission entrance: the band is invisible
-               below progress 0.8 and fades in with the mission ramp
-               (fully present at 0.85), so no static dot strip shows
-               while the mission text itself is still at opacity 0.
-               The sweep geometry below (f, top, height) is untouched. */
+               below progress 0.70 and fades in with the mission ramp
+               (fully present at 0.78), so no static dot strip shows
+               while the mission text itself is still at opacity 0. */
             opacity: missionOpacity,
             backgroundImage:
-              "radial-gradient(circle, rgba(0, 0, 0, 0.44) 0.4px, transparent 0.5px)",
+              "radial-gradient(circle, rgba(0, 0, 0, 0.60) 0.6px, transparent 0.7px)",
             backgroundSize: "14px 14px",
             backgroundRepeat: "repeat",
             maskImage: v13Mask,
@@ -316,13 +343,17 @@ export default function Quote() {
     </>
   );
 
-  /* V6 dot trail below the mission: 12 dots light in step order,
-     then a hollow ring strokes in with a blue center dot. Takes the
-     same drawn value as the rule, so the static branch (drawn 1)
-     renders it fully lit automatically. No transition anywhere:
-     the dots are a step function of scroll progress. */
+  /* V6 dot trail below the mission: 12 dots of 4px light in step
+     order from 0.72 to 0.90, then a 32px hollow ring fades in with
+     a 10px blue center dot from 0.90 to 1.00. At full ring opacity
+     the center dot carries the q-pulse-dot class (3s ease-in-out
+     infinite alternate, opacity 1 to 0.6); below full it stays
+     inline-opacity-driven. Takes the same drawn value as the rule,
+     so the static branch (drawn 1) renders it fully lit
+     automatically. No transition anywhere: the dots are a step
+     function of scroll progress. */
   const trail = (drawn: number) => {
-    const ringOpacity = clamp01((drawn - 0.95) / 0.05);
+    const ringOpacity = clamp01((drawn - 0.9) / 0.1);
     return (
       <div
         aria-hidden="true"
@@ -341,22 +372,23 @@ export default function Quote() {
             style={{
               position: "absolute",
               left: i * 14,
-              top: 18.5,
-              width: 3,
-              height: 3,
+              top: 18,
+              width: 4,
+              height: 4,
               borderRadius: "50%",
               background:
-                drawn >= 0.82 + i * 0.012 ? INK : "rgba(1, 1, 1, 0.2)",
+                drawn >= 0.72 + i * (0.18 / 11) ? INK : "rgba(1, 1, 1, 0.3)",
             }}
           />
         ))}
         <div
+          ref={ringRef}
           style={{
             position: "absolute",
-            left: 182,
-            top: 8,
-            width: 24,
-            height: 24,
+            left: 178,
+            top: 4,
+            width: 32,
+            height: 32,
             borderRadius: "50%",
             border: "1px solid rgba(1, 1, 1, 0.3)",
             background: "transparent",
@@ -364,12 +396,13 @@ export default function Quote() {
           }}
         />
         <div
+          className={ringOpacity >= 1 ? "q-pulse-dot" : undefined}
           style={{
             position: "absolute",
-            left: 190,
-            top: 16,
-            width: 8,
-            height: 8,
+            left: 189,
+            top: 15,
+            width: 10,
+            height: 10,
             borderRadius: "50%",
             background: BLUE,
             opacity: ringOpacity,
@@ -492,15 +525,27 @@ export default function Quote() {
           from { opacity: 0.85; }
           to { opacity: 1; }
         }
-        /* B15 tap bloom: expands from a small faint ring to full
-           size while fading out over 1s. The key bump on each tap
-           remounts the element, so the animation restarts. */
+        /* B15 bloom: expands from a small faint ring to full
+           size while fading out over 1.4s. The key bump on each tap
+           remounts the element, so the animation restarts. The P2
+           auto bloom at first progress 1.0 reuses this class, so
+           it shares the same size, stroke, and duration. */
         .q-bloom {
-          animation: q-bloom 1s ease-out forwards;
+          animation: q-bloom 1.4s ease-out forwards;
         }
         @keyframes q-bloom {
-          from { transform: scale(0.2); opacity: 0.25; }
+          from { transform: scale(0.2); opacity: 0.35; }
           to { transform: scale(1); opacity: 0; }
+        }
+        /* P2 pulse: the V6 center dot breathes once its ring fade
+           is complete. Applied only when ringOpacity >= 1, so the
+           fade itself stays inline-opacity-driven. */
+        .q-pulse-dot {
+          animation: q-pulse-dot 3s ease-in-out infinite alternate;
+        }
+        @keyframes q-pulse-dot {
+          from { opacity: 1; }
+          to { opacity: 0.6; }
         }
         @media (max-width: 1023px) {
           .q-pin-wrap {
@@ -527,6 +572,9 @@ export default function Quote() {
             animation: none;
           }
           .q-bloom {
+            animation: none;
+          }
+          .q-pulse-dot {
             animation: none;
           }
         }
@@ -595,11 +643,11 @@ export default function Quote() {
               position: "absolute",
               right: "6%",
               top: `${10 + progress * 60}%`,
-              width: 160,
-              height: 160,
+              width: 200,
+              height: 200,
               borderRadius: "50%",
               border: `1px solid ${INK}`,
-              opacity: 0.15,
+              opacity: 0.25,
             }}
           />
         </div>
