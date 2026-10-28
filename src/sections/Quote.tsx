@@ -12,22 +12,23 @@
  *   overflow visible, so the content stays pinned while the
  *   visitor scrolls through the runway and no second scrollbar
  *   appears (no inner scroll container anywhere in this file).
- * - The H1 claim is split into 15 word spans. Each word starts pale
+ * - The H1 claim is split into 17 word spans. Each word starts pale
  *   grey and flips to full ink as scroll progress advances, with a
  *   0.35s color transition per word. Progress maps to words over the
  *   first 80 percent of the runway: word i (0-indexed) paints when
- *   progress >= ((i + 1) / 15) * 0.8, so the last word lands at
+ *   progress >= ((i + 1) / 17) * 0.8, so the last word lands at
  *   progress 0.8. Scrolling back up unpaints words in reverse.
  * - The mission line fades in only near the end of the runway:
  *   opacity 0 at progress <= 0.8, ramping to 1 at progress 0.85
- *   with a 14px rise over the same interval; four blue underline
- *   bars then grow over 0.80-0.85, 0.85-0.90, 0.90-0.95, 0.95-1.00.
+ *   with a 14px rise over the same interval. The mission animation
+ *   is a dot trail below the paragraph, a reading-light dot band
+ *   behind it, and tap blooms in the background.
  * - The dashed vertical rule draws in step with progress (its height
  *   is progress * 100 percent of the content block), the top square
  *   node sits at the rule start, and the bottom node travels with the
  *   rule tip.
- * - Wording and bold key phrases are the rewritten clerkship
- *   narrative; words are plain inline spans, so on narrow screens they wrap normally and
+ * - Wording and bold key phrases are the N2 narrative; words
+ *   are plain inline spans, so on narrow screens they wrap normally and
  *   the mapping still works by word index.
  * - prefers-reduced-motion: the plain static quote renders instead
  *   (fully ink words, mission visible, no tall wrapper, no pinning),
@@ -48,21 +49,23 @@ const MONO =
 
 /** The H1 claim, split by word. bold marks the key phrases. */
 const WORDS: { text: string; bold: boolean }[] = [
-  { text: "I", bold: false },
-  { text: "am", bold: false },
-  { text: "a", bold: false },
-  { text: "clinical", bold: false },
-  { text: "clerk", bold: false },
-  { text: "in", bold: false },
-  { text: "Indonesia,", bold: false },
-  { text: "deeply", bold: false },
-  { text: "passionate", bold: false },
-  { text: "about", bold: false },
-  { text: "new", bold: true },
-  { text: "knowledge", bold: true },
+  { text: "Between", bold: false },
+  { text: "the", bold: false },
+  { text: "ward", bold: true },
   { text: "and", bold: false },
-  { text: "diverse", bold: true },
-  { text: "experiences.", bold: true },
+  { text: "the", bold: false },
+  { text: "keyboard,", bold: true },
+  { text: "I", bold: false },
+  { text: "turn", bold: false },
+  { text: "everyday", bold: false },
+  { text: "clinical", bold: false },
+  { text: "problems", bold: false },
+  { text: "into", bold: false },
+  { text: "tools", bold: true },
+  { text: "people", bold: false },
+  { text: "can", bold: false },
+  { text: "actually", bold: false },
+  { text: "use.", bold: false },
 ];
 
 function clamp01(value: number): number {
@@ -73,6 +76,11 @@ export default function Quote() {
   const wrapperRef = useRef<HTMLElement | null>(null);
   const stickyRef = useRef<HTMLDivElement | null>(null);
   const [cursorLit, setCursorLit] = useState(false);
+  const [bloom, setBloom] = useState<{
+    x: number;
+    y: number;
+    key: number;
+  } | null>(null);
   const [progress, setProgress] = useState(0);
   const [reducedMotion, setReducedMotion] = useState(
     () =>
@@ -146,6 +154,20 @@ export default function Quote() {
     setCursorLit(true);
   };
 
+  /* B15 tap handler: section-scoped pointer coordinates. Bumping
+     the key remounts the single bloom element, so a new tap
+     replaces the previous bloom instead of stacking rings. */
+  const handlePointerDown = (event: React.PointerEvent<HTMLDivElement>) => {
+    const node = stickyRef.current;
+    if (!node) return;
+    const rect = node.getBoundingClientRect();
+    setBloom((prev) => ({
+      x: event.clientX - rect.left,
+      y: event.clientY - rect.top,
+      key: (prev?.key ?? 0) + 1,
+    }));
+  };
+
   const claim = (
     <h1
       id="quote-heading"
@@ -185,51 +207,66 @@ export default function Quote() {
     </h1>
   );
 
-  /* Mission underline bars: plain inline spans whose background
-     grows left to right over a 0.05 progress sub-window each
-     (easeOutCubic). Under reduced motion the spans carry no
-     background properties at all, so the static text is plain. */
-  const barGrowth = (start: number) =>
-    1 - (1 - clamp01((progress - start) / 0.05)) ** 3;
-  const barStyle = (start: number, blue = false): React.CSSProperties =>
-    reducedMotion
-      ? blue
-        ? { color: BLUE }
-        : {}
-      : {
-          ...(blue ? { color: BLUE } : {}),
-          backgroundImage: `linear-gradient(${BLUE}, ${BLUE})`,
-          backgroundRepeat: "no-repeat",
-          backgroundPosition: "0 100%",
-          backgroundSize: `${barGrowth(start) * 100}% 3px`,
-          paddingBottom: 3,
-        };
+  /* V13 reading-light band geometry: the band is 40 percent of the
+     mission block height and travels from the top (progress 0.8) to
+     the bottom (progress 1.0), so its top edge runs from 0 to 60
+     percent. The mask feathers about 8 percent on each side. */
+  const v13f = clamp01((progress - 0.8) / 0.2);
+  const v13Top = v13f * 60;
+  const v13Bottom = v13Top + 40;
+  const v13FadeIn = Math.max(0, v13Top - 8);
+  const v13FadeOut = Math.min(100, v13Bottom + 8);
+  const v13Mask = `linear-gradient(to bottom, transparent 0%, transparent ${v13FadeIn}%, rgba(0, 0, 0, 1) ${v13Top}%, rgba(0, 0, 0, 1) ${v13Bottom}%, transparent ${v13FadeOut}%, transparent 100%)`;
 
+  /* Mission paragraph wrapped for the V13 band: the wrapper tracks
+     the mission block exactly, so the band follows wrapped lines on
+     any width. The paragraph itself sits above the band. */
   const mission = (
-    <p
-      style={{
-        fontSize: 18,
-        lineHeight: 1.65,
-        color: GRAPHITE,
-        maxWidth: 640,
-        margin: 0,
-        opacity: reducedMotion ? 1 : missionOpacity,
-        transform:
-          reducedMotion || missionOpacity >= 1
-            ? "none"
-            : `translateY(${(1 - missionOpacity) * 14}px)`,
-      }}
-    >
-      I aim to{" "}
-      <span style={barStyle(0.8)}>enhance health standards in Indonesia</span>
-      {", bring about "}
-      <span style={barStyle(0.85)}>sustainable change</span>
-      {", and create "}
-      <span style={barStyle(0.9)}>lasting positive impacts</span>
-      {". I founded DaivanLabs on "}
-      <span style={barStyle(0.95, true)}>CodeCureConnect:</span>
-      {" code that becomes healthcare tools, and connections that carry them further."}
-    </p>
+    <div style={{ position: "relative", margin: 0 }}>
+      {!reducedMotion && (
+        <div
+          aria-hidden="true"
+          style={{
+            position: "absolute",
+            inset: 0,
+            zIndex: 0,
+            pointerEvents: "none",
+            /* Gated on the mission entrance: the band is invisible
+               below progress 0.8 and fades in with the mission ramp
+               (fully present at 0.85), so no static dot strip shows
+               while the mission text itself is still at opacity 0.
+               The sweep geometry below (f, top, height) is untouched. */
+            opacity: missionOpacity,
+            backgroundImage:
+              "radial-gradient(circle, rgba(0, 0, 0, 0.44) 0.4px, transparent 0.5px)",
+            backgroundSize: "14px 14px",
+            backgroundRepeat: "repeat",
+            maskImage: v13Mask,
+            WebkitMaskImage: v13Mask,
+          }}
+        />
+      )}
+      <p
+        style={{
+          fontSize: 18,
+          lineHeight: 1.65,
+          color: GRAPHITE,
+          maxWidth: 640,
+          margin: 0,
+          position: "relative",
+          zIndex: 1,
+          opacity: reducedMotion ? 1 : missionOpacity,
+          transform:
+            reducedMotion || missionOpacity >= 1
+              ? "none"
+              : `translateY(${(1 - missionOpacity) * 14}px)`,
+        }}
+      >
+        {"Through DaivanLabs, I work on "}
+        <span style={{ color: BLUE }}>CodeCureConnect:</span>
+        {" code that becomes healthcare tools, and connections that carry them further toward higher health standards and lasting change in Indonesia. Curiosity and diverse experiences keep pointing me to the next problem worth solving."}
+      </p>
+    </div>
   );
 
   const rule = (drawn: number) => (
@@ -279,6 +316,69 @@ export default function Quote() {
     </>
   );
 
+  /* V6 dot trail below the mission: 12 dots light in step order,
+     then a hollow ring strokes in with a blue center dot. Takes the
+     same drawn value as the rule, so the static branch (drawn 1)
+     renders it fully lit automatically. No transition anywhere:
+     the dots are a step function of scroll progress. */
+  const trail = (drawn: number) => {
+    const ringOpacity = clamp01((drawn - 0.95) / 0.05);
+    return (
+      <div
+        aria-hidden="true"
+        style={{
+          position: "relative",
+          marginTop: 24,
+          maxWidth: 640,
+          width: "100%",
+          height: 40,
+          pointerEvents: "none",
+        }}
+      >
+        {Array.from({ length: 12 }, (_, i) => (
+          <div
+            key={`d-${i}`}
+            style={{
+              position: "absolute",
+              left: i * 14,
+              top: 18.5,
+              width: 3,
+              height: 3,
+              borderRadius: "50%",
+              background:
+                drawn >= 0.82 + i * 0.012 ? INK : "rgba(1, 1, 1, 0.2)",
+            }}
+          />
+        ))}
+        <div
+          style={{
+            position: "absolute",
+            left: 182,
+            top: 8,
+            width: 24,
+            height: 24,
+            borderRadius: "50%",
+            border: "1px solid rgba(1, 1, 1, 0.3)",
+            background: "transparent",
+            opacity: ringOpacity,
+          }}
+        />
+        <div
+          style={{
+            position: "absolute",
+            left: 190,
+            top: 16,
+            width: 8,
+            height: 8,
+            borderRadius: "50%",
+            background: BLUE,
+            opacity: ringOpacity,
+          }}
+        />
+      </div>
+    );
+  };
+
   const body = (drawn: number) => (
     <div
       style={{
@@ -305,6 +405,7 @@ export default function Quote() {
         </p>
         {claim}
         {mission}
+        {trail(drawn)}
       </div>
     </div>
   );
@@ -391,12 +492,25 @@ export default function Quote() {
           from { opacity: 0.85; }
           to { opacity: 1; }
         }
+        /* B15 tap bloom: expands from a small faint ring to full
+           size while fading out over 1s. The key bump on each tap
+           remounts the element, so the animation restarts. */
+        .q-bloom {
+          animation: q-bloom 1s ease-out forwards;
+        }
+        @keyframes q-bloom {
+          from { transform: scale(0.2); opacity: 0.25; }
+          to { transform: scale(1); opacity: 0; }
+        }
         @media (max-width: 1023px) {
           .q-pin-wrap {
             height: calc(100svh + 1125px + 140px);
           }
           .q-pin-sticky {
             padding: 70px 24px;
+          }
+          .q-drift-ring {
+            display: none;
           }
         }
         @media (prefers-reduced-motion: reduce) {
@@ -412,9 +526,16 @@ export default function Quote() {
           .q-dot-breathe {
             animation: none;
           }
+          .q-bloom {
+            animation: none;
+          }
         }
       `}</style>
-      <div ref={stickyRef} className="q-pin-sticky">
+      <div
+        ref={stickyRef}
+        className="q-pin-sticky"
+        onPointerDown={handlePointerDown}
+      >
         {/* Entrance opacity lives on the wrapper so the breathe
             animation on the inner dot layer never overrides it:
             animations beat inline opacity on the same element. */}
@@ -438,6 +559,50 @@ export default function Quote() {
             transition: `opacity ${cursorLit ? 0 : 600}ms ease`,
           }}
         />
+        {/* B15 background layer: one tap bloom plus one slow drift
+            ring through the right empty area. Clipped to the section
+            by its own overflow, behind the text block. */}
+        <div
+          aria-hidden="true"
+          style={{
+            position: "absolute",
+            inset: 0,
+            zIndex: 0,
+            overflow: "hidden",
+            pointerEvents: "none",
+          }}
+        >
+          {bloom && (
+            <div
+              key={bloom.key}
+              aria-hidden="true"
+              className="q-bloom"
+              style={{
+                position: "absolute",
+                left: bloom.x - 120,
+                top: bloom.y - 120,
+                width: 240,
+                height: 240,
+                borderRadius: "50%",
+                border: "1px solid rgba(96, 110, 130, 0.45)",
+              }}
+            />
+          )}
+          <div
+            aria-hidden="true"
+            className="q-drift-ring"
+            style={{
+              position: "absolute",
+              right: "6%",
+              top: `${10 + progress * 60}%`,
+              width: 160,
+              height: 160,
+              borderRadius: "50%",
+              border: `1px solid ${INK}`,
+              opacity: 0.15,
+            }}
+          />
+        </div>
         {body(progress)}
       </div>
     </section>
