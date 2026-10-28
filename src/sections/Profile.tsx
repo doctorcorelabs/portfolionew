@@ -46,7 +46,7 @@ const MONO =
   "'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, monospace";
 
 const ANCHORS: Array<{ label: string; value: string }> = [
-  { label: "GPA, Bachelor of Medicine, UII", value: "3.91 / 4.0" },
+  { label: "GPA, Bachelor of Medicine, UII", value: "3.90 / 4.0" },
   { label: "Total awards recorded on the old site", value: "29" },
   { label: "Gold medals", value: "6" },
   { label: "International items", value: "12" },
@@ -65,7 +65,7 @@ const FACT_CHIPS: Array<{
   delay: number;
 }> = [
   {
-    text: "GPA 3.91 / 4.0",
+    text: "GPA 3.90 / 4.0",
     style: { top: -14, right: 16 },
     duration: 9,
     delay: 0,

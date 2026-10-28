@@ -11,7 +11,9 @@
  * the overshoot curve. Award and presentation clusters render as
  * small blue dots with a visible count label (dots are decorative;
  * the count label carries the information, so nothing is
- * hover-dependent). On mobile (1100px and below) the route becomes
+ * hover-dependent). Since the 28 Oct 2026 overview revision, dots
+ * also carry a short visible label each, so the per-year
+ * achievements read without hovering. On mobile (1100px and below) the route becomes
  * a vertical dashed line on the left with stations stacked beside
  * it.
  *
@@ -168,31 +170,28 @@ type Station = {
 
 const STATIONS: Station[] = [
   {
-    year: "2021",
+    year: "2022",
     title: "Medicine begins",
-    detail:
-      "Bachelor of Medicine, Faculty of Medicine, Universitas Islam Indonesia, GPA 3.91/4.0. Guest speaker, Blora Regency Government dialogue Ngobrol Bareng Bupati.",
-    dots: [],
+    detail: "Medical school begins at Universitas Islam Indonesia.",
+    dots: [
+      "Bachelor of Medicine, Faculty of Medicine, UII",
+      "GPA 3.90 out of 4.0",
+    ],
     dotCount: null,
   },
   {
     year: "2023",
-    title: "Scholarship, and first wins",
+    title: "Scholarship year",
     detail:
-      "Beasiswa Unggulan Awardee, Ministry of Education, Culture, Research, and Technology. SMART FK UII Scientific Division and BAPIN-ISMKI, public speaking educator at Seni.Bicara, Master of Ceremony, UII Faculty of Medicine General Assembly XVI.",
-    dots: [
-      "Beasiswa Unggulan Awardee",
-      "1st Place, Scientific Essay, Scientific Fair SMART FK UII",
-      "Bronze Medal, IRPOCO 2023",
-      "2nd Winner, National Essay RJJ Undiksha",
-    ],
-    dotCount: "4 award items in 2023",
+      "A scholarship year, active in SMART FK UII, BAPIN-ISMKI, and Seni.Bicara.",
+    dots: ["Beasiswa Unggulan Awardee"],
+    dotCount: null,
   },
   {
     year: "2024",
     title: "Certificates, papers, world stages",
     detail:
-      "20 certifications: WHO, UNITAR, Johns Hopkins, Coursera. Four publications recorded. First-author ePoster, ENDO 2024 Seoul; poster, ICKSH 2024; oral presentation, MYHAM 2024; Gold Medal, ISIF 2024. Speaker and mentor, KampusInovatif.id and INTIMATE SMART FK UII.",
+      "20 certifications and first international stages. Four 2024 publications: gut axis and leukemia, colonoscopy AI, RAAS and hypertension. Speaker and mentor, KampusInovatif.id and INTIMATE SMART FK UII.",
     dots: [
       "ePoster, ENDO 2024, Seoul",
       "Poster, ICKSH 2024",
@@ -205,7 +204,7 @@ const STATIONS: Station[] = [
     year: "2025",
     title: "A peak year, and a lab is born",
     detail:
-      "Most Outstanding Student UII 2025; 3rd Most Outstanding Student LLDIKTI V 2025. DaivanLabs founded June 2025. Summer school, Chulalongkorn (AASP-PECT). Amomum cardamomum publication recorded this year.",
+      "Most Outstanding Student, a new lab, and a summer school abroad. DaivanLabs founded June 2025. Summer school at Chulalongkorn (AASP-PECT). Amomum cardamomum breast cancer publication (2025).",
     dots: [
       "Most Outstanding Student UII 2025",
       "3rd Most Outstanding Student LLDIKTI V 2025",
@@ -223,10 +222,10 @@ const STATIONS: Station[] = [
   },
   {
     year: "2026",
-    title: "Clinic, congress, and tools",
+    title: "Clinic and congress",
     detail:
-      "Clinical clerkship (koas), surgery rotation from 5 October 2026. Poster ABST-000034, Hypertension Seoul 2026, Conrad Seoul, 5-7 November 2026: FAERS resistant hypertension study, N = 6,601 reports analysed (hypothesis-generating: reporting disproportionality, not clinical risk or causality). StrokeSense and StrokeSense AI Lab: uploads are AI image interpretation, not measurement; FAST output is an Observation Sheet, no score, no diagnosis. Cerclage Table 1 analysis completed 18 October 2026, no result numbers published. Five further 2026 papers: BPA and hormone-related disorders; Amomum cardamomum, breast cancer; Lytechinus variegatus peptides, obesity; miRNA diagnostics, endometrial cancer; Echinometra lucunter peptides, lung cancer.",
-    dots: [],
+      "Clinical clerkship (koas). Poster presenter at Hypertension Seoul 2026.",
+    dots: ["Five further 2026 papers"],
     dotCount: null,
   },
 ];
@@ -732,8 +731,7 @@ export default function Manifesto() {
             transitionDelay: "80ms",
           }}
         >
-          Medicine at UII in 2021, clinic and Seoul congress poster in 2026:
-          five stations.
+          From starting medicine at UII in 2022 to the clinic and a Seoul congress poster in 2026.
         </p>
         </div>
         <div
@@ -877,10 +875,9 @@ export default function Manifesto() {
                   </p>
                   {station.dots.length > 0 && (
                     <div
-                      aria-hidden="true"
                       style={{
                         display: "flex",
-                        flexWrap: "wrap",
+                        flexDirection: "column",
                         gap: 6,
                         marginTop: 16,
                       }}
@@ -888,15 +885,27 @@ export default function Manifesto() {
                       {station.dots.map((dot) => (
                         <span
                           key={dot}
-                          title={dot}
                           style={{
-                            width: 8,
-                            height: 8,
-                            borderRadius: "50%",
-                            background: BLUE,
-                            flexShrink: 0,
+                            display: "flex",
+                            alignItems: "center",
+                            gap: 8,
+                            fontSize: 14,
+                            lineHeight: 1.6,
+                            color: BODY,
                           }}
-                        />
+                        >
+                          <span
+                            aria-hidden="true"
+                            style={{
+                              width: 8,
+                              height: 8,
+                              borderRadius: "50%",
+                              background: BLUE,
+                              flexShrink: 0,
+                            }}
+                          />
+                          {dot}
+                        </span>
                       ))}
                     </div>
                   )}

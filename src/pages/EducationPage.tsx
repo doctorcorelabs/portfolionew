@@ -90,7 +90,7 @@ const ENTRIES: Entry[] = [
     program: "Bachelor of Medicine",
     period: "2021 - Present",
     detail:
-      "Undergraduate, Faculty of Medicine. Current GPA 3.91/4.0 as recorded.",
+      "Undergraduate, Faculty of Medicine. Current GPA 3.90/4.0 as recorded.",
     notes: [
       "Most Outstanding Student UII 2025",
       "Awardee, Beasiswa Unggulan, Ministry of Education, Culture, Research, and Technology, 2023",

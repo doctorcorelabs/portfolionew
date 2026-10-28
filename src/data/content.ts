@@ -465,7 +465,7 @@ export const education: EducationItem[] = [
     institution: "Islamic University of Indonesia",
     program: "Bachelor of Medicine",
     period: "2021 to present",
-    detail: "GPA 3.91 out of 4.0. Most Outstanding Student 2025 and Beasiswa Unggulan Awardee.",
+    detail: "GPA 3.90 out of 4.0. Most Outstanding Student 2025 and Beasiswa Unggulan Awardee.",
   },
   {
     institution: "Chulalongkorn University",
@@ -814,7 +814,7 @@ export const educationItems: EducationItem[] = [
     program: "Bachelor of Medicine",
     period: "2021 to present",
     detail:
-      "GPA 3.91 out of 4.0. Most Outstanding Student 2025 and Beasiswa Unggulan Awardee.",
+      "GPA 3.90 out of 4.0. Most Outstanding Student 2025 and Beasiswa Unggulan Awardee.",
   },
   {
     institution: "Chulalongkorn University",
