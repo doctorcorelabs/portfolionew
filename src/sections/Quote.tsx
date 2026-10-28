@@ -15,11 +15,11 @@
  * - The H1 claim is split into 17 word spans. Each word starts pale
  *   grey and flips to full ink as scroll progress advances, with a
  *   0.35s color transition per word. Progress maps to words over the
- *   first 70 percent of the runway: word i (0-indexed) paints when
- *   progress >= ((i + 1) / 17) * 0.7, so the last word lands at
- *   progress 0.7. Scrolling back up unpaints words in reverse.
+ *   first 80 percent of the runway: word i (0-indexed) paints when
+ *   progress >= ((i + 1) / 17) * 0.8, so the last word lands at
+ *   progress 0.8. Scrolling back up unpaints words in reverse.
  * - The mission line fades in only near the end of the runway:
- *   opacity 0 at progress <= 0.70, ramping to 1 at progress 0.78
+ *   opacity 0 at progress <= 0.80, ramping to 1 at progress 0.85
  *   with a 14px rise over the same interval. The mission animation
  *   is a dot trail below the paragraph, a reading-light dot band
  *   behind it, and tap blooms in the background.
@@ -152,16 +152,16 @@ export default function Quote() {
     }));
   }, [progress, reducedMotion]);
 
-  const missionOpacity = progress <= 0.7 ? 0 : clamp01((progress - 0.7) / 0.08);
+  const missionOpacity = progress <= 0.8 ? 0 : clamp01((progress - 0.8) / 0.05);
 
-  /* Dot-field entrance: both dot layers fade from opacity 0 to
+  /* Dot-field entrance: the base and offset dot layers fade from opacity 0 to
      full over the first 10 percent of scroll progress, then stay
      full. The cursor-lit fade (instant on, 600ms out) is unchanged
      and multiplies on top of this entrance factor. */
   const dotEntrance = progress < 0.1 ? progress / 0.1 : 1;
 
   /* Dot field cursor plumbing, same geometry as Contact (14px
-     pitch, 0.4px dots, 20 percent base, 44 percent lit, 350px field
+     pitch, 0.7px dots, 30 percent base, 44 percent lit, 350px field
      mask, 50px lit halo, 600ms fade-out). Coordinates are relative
      to the sticky child, which is the layer the dots live in. */
   const handleMouseMove = (event: React.MouseEvent<HTMLElement>) => {
@@ -207,7 +207,7 @@ export default function Quote() {
     >
       {WORDS.map((word, i) => {
         const painted =
-          reducedMotion || progress >= ((i + 1) / WORDS.length) * 0.7;
+          reducedMotion || progress >= ((i + 1) / WORDS.length) * 0.8;
         return (
           <span key={`w-${i}`}>
             <span
@@ -233,13 +233,13 @@ export default function Quote() {
   );
 
   /* V13 reading-light band geometry: the band is 50 percent of the
-     mission block height and travels from the top (progress 0.70)
+     mission block height and travels from the top (progress 0.80)
      to the bottom (progress 1.0), so its top edge runs from 0 to 60
      percent. At f = 1 the bottom edge is 110 percent, capped by the
      mask at 100 percent, so the end-state visible band is the
      bottom 40 percent of the mission block, denser than before.
      The mask feathers about 8 percent on each side. */
-  const v13f = clamp01((progress - 0.7) / 0.3);
+  const v13f = clamp01((progress - 0.8) / 0.2);
   const v13Top = v13f * 60;
   const v13Bottom = v13Top + 50;
   const v13FadeIn = Math.max(0, v13Top - 8);
@@ -260,8 +260,8 @@ export default function Quote() {
             zIndex: 0,
             pointerEvents: "none",
             /* Gated on the mission entrance: the band is invisible
-               below progress 0.70 and fades in with the mission ramp
-               (fully present at 0.78), so no static dot strip shows
+               below progress 0.80 and fades in with the mission ramp
+               (fully present at 0.85), so no static dot strip shows
                while the mission text itself is still at opacity 0. */
             opacity: missionOpacity,
             backgroundImage:
@@ -344,8 +344,8 @@ export default function Quote() {
   );
 
   /* V6 dot trail below the mission: 12 dots of 4px light in step
-     order from 0.72 to 0.90, then a 32px hollow ring fades in with
-     a 10px blue center dot from 0.90 to 1.00. At full ring opacity
+     order from 0.82 to 0.952, then a 32px hollow ring fades in with
+     a 10px blue center dot from 0.95 to 1.00. At full ring opacity
      the center dot carries the q-pulse-dot class (3s ease-in-out
      infinite alternate, opacity 1 to 0.6); below full it stays
      inline-opacity-driven. Takes the same drawn value as the rule,
@@ -353,7 +353,7 @@ export default function Quote() {
      automatically. No transition anywhere: the dots are a step
      function of scroll progress. */
   const trail = (drawn: number) => {
-    const ringOpacity = clamp01((drawn - 0.9) / 0.1);
+    const ringOpacity = clamp01((drawn - 0.95) / 0.05);
     return (
       <div
         aria-hidden="true"
@@ -377,7 +377,7 @@ export default function Quote() {
               height: 4,
               borderRadius: "50%",
               background:
-                drawn >= 0.72 + i * (0.18 / 11) ? INK : "rgba(1, 1, 1, 0.3)",
+                drawn >= 0.82 + i * 0.012 ? INK : "rgba(1, 1, 1, 0.3)",
             }}
           />
         ))}
@@ -495,7 +495,8 @@ export default function Quote() {
           overflow: visible;
         }
         .q-dot-base,
-        .q-dot-lit {
+        .q-dot-lit,
+        .q-dot-offset {
           position: absolute;
           inset: 0;
           pointer-events: none;
@@ -504,27 +505,33 @@ export default function Quote() {
           z-index: 0;
         }
         .q-dot-base {
-          background-image: radial-gradient(circle, rgba(0, 0, 0, 0.2) 0.4px, transparent 0.5px);
+          background-image: radial-gradient(circle, rgba(0, 0, 0, 0.30) 0.7px, transparent 0.8px);
           -webkit-mask-image: radial-gradient(circle 350px at var(--qdot-x, 50%) var(--qdot-y, 50%), rgba(0, 0, 0, 1) 0%, rgba(0, 0, 0, 1) 60%, rgba(0, 0, 0, 0) 100%);
           mask-image: radial-gradient(circle 350px at var(--qdot-x, 50%) var(--qdot-y, 50%), rgba(0, 0, 0, 1) 0%, rgba(0, 0, 0, 1) 60%, rgba(0, 0, 0, 0) 100%);
+        }
+        .q-dot-offset {
+          background-image: radial-gradient(circle, rgba(0, 0, 0, 0.30) 0.7px, transparent 0.8px);
+          background-position: 7px 7px;
+          -webkit-mask-image: radial-gradient(circle 350px at var(--qdot-x, 50%) var(--qdot-y, 50%), rgba(0, 0, 0, 1) 0%, rgba(0, 0, 0, 1) 60%, rgba(0, 0, 0, 0) 100%);
+          mask-image: radial-gradient(circle 350px at var(--qdot-x, 50%) var(--qdot-y, 50%), rgba(0, 0, 0, 1) 0%, rgba(0, 0, 0, 1) 60%, rgba(0, 0, 0, 0) 100%);
+          animation: q-dot-offset 9s ease-in-out infinite alternate;
+        }
+        @keyframes q-dot-offset {
+          from { opacity: 0; }
+          to { opacity: 0.25; }
         }
         .q-dot-lit {
           background-image: radial-gradient(circle, rgba(0, 0, 0, 0.44) 0.4px, transparent 0.5px);
           -webkit-mask-image: radial-gradient(circle 50px at var(--qdot-x, 50%) var(--qdot-y, 50%), rgba(0, 0, 0, 0.65) 0%, rgba(0, 0, 0, 0) 100%);
           mask-image: radial-gradient(circle 50px at var(--qdot-x, 50%) var(--qdot-y, 50%), rgba(0, 0, 0, 0.65) 0%, rgba(0, 0, 0, 0) 100%);
         }
-        /* Active layer: slow breathe on the dot-field base only
-           (opacity 0.85 to 1, 8s ease-in-out infinite alternate).
-           Words are untouched; the lit layer keeps its cursor-only
-           behavior. The wrapper above carries the entrance fade,
-           so this animation never fights it. */
-        .q-dot-breathe {
-          animation: q-dot-breathe 8s ease-in-out infinite alternate;
-        }
-        @keyframes q-dot-breathe {
-          from { opacity: 0.85; }
-          to { opacity: 1; }
-        }
+        /* Density pulse: the ambient dot field is a constant base
+           layer plus an offset layer (same 14px pitch, shifted 7px
+           so each offset dot sits at the center of a base-grid
+           cell) whose opacity pulses 0 to 0.25 over 9s ease-in-out
+           infinite alternate. The wrapper above carries the
+           entrance fade, so the pulse never fights it. The lit
+           layer keeps its cursor-only behavior. */
         /* B15 bloom: expands from a small faint ring to full
            size while fading out over 1.4s. The key bump on each tap
            remounts the element, so the animation restarts. The P2
@@ -568,7 +575,7 @@ export default function Quote() {
             min-height: auto;
             overflow: visible;
           }
-          .q-dot-breathe {
+          .q-dot-offset {
             animation: none;
           }
           .q-bloom {
@@ -584,8 +591,8 @@ export default function Quote() {
         className="q-pin-sticky"
         onPointerDown={handlePointerDown}
       >
-        {/* Entrance opacity lives on the wrapper so the breathe
-            animation on the inner dot layer never overrides it:
+        {/* Entrance opacity lives on the wrapper so the offset
+            pulse animation on an inner dot layer never overrides it:
             animations beat inline opacity on the same element. */}
         <div
           aria-hidden="true"
@@ -597,7 +604,8 @@ export default function Quote() {
             opacity: dotEntrance,
           }}
         >
-          <div aria-hidden="true" className="q-dot-base q-dot-breathe" />
+          <div aria-hidden="true" className="q-dot-base" />
+          <div aria-hidden="true" className="q-dot-offset" />
         </div>
         <div
           aria-hidden="true"
