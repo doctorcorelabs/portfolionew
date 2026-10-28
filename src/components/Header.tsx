@@ -74,7 +74,8 @@ export default function Header() {
           display: none;
         }
         @media (max-width: 720px) {
-          .onlines-nav { display: none; }
+          /* !important required because display is set inline below. */
+          .onlines-nav { display: none !important; }
           .hdr-menu-btn {
             display: flex;
             align-items: center;
