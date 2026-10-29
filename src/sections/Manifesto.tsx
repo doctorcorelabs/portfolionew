@@ -40,7 +40,9 @@
  * - The header block (kicker, heading, intro) sits in a sec-slide
  *   from-right wrapper (CSS owned by section-slide.css); it slides
  *   in when the section enters view.
- * - The blue drift blob from v4 is kept behind the content.
+ * - The blue drift blob from v4 was retired by the Three Lanterns
+ *   spec (docs/journey-three-lanterns/01-spec.md): three
+ *   section-level lanterns now light the navy gradient base.
  * - Balanced package (28 Oct 2026, docs/journey-balanced-package/
  *   01-spec.md): Contour Drift rings behind the wells, one
  *   line-drawn Instrument per station after its dotCount, and a
@@ -354,16 +356,58 @@ const REVEAL_CSS = `
   opacity: 1;
   transform: translateY(0);
 }
-.mvM-drift {
-  animation: mvM-drift 22s ease-in-out infinite alternate;
+.journey-lantern-a,
+.journey-lantern-b,
+.journey-lantern-c {
+  position: absolute;
+  border-radius: 50%;
+  pointer-events: none;
+  z-index: 0;
   will-change: transform;
 }
-@keyframes mvM-drift {
+.journey-lantern-a {
+  width: 1100px;
+  height: 1100px;
+  top: -6%;
+  left: -8%;
+  animation: journey-lantern-a 28s ease-in-out infinite alternate;
+}
+@keyframes journey-lantern-a {
   from {
     transform: translate3d(0, 0, 0);
   }
   to {
-    transform: translate3d(-120px, 60px, 0);
+    transform: translate3d(70px, 70px, 0);
+  }
+}
+.journey-lantern-b {
+  width: 1300px;
+  height: 1300px;
+  bottom: -12%;
+  right: -10%;
+  animation: journey-lantern-b 36s ease-in-out infinite alternate;
+}
+@keyframes journey-lantern-b {
+  from {
+    transform: translate3d(0, 0, 0);
+  }
+  to {
+    transform: translate3d(-60px, -60px, 0);
+  }
+}
+.journey-lantern-c {
+  width: 800px;
+  height: 800px;
+  top: 38%;
+  right: 2%;
+  animation: journey-lantern-c 24s ease-in-out infinite alternate;
+}
+@keyframes journey-lantern-c {
+  from {
+    transform: translate3d(0, -40px, 0);
+  }
+  to {
+    transform: translate3d(0, 40px, 0);
   }
 }
 .journey-grid {
@@ -674,6 +718,41 @@ const REVEAL_CSS = `
   .journey-ring-2 {
     display: none;
   }
+  /* Mobile lanterns: A and B shrink with halved drift; C is dropped,
+     the stacked layout has no right gutter for it. */
+  .journey-lantern-a {
+    width: 700px;
+    height: 700px;
+    top: -4%;
+    left: -20%;
+    animation: journey-lantern-a-mobile 28s ease-in-out infinite alternate;
+  }
+  @keyframes journey-lantern-a-mobile {
+    from {
+      transform: translate3d(0, 0, 0);
+    }
+    to {
+      transform: translate3d(35px, 35px, 0);
+    }
+  }
+  .journey-lantern-b {
+    width: 900px;
+    height: 900px;
+    bottom: -8%;
+    right: -25%;
+    animation: journey-lantern-b-mobile 36s ease-in-out infinite alternate;
+  }
+  @keyframes journey-lantern-b-mobile {
+    from {
+      transform: translate3d(0, 0, 0);
+    }
+    to {
+      transform: translate3d(-30px, -30px, 0);
+    }
+  }
+  .journey-lantern-c {
+    display: none;
+  }
   /* Step Forward mobile: every active wrapper steps 8px left toward
      the vertical line, regardless of top/bottom. */
   .journey-station-active .journey-step-top,
@@ -694,7 +773,9 @@ const REVEAL_CSS = `
     transform: none !important;
     transition: none !important;
   }
-  .mvM-drift {
+  .journey-lantern-a,
+  .journey-lantern-b,
+  .journey-lantern-c {
     animation: none !important;
   }
   .mvM-armed .journey-line {
@@ -882,7 +963,7 @@ export default function Manifesto() {
       style={{
         position: "relative",
         overflow: "hidden",
-        background: "#111111",
+        background: "linear-gradient(180deg, #111111 0%, #0E1626 100%)",
         color: PAPER,
         fontFamily: DISPLAY,
         padding: "130px 24px",
@@ -891,19 +972,26 @@ export default function Manifesto() {
       <style>{REVEAL_CSS}</style>
       <div
         aria-hidden="true"
-        className="mvM-drift"
+        className="journey-lantern-a"
         style={{
-          position: "absolute",
-          top: "-10%",
-          right: "-8%",
-          width: 900,
-          height: 900,
-          borderRadius: "50%",
-          pointerEvents: "none",
-          zIndex: 0,
           background:
-            "radial-gradient(circle, rgba(8, 89, 212, 0.22) 0%, rgba(255, 255, 255, 0.08) 45%, rgba(255, 255, 255, 0) 70%)",
-          filter: "blur(80px)",
+            "radial-gradient(circle, rgba(8, 89, 212, 0.35) 0%, rgba(8, 89, 212, 0.18) 45%, rgba(8, 89, 212, 0) 70%)",
+        }}
+      />
+      <div
+        aria-hidden="true"
+        className="journey-lantern-b"
+        style={{
+          background:
+            "radial-gradient(circle, rgba(8, 89, 212, 0.25) 0%, rgba(8, 89, 212, 0) 70%)",
+        }}
+      />
+      <div
+        aria-hidden="true"
+        className="journey-lantern-c"
+        style={{
+          background:
+            "radial-gradient(circle, rgba(255, 255, 255, 0.08) 0%, rgba(255, 255, 255, 0) 70%)",
         }}
       />
       <div style={{ position: "relative", zIndex: 1, maxWidth: 1160, margin: "0 auto" }}>
