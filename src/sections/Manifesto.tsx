@@ -1368,26 +1368,6 @@ export default function Manifesto() {
             );
           })}
         </div>
-        <p
-          className="mvM-reveal"
-          style={{
-            fontFamily: MONO,
-            fontSize: 13,
-            lineHeight: 1.7,
-            color: LABEL,
-            maxWidth: 760,
-            margin: "80px 0 0",
-            transitionDelay: "400ms",
-          }}
-        >
-          Items with no recorded year: Field Staff for the doctor
-          inauguration of FK UII Periode LIX; 3rd Most Outstanding
-          Student, SMAN 1 Blora; Head of Research on dietary impacts in
-          women with PCOS; two Bisphenol A systematic review grants;
-          in silico drug discovery collaboration on Kapulaga and
-          tuberculosis. The full record lives on the Awards, Education,
-          and Research pages.
-        </p>
       </div>
     </section>
   );
