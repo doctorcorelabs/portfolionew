@@ -277,6 +277,7 @@
 .bead-expand-row {
   display: flex;
   align-items: flex-start;
+  min-width: 0;
   opacity: 0;
   transform: translateY(10px);
   transition: opacity 120ms ease-in, transform 120ms ease-in;
@@ -302,11 +303,28 @@
 }
 
 .bead-expand-row-title {
+  flex: 1 1 auto;
   font-size: 14px;
   line-height: 1.6;
   color: #D8D8D8;
   min-width: 0;
   overflow-wrap: break-word;
+}
+
+.bead-expand-row-q {
+  flex-shrink: 0;
+  align-self: flex-start;
+  margin: 1px 0 0 8px;
+  padding: 3px 8px;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: #9CC2FF;
+  background: rgba(8, 89, 212, 0.28);
+  border: 1px solid rgba(110, 168, 254, 0.35);
+  border-radius: 999px;
+  white-space: nowrap;
 }
 
 /* ---------- tablet: 721px to 1100px ---------- */

@@ -345,7 +345,13 @@ const STATIONS: Station[] = [
     title: "Clinic and congress",
     detail:
       "Clinical clerkship (koas). Poster presenter at Hypertension Seoul 2026.",
-    dots: ["Five further 2026 papers"],
+    dots: [
+      "BPA and hormone disorders",
+      "Echinometra lucunter in NSCLC",
+      "Amomum cardamomum in breast cancer",
+      "Lytechinus variegatus in obesity",
+      "miRNA in endometrial cancer",
+    ],
     dotCount: null,
   },
 ];
@@ -357,6 +363,15 @@ const STATIONS: Station[] = [
 const BEAD_YEARS = new Set(["2024", "2025", "2026"]);
 /* Hint pill wording beside each bead; swap the word in one place. */
 const BEAD_HINT_TEXT = "tap me";
+/* Scopus quartile badges for the 2026 paper rows (user-directed facts).
+   Only 2026 items carry quartiles; 2024/2025 items get none. */
+const BEAD_QUARTILES: Record<string, string> = {
+  "BPA and hormone disorders": "Q2",
+  "Echinometra lucunter in NSCLC": "Q3",
+  "Amomum cardamomum in breast cancer": "Q1",
+  "Lytechinus variegatus in obesity": "Q3",
+  "miRNA in endometrial cancer": "Q1",
+};
 
 const REVEAL_CSS = `
 .mvM-armed .mvM-reveal {
@@ -1281,6 +1296,7 @@ export default function Manifesto() {
                         items={station.dots.map((dot, k) => ({
                           id: `${station.year}-${k}`,
                           title: dot,
+                          quartile: BEAD_QUARTILES[dot],
                         }))}
                         year={station.year}
                         expanded={expandedBead === station.year}

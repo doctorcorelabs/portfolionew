@@ -4,7 +4,7 @@
 import { useEffect, useRef, useState, type CSSProperties, type ReactElement } from "react";
 import "./BeadExpand.css";
 
-export type BeadItem = { id: string; title: string };
+export type BeadItem = { id: string; title: string; quartile?: string };
 
 export type BeadExpandProps = {
   items: BeadItem[];
@@ -112,6 +112,11 @@ export function BeadExpand({
                 >
                   <span className="bead-expand-row-dot" aria-hidden="true" />
                   <span className="bead-expand-row-title">{item.title}</span>
+                  {item.quartile && (
+                    <span className="bead-expand-row-q" aria-hidden="true">
+                      {item.quartile}
+                    </span>
+                  )}
                 </li>
               ))}
             </ul>
