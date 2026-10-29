@@ -1,0 +1,235 @@
+/* AwardCluster: node-diagram cloud + floating detail panel for Journey stations.
+   Dark-section palette. All text carries an explicit light color. */
+
+/* ---------- Cluster container ---------- */
+
+.journey-cluster {
+  margin-top: 16px;
+  width: 100%;
+}
+
+/* Desktop: bounded cloud with a fixed height so opening or closing the
+   portaled panel never shifts section layout. Height comes from the
+   --journey-cluster-h custom property set by the component
+   (clamp(140, 60 + 24 * items.length, 280) px). */
+@media (min-width: 1101px) {
+  .journey-cluster {
+    position: relative;
+    overflow: visible;
+    height: var(--journey-cluster-h, 200px);
+  }
+}
+
+/* Mobile: nodes flow as wrapping chips, height auto. */
+@media (max-width: 1100px) {
+  .journey-cluster {
+    position: static;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+}
+
+/* ---------- Node buttons ---------- */
+
+.journey-cluster-node {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 12px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  color: #d8d8d8;
+  font-size: 13px;
+  line-height: 1.4;
+  font-family: inherit;
+  cursor: pointer;
+  min-height: 40px;
+  text-align: left;
+  box-sizing: border-box;
+  -webkit-tap-highlight-color: transparent;
+  /* No transitions on chips, so there is nothing to kill under
+     prefers-reduced-motion. Hover only brightens the border. */
+}
+
+@media (min-width: 1101px) {
+  .journey-cluster-node {
+    position: absolute;
+    transform: translate(-50%, -50%);
+    white-space: nowrap;
+  }
+}
+
+@media (max-width: 1100px) {
+  .journey-cluster-node {
+    position: static;
+    transform: none;
+    /* Never let a long label push the page sideways on narrow phones. */
+    max-width: 100%;
+    white-space: normal;
+  }
+}
+
+.journey-cluster-node:hover {
+  border-color: rgba(255, 255, 255, 0.45);
+}
+
+.journey-cluster-node:focus-visible {
+  outline: 2px solid #fafafa;
+  outline-offset: 2px;
+}
+
+.journey-cluster-node-active,
+.journey-cluster-node-active:hover {
+  border-color: #fafafa;
+  background: rgba(8, 89, 212, 0.35);
+}
+
+.journey-cluster-node-dot {
+  flex: none;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #0859d4;
+}
+
+.journey-cluster-node-label {
+  color: #d8d8d8;
+}
+
+/* ---------- Floating panel (portaled to document.body) ---------- */
+
+.journey-cluster-panel {
+  position: fixed;
+  width: 320px;
+  max-width: calc(100vw - 32px);
+  max-height: 60vh;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior: contain;
+  background: rgba(17, 17, 17, 0.96);
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  border-radius: 14px;
+  padding: 18px 18px 14px;
+  box-shadow: 0 18px 50px rgba(0, 0, 0, 0.55);
+  z-index: 60;
+  color: #d8d8d8;
+  font-family: inherit;
+  box-sizing: border-box;
+  opacity: 0;
+  transform: scale(0.96);
+  transition: opacity 180ms ease-out, transform 180ms ease-out;
+}
+
+.journey-cluster-panel-entered {
+  opacity: 1;
+  transform: scale(1);
+}
+
+/* Mobile: the panel becomes a bottom sheet; anchor math is skipped. */
+@media (max-width: 1100px) {
+  .journey-cluster-panel {
+    left: 12px;
+    right: 12px;
+    bottom: 12px;
+    top: auto;
+    width: auto;
+    max-height: 55vh;
+    border-radius: 16px;
+    /* Keep the sheet footer clear of the home indicator / gesture bar. */
+    padding-bottom: max(14px, env(safe-area-inset-bottom));
+    transform: translateY(16px);
+    transition: opacity 220ms ease-out, transform 220ms ease-out;
+  }
+  .journey-cluster-panel-entered {
+    transform: translateY(0);
+  }
+}
+
+.journey-cluster-panel-kicker {
+  margin: 0 64px 8px 0;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-size: 11px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: #98989c;
+}
+
+.journey-cluster-panel-title {
+  margin: 0 64px 8px 0;
+  font-size: 18px;
+  font-weight: 700;
+  line-height: 1.35;
+  color: #fafafa;
+}
+
+.journey-cluster-panel-body {
+  margin: 0 0 12px;
+  font-size: 15px;
+  line-height: 1.65;
+  color: #d8d8d8;
+}
+
+.journey-cluster-panel-footer {
+  margin: 0;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-size: 11px;
+  letter-spacing: 0.04em;
+  color: #98989c;
+}
+
+.journey-cluster-panel-close {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  min-height: 40px;
+  min-width: 40px;
+  padding: 6px 12px;
+  border-radius: 999px;
+  background: transparent;
+  border: 1px solid rgba(255, 255, 255, 0.22);
+  color: #d8d8d8;
+  font-size: 12px;
+  font-family: inherit;
+  cursor: pointer;
+  box-sizing: border-box;
+}
+
+.journey-cluster-panel-close:hover {
+  border-color: #fafafa;
+  color: #fafafa;
+}
+
+.journey-cluster-panel-close:focus-visible {
+  outline: 2px solid #fafafa;
+  outline-offset: 2px;
+}
+
+/* ---------- Mobile backdrop ---------- */
+
+.journey-cluster-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.5);
+  z-index: 59;
+  border: 0;
+  padding: 0;
+  margin: 0;
+  cursor: pointer;
+}
+
+@media (min-width: 1101px) {
+  .journey-cluster-backdrop {
+    display: none;
+  }
+}
+
+/* ---------- Reduced motion ---------- */
+
+@media (prefers-reduced-motion: reduce) {
+  .journey-cluster-panel,
+  .journey-cluster-backdrop {
+    transition: none;
+  }
+}
