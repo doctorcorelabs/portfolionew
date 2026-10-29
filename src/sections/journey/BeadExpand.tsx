@@ -1,7 +1,7 @@
 /* BeadExpand: glowing bead trigger that opens an inline award card beneath it.
    Used for the 2024/2025 Journey stations. The card is a diagram node that
    opens, connected to its bead by a drawn stem: no portal, no overlay. */
-import { useEffect, type CSSProperties, type ReactElement } from "react";
+import { useEffect, useRef, useState, type CSSProperties, type ReactElement } from "react";
 import "./BeadExpand.css";
 
 export type BeadItem = { id: string; title: string };
@@ -11,6 +11,10 @@ export type BeadExpandProps = {
   year: string;
   expanded: boolean;
   onToggle: () => void;
+  hintText?: string;
+  hintVisible?: boolean;
+  hintSide?: "left" | "right";
+  hintDelay?: string;
 };
 
 export function BeadExpand({
@@ -18,6 +22,10 @@ export function BeadExpand({
   year,
   expanded,
   onToggle,
+  hintText = "tap me",
+  hintVisible = true,
+  hintSide = "right",
+  hintDelay = "0s",
 }: BeadExpandProps): ReactElement {
   const regionId = `bead-expand-${year}`;
 
@@ -29,6 +37,32 @@ export function BeadExpand({
     document.addEventListener("keydown", onKey);
     return () => document.removeEventListener("keydown", onKey);
   }, [expanded, onToggle]);
+
+  /* Hint leave: when hintVisible flips false, fade 300ms then unmount. */
+  const [leaving, setLeaving] = useState(false);
+  const leaveTimer = useRef<number | null>(null);
+
+  useEffect(() => {
+    if (hintVisible) {
+      if (leaveTimer.current !== null) {
+        window.clearTimeout(leaveTimer.current);
+        leaveTimer.current = null;
+      }
+      setLeaving(false);
+      return;
+    }
+    setLeaving(true);
+    leaveTimer.current = window.setTimeout(() => {
+      leaveTimer.current = null;
+      setLeaving(false);
+    }, 320);
+    return () => {
+      if (leaveTimer.current !== null) {
+        window.clearTimeout(leaveTimer.current);
+        leaveTimer.current = null;
+      }
+    };
+  }, [hintVisible]);
 
   return (
     <div className={"bead-expand" + (expanded ? " bead-expand-open" : "")}>
@@ -46,6 +80,19 @@ export function BeadExpand({
           <span className="bead-expand-core" aria-hidden="true" />
         </button>
         <span className="bead-expand-stem" aria-hidden="true" />
+        {(hintVisible || leaving) && (
+          <span
+            className={
+              "bead-expand-hint" +
+              (hintSide === "left" ? " bead-expand-hint-left" : "") +
+              (leaving ? " bead-expand-hint-leave" : "")
+            }
+            style={{ "--hint-delay": hintDelay } as CSSProperties}
+            aria-hidden="true"
+          >
+            {hintText}
+          </span>
+        )}
       </div>
       <div className="bead-expand-body">
         <div className="bead-expand-body-inner">

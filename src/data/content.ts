@@ -200,6 +200,7 @@ export const researchItems: ResearchItem[] = [
       "Small case and control groups, different sample types and lab methods, and possible publication bias limit confidence. Evidence on BPA analogs and prostate cancer was too thin to pool. Funded by the Faculty of Medicine UII Systematic Review Grant 2024.",
     visual: "bpa",
     scopusJournal: true,
+    scopusQuartile: "Q2",
     notes: [
       "Published 2026, Toxicology Letters 426, article 113213, online 19 October 2026.",
       "Journal verified Scopus-indexed (coverage 1977-2026, Q2). This is a journal-level verification; the page does not claim the individual article is indexed.",
@@ -227,6 +228,7 @@ export const researchItems: ResearchItem[] = [
       "Findings are entirely computational, and a 50 ns simulation cannot capture slower rearrangements, cell uptake, enzyme breakdown, or effects in a tumor environment. The non-cell-penetrating prediction also means delivery into cells would need formulation work.",
     visual: "echinometra",
     scopusJournal: true,
+    scopusQuartile: "Q3",
     notes: [
       "Published online 1 October 2026, Tropical Journal of Natural Product Research 10(9), pages 11744 to 11751.",
       "Journal verified Scopus-indexed (Q3). This is a journal-level verification; the page does not claim the individual article is indexed.",
@@ -285,6 +287,7 @@ export const researchItems: ResearchItem[] = [
       "Everything here is computational; enzyme breakdown, real membrane crossing, and safety in a living system are untested. Toxicity prediction places peptide 7 in ProTox Class 4 (harmful) with LD50 3000 mg/kg, so this page does not call it non-toxic.",
     visual: "lytechinus",
     scopusJournal: true,
+    scopusQuartile: "Q3",
     notes: [
       "Published online 1 May 2026, Tropical Journal of Natural Product Research 10(4), pages 8729 to 8740.",
       "Journal verified Scopus-indexed (Q3). This is a journal-level verification; the page does not claim the individual article is indexed.",

@@ -350,10 +350,13 @@ const STATIONS: Station[] = [
   },
 ];
 
-/* Bead-expand round (docs/journey-bead-expand/01-spec.md): the 2024 and
-   2025 award lists open from a glowing bead with an inline expanding
-   card. Every other station keeps its dot list byte for byte. */
-const BEAD_YEARS = new Set(["2024", "2025"]);
+/* Bead-expand round (docs/journey-bead-expand/01-spec.md, 02-hint-spec.md):
+   the 2024, 2025 and 2026 award lists open from a glowing bead with an
+   inline expanding card. Every other station keeps its dot list byte for
+   byte. */
+const BEAD_YEARS = new Set(["2024", "2025", "2026"]);
+/* Hint pill wording beside each bead; swap the word in one place. */
+const BEAD_HINT_TEXT = "tap me";
 
 const REVEAL_CSS = `
 .mvM-armed .mvM-reveal {
@@ -902,10 +905,20 @@ export default function Manifesto() {
   const [activeIdx, setActiveIdx] = useState(-1);
   const [beadTop, setBeadTop] = useState<number | null>(null);
   const [inView, setInView] = useState(false);
-  /* Bead-expand round: one station expanded at a time. */
+  /* Bead-expand round: one station expanded at a time. seenBeads hides the
+     "tap me" hint permanently after a bead's first open. */
   const [expandedBead, setExpandedBead] = useState<string | null>(null);
+  const [seenBeads, setSeenBeads] = useState<Set<string>>(() => new Set());
   const toggleBead = (year: string) => {
-    setExpandedBead((prev) => (prev === year ? null : year));
+    const opening = expandedBead !== year;
+    if (opening) {
+      setSeenBeads((prev) => {
+        const next = new Set(prev);
+        next.add(year);
+        return next;
+      });
+    }
+    setExpandedBead(opening ? year : null);
   };
 
   useEffect(() => {
@@ -1272,6 +1285,16 @@ export default function Manifesto() {
                         year={station.year}
                         expanded={expandedBead === station.year}
                         onToggle={() => toggleBead(station.year)}
+                        hintText={BEAD_HINT_TEXT}
+                        hintVisible={!seenBeads.has(station.year)}
+                        hintSide={station.year === "2026" ? "left" : "right"}
+                        hintDelay={
+                          station.year === "2024"
+                            ? "0s"
+                            : station.year === "2025"
+                              ? "0.7s"
+                              : "1.4s"
+                        }
                       />
                     ) : (
                       <div
