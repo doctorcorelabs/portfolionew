@@ -389,10 +389,10 @@ export default function Profile() {
               margin: "0 0 24px",
             }}
           >
-            I am Daivan Febri Juan Setiya, a medical student and researcher
-            in Indonesia. Guided by the principle{" "}
+            I am Daivan Febri Juan Setiya, a <strong>clinical clerk</strong> and
+            researcher in Indonesia. Guided by the principle{" "}
             <em>Ad maiora natus sum</em> (born for greater things), I view
-            medicine as a pathway to transformative service.
+            medicine as a pathway to <strong>transformative service</strong>.
           </p>
           <p
             className="mvP-reveal"
@@ -404,10 +404,11 @@ export default function Profile() {
               transitionDelay: "80ms",
             }}
           >
-            My goal is to move beyond immediate solutions and create
-            sustainable health systems for Indonesia, through research
-            done carefully, tools that are actually useful, and work
-            finished properly.
+            My goal is to move beyond immediate solutions and create{" "}
+            <strong>sustainable health systems for Indonesia</strong>,
+            through <strong>research done carefully</strong>, tools that
+            are <strong>actually useful</strong>, and work finished
+            properly.
           </p>
           <p
             className="mvP-reveal"
@@ -419,30 +420,10 @@ export default function Profile() {
               transitionDelay: "160ms",
             }}
           >
-            I founded DaivanLabs in June 2025 to apply coding skills
-            (Code) to healthcare-related tools (Cure) and to build
-            professional connections (Connect).
-          </p>
-          <p
-            className="mvP-reveal"
-            style={{
-              fontFamily: MONO,
-              fontSize: 13,
-              lineHeight: 1.7,
-              color: "#3C3C38",
-              margin: "0 0 24px",
-              transitionDelay: "240ms",
-            }}
-          >
-            Current status: clinical clerk (koas), surgery rotation from
-            5 October 2026. Based in Indonesia.{" "}
-            <a
-              href="mailto:daivanfebrijuansetiya@gmail.com"
-              className="mvP-mailto"
-              style={{ color: "#0859D4" }}
-            >
-              daivanfebrijuansetiya@gmail.com
-            </a>
+            I founded <strong>DaivanLabs in 2025</strong> to apply coding
+            skills (<strong>Code</strong>) to healthcare-related tools
+            (<strong>Cure</strong>) and to build professional connections
+            (<strong>Connect</strong>).
           </p>
           </div>
         </div>
