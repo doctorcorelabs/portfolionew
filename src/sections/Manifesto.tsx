@@ -14,9 +14,9 @@
  * hover-dependent). Since the 28 Oct 2026 overview revision, dots
  * also carry a short visible label each, so the per-year
  * achievements read without hovering. Since the 29 Oct 2026
- * node-diagram round (docs/journey-node-panel/01-spec.md), the 2024
- * and 2025 award lists render as AwardCluster node clouds with a
- * floating detail panel; the other stations keep their labeled dots. On mobile (1100px and below) the route becomes
+ * bead-expand round (docs/journey-bead-expand/01-spec.md), the 2024
+ * and 2025 award lists open from a glowing bead with an inline
+ * expanding card; the other stations keep their labeled dots. On mobile (1100px and below) the route becomes
  * a vertical dashed line on the left with stations stacked beside
  * it.
  *
@@ -58,7 +58,7 @@
 
 import { useEffect, useRef, useState, type CSSProperties } from "react";
 import { Fragment } from "react";
-import { AwardCluster, type ClusterItem } from "./journey/AwardCluster";
+import { BeadExpand } from "./journey/BeadExpand";
 
 const DISPLAY =
   "Inter, -apple-system, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif";
@@ -350,26 +350,10 @@ const STATIONS: Station[] = [
   },
 ];
 
-/* Node-diagram round (docs/journey-node-panel/01-spec.md): the 2024 and
-   2025 dot lists are replaced by AwardCluster node clouds with a floating
-   detail panel. Every other station keeps its dot list byte for byte. */
-const CLUSTER_YEARS = new Set(["2024", "2025"]);
-
-/* Trimmed node-chip labels for the clusters. Drop-words only from the
-   verbatim dot text (see docs/journey-node-panel/data.json); nothing added,
-   nothing invented. Fallback `?? dot` keeps any future dot safe. */
-const CLUSTER_SHORT_LABELS: Record<string, string> = {
-  "ePoster, ENDO 2024, Seoul": "ePoster ENDO 2024",
-  "Oral presentation, MYHAM 2024": "Oral MYHAM 2024",
-  "Most Outstanding Student UII 2025": "Outstanding UII 2025",
-  "3rd Most Outstanding Student LLDIKTI V 2025": "Outstanding LLDIKTI V",
-  "Gold Medal and Special Award, IIF 2025": "Special Award IIF 2025",
-  "Gold Medal, IICYMS 2025": "Gold IICYMS 2025",
-  "Silver Medal, I2ASPO 2025": "Silver I2ASPO 2025",
-  "Silver Medal, BISF 2025": "Silver BISF 2025",
-  "Silver Medal, JISF 2025": "Silver JISF 2025",
-  "Travel Grant, ICDM 2025": "Travel ICDM 2025",
-};
+/* Bead-expand round (docs/journey-bead-expand/01-spec.md): the 2024 and
+   2025 award lists open from a glowing bead with an inline expanding
+   card. Every other station keeps its dot list byte for byte. */
+const BEAD_YEARS = new Set(["2024", "2025"]);
 
 const REVEAL_CSS = `
 .mvM-armed .mvM-reveal {
@@ -918,15 +902,10 @@ export default function Manifesto() {
   const [activeIdx, setActiveIdx] = useState(-1);
   const [beadTop, setBeadTop] = useState<number | null>(null);
   const [inView, setInView] = useState(false);
-  /* Node-diagram round: one open panel at a time across both clusters. */
-  const [openNode, setOpenNode] = useState<{
-    clusterId: string;
-    nodeId: string;
-  } | null>(null);
-  const toggleClusterNode = (year: string, id: string) => {
-    setOpenNode((prev) =>
-      prev && prev.nodeId === id ? null : { clusterId: year, nodeId: id },
-    );
+  /* Bead-expand round: one station expanded at a time. */
+  const [expandedBead, setExpandedBead] = useState<string | null>(null);
+  const toggleBead = (year: string) => {
+    setExpandedBead((prev) => (prev === year ? null : year));
   };
 
   useEffect(() => {
@@ -1174,17 +1153,6 @@ export default function Manifesto() {
           )}
           {STATIONS.map((station, i) => {
             const onTop = i % 2 === 0;
-            /* Byte-identical cluster items, derived at render time from the
-               existing dots (spec section 3). Only 2024/2025 use them.
-               Node chips use trimmed labels (drop-words only, no words added)
-               so the desktop spiral fits the narrow column; the panel always
-               shows the full verbatim dot text. */
-            const clusterItems: ClusterItem[] = station.dots.map((dot, k) => ({
-              id: `${station.year}-${k}`,
-              shortLabel: CLUSTER_SHORT_LABELS[dot] ?? dot,
-              title: dot,
-              body: dot,
-            }));
             return (
               <Fragment key={station.year}>
                 <div
@@ -1295,14 +1263,15 @@ export default function Manifesto() {
                     {station.detail}
                   </p>
                   {station.dots.length > 0 &&
-                    (CLUSTER_YEARS.has(station.year) ? (
-                      <AwardCluster
-                        items={clusterItems}
+                    (BEAD_YEARS.has(station.year) ? (
+                      <BeadExpand
+                        items={station.dots.map((dot, k) => ({
+                          id: `${station.year}-${k}`,
+                          title: dot,
+                        }))}
                         year={station.year}
-                        dotCount={station.dotCount}
-                        onTop={onTop}
-                        openId={openNode?.nodeId ?? null}
-                        onToggle={(id) => toggleClusterNode(station.year, id)}
+                        expanded={expandedBead === station.year}
+                        onToggle={() => toggleBead(station.year)}
                       />
                     ) : (
                       <div

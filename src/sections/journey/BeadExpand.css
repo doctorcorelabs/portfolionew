@@ -1,0 +1,301 @@
+/* BeadExpand styles. In-flow component: no z-index, no portal, no fixed
+   positioning. Decorative spans are absolutely positioned inside the bead
+   button only. All animation durations and easings follow
+   docs/journey-bead-expand/01-spec.md exactly. */
+
+.bead-expand {
+  --bead-btn: 48px;
+  --bead-core: 20px;
+  --bead-halo: 44px;
+  --bead-orbit: 76px;
+  --bead-stem-h: 20px;
+  min-width: 0;
+}
+
+/* ---------- bead row ---------- */
+
+.bead-expand-beadrow {
+  margin-top: 20px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.bead-expand-bead {
+  position: relative;
+  width: var(--bead-btn);
+  height: var(--bead-btn);
+  padding: 0;
+  border: 0;
+  background: transparent;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.bead-expand-bead:focus-visible {
+  outline: 2px solid #9CC2FF;
+  outline-offset: 6px;
+  border-radius: 50%;
+}
+
+.bead-expand-orbit,
+.bead-expand-halo,
+.bead-expand-core {
+  position: absolute;
+  border-radius: 50%;
+  pointer-events: none;
+}
+
+.bead-expand-orbit {
+  width: var(--bead-orbit);
+  height: var(--bead-orbit);
+  top: calc((var(--bead-btn) - var(--bead-orbit)) / 2);
+  left: calc((var(--bead-btn) - var(--bead-orbit)) / 2);
+  border: 1px dashed rgba(255, 255, 255, 0.25);
+  animation: bead-orbit-spin 26s linear infinite;
+  transition: opacity 300ms ease-out;
+}
+
+.bead-expand-halo {
+  width: var(--bead-halo);
+  height: var(--bead-halo);
+  top: calc((var(--bead-btn) - var(--bead-halo)) / 2);
+  left: calc((var(--bead-btn) - var(--bead-halo)) / 2);
+  border: 2px solid rgba(8, 89, 212, 0.55);
+  animation: bead-halo 2.4s ease-out infinite;
+}
+
+.bead-expand-core {
+  width: var(--bead-core);
+  height: var(--bead-core);
+  top: calc((var(--bead-btn) - var(--bead-core)) / 2);
+  left: calc((var(--bead-btn) - var(--bead-core)) / 2);
+  background: radial-gradient(circle at 35% 35%, #5B9BFF, #0859D4 75%);
+  border: 2px solid #FAFAFA;
+  box-shadow: 0 0 12px rgba(8, 89, 212, 0.6);
+  transition: transform 120ms ease-out, box-shadow 150ms ease-out;
+}
+
+.bead-expand-bead:active .bead-expand-core {
+  transform: scale(0.88);
+}
+
+/* expanded bead morph: core grows, glow strengthens, halo steadies */
+.bead-expand-open .bead-expand-core {
+  transform: scale(1.12);
+  box-shadow: 0 0 20px rgba(8, 89, 212, 0.85);
+  transition: transform 150ms ease-out, box-shadow 150ms ease-out;
+}
+
+/* expanded bead morph: core grows, glow strengthens, halo steadies.
+   animation:none (not paused) so the halo truly holds the documented
+   scale(1.15)/opacity 0.85 steady ring; a paused animation would freeze
+   at an arbitrary cycle phase and could leave the ring near-invisible. */
+.bead-expand-open .bead-expand-halo {
+  animation: none;
+  transform: scale(1.15);
+  opacity: 0.85;
+}
+
+.bead-expand-open .bead-expand-orbit {
+  opacity: 0.35;
+}
+
+@keyframes bead-halo {
+  0% {
+    transform: scale(1);
+    opacity: 0.6;
+  }
+  100% {
+    transform: scale(1.55);
+    opacity: 0;
+  }
+}
+
+@keyframes bead-orbit-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* ---------- stem ---------- */
+
+.bead-expand-stem {
+  width: 2px;
+  height: var(--bead-stem-h);
+  background: linear-gradient(180deg, #0859D4, rgba(8, 89, 212, 0.15));
+  transform: scaleY(0);
+  transform-origin: top;
+  transition: transform 200ms ease-in 60ms;
+}
+
+.bead-expand-open .bead-expand-stem {
+  transform: scaleY(1);
+  transition: transform 260ms cubic-bezier(0.22, 1, 0.36, 1) 90ms;
+}
+
+/* ---------- card body (grid 0fr/1fr bloom) ---------- */
+
+.bead-expand-body {
+  display: grid;
+  grid-template-rows: 0fr;
+  opacity: 0;
+  visibility: hidden;
+  transition:
+    grid-template-rows 320ms cubic-bezier(0.55, 0, 0.55, 0.2),
+    opacity 220ms ease-in,
+    visibility 0s 320ms;
+}
+
+.bead-expand-open .bead-expand-body {
+  grid-template-rows: 1fr;
+  opacity: 1;
+  visibility: visible;
+  transition:
+    grid-template-rows 500ms cubic-bezier(0.34, 1.25, 0.64, 1) 120ms,
+    opacity 280ms ease 120ms,
+    visibility 0s 120ms;
+}
+
+.bead-expand-body-inner {
+  overflow: hidden;
+  min-height: 0;
+}
+
+.bead-expand-card {
+  position: relative;
+  width: 100%;
+  min-width: 0;
+  background: rgba(17, 17, 17, 0.94);
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  border-radius: 16px;
+  padding: 18px 16px;
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.45);
+  transform: translateY(14px);
+  transition: transform 200ms ease-in;
+}
+
+.bead-expand-open .bead-expand-card {
+  transform: translateY(0);
+  transition: transform 480ms cubic-bezier(0.34, 1.3, 0.64, 1) 140ms;
+}
+
+/* dock tab: where the stem visually lands */
+.bead-expand-card::before {
+  content: "";
+  position: absolute;
+  top: -2px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 28px;
+  height: 3px;
+  background: #0859D4;
+  border-radius: 2px;
+}
+
+.bead-expand-kicker {
+  display: inline-block;
+  margin: 0 0 14px;
+  padding: 5px 12px;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: #9CC2FF;
+  background: rgba(8, 89, 212, 0.28);
+  border: 1px solid rgba(110, 168, 254, 0.35);
+  border-radius: 999px;
+}
+
+.bead-expand-rows {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.bead-expand-row {
+  display: flex;
+  align-items: flex-start;
+  opacity: 0;
+  transform: translateY(10px);
+  transition: opacity 120ms ease-in, transform 120ms ease-in;
+}
+
+.bead-expand-open .bead-expand-row {
+  opacity: 1;
+  transform: none;
+  transition:
+    opacity 300ms ease-out,
+    transform 320ms cubic-bezier(0.22, 1, 0.36, 1);
+  transition-delay: var(--row-delay);
+}
+
+.bead-expand-row-dot {
+  flex-shrink: 0;
+  width: 8px;
+  height: 8px;
+  margin-top: 7px;
+  margin-right: 10px;
+  border-radius: 50%;
+  background: #0859D4;
+}
+
+.bead-expand-row-title {
+  font-size: 14px;
+  line-height: 1.6;
+  color: #D8D8D8;
+  min-width: 0;
+  overflow-wrap: break-word;
+}
+
+/* ---------- tablet: 721px to 1100px ---------- */
+
+@media (min-width: 721px) and (max-width: 1100px) {
+  .bead-expand {
+    --bead-btn: 52px;
+    --bead-core: 22px;
+    --bead-halo: 48px;
+    --bead-orbit: 84px;
+    --bead-stem-h: 24px;
+  }
+
+  .bead-expand-card {
+    padding: 20px 22px;
+  }
+
+  .bead-expand-rows {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    column-gap: 24px;
+    row-gap: 12px;
+  }
+}
+
+/* ---------- mobile: 720px and below ---------- */
+/* Defaults already match: 48px bead, 20px stem, single-column rows.
+   Nothing fixed or absolutely positioned outside the bead button, so
+   safe-area insets need no special handling. */
+
+/* ---------- reduced motion ---------- */
+
+@media (prefers-reduced-motion: reduce) {
+  .bead-expand *,
+  .bead-expand *::before,
+  .bead-expand *::after {
+    animation: none !important;
+    transition: none !important;
+  }
+  .bead-expand-halo {
+    opacity: 0.5;
+  }
+  .bead-expand-orbit {
+    opacity: 0.5;
+  }
+  .bead-expand-row {
+    opacity: 1;
+    transform: none;
+  }
+}
