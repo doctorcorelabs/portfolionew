@@ -363,14 +363,14 @@ const REVEAL_CSS = `
   border-radius: 50%;
   pointer-events: none;
   z-index: 0;
-  will-change: transform;
+  will-change: transform, opacity;
 }
 .journey-lantern-a {
   width: 1100px;
   height: 1100px;
   top: -6%;
   left: -8%;
-  animation: journey-lantern-a 28s ease-in-out infinite alternate;
+  animation: journey-lantern-a 28s ease-in-out infinite alternate, journey-lantern-pulse 6s ease-in-out infinite;
 }
 @keyframes journey-lantern-a {
   from {
@@ -385,7 +385,8 @@ const REVEAL_CSS = `
   height: 1300px;
   bottom: -12%;
   right: -10%;
-  animation: journey-lantern-b 36s ease-in-out infinite alternate;
+  animation: journey-lantern-b 36s ease-in-out infinite alternate, journey-lantern-pulse 7s ease-in-out infinite;
+  animation-delay: 0s, -3.5s;
 }
 @keyframes journey-lantern-b {
   from {
@@ -408,6 +409,21 @@ const REVEAL_CSS = `
   }
   to {
     transform: translate3d(0, 40px, 0);
+  }
+}
+/* Lantern pulse (pulse-rings spec 2): drift owns transform, pulse
+   owns opacity, so the two animations never fight. Shared by both
+   blue lanterns; C keeps drift only. Opacity 0.8 to 1 is a breath,
+   never a blink, so the section never flashes back toward black. */
+@keyframes journey-lantern-pulse {
+  0% {
+    opacity: 0.8;
+  }
+  50% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0.8;
   }
 }
 .journey-grid {
@@ -659,6 +675,27 @@ const REVEAL_CSS = `
 .mvM-armed:not(.mvM-in) .journey-rings {
   opacity: 0;
 }
+/* Ring march (pulse-rings spec 4b): concentric circles cannot show
+   rotation, so the animation is marching dashes. Dashoffset lives
+   on the child circles and never touches the SVG opacity gate or
+   the scroll scale on the SVG transform. Odd rings run reversed. */
+.journey-rings circle {
+  stroke-dasharray: 60 40;
+  animation: journey-ring-march 12s linear infinite;
+}
+.journey-rings .journey-ring-1,
+.journey-rings .journey-ring-3,
+.journey-rings .journey-ring-5 {
+  animation-direction: reverse;
+}
+@keyframes journey-ring-march {
+  from {
+    stroke-dashoffset: 0;
+  }
+  to {
+    stroke-dashoffset: -100;
+  }
+}
 /* Instruments (balanced-package spec 3): in-flow block after the
    dotCount; draw-on runs only under the active class, and the base
    style has no dash array, so deactivation fades back to a fully
@@ -725,7 +762,7 @@ const REVEAL_CSS = `
     height: 700px;
     top: -4%;
     left: -20%;
-    animation: journey-lantern-a-mobile 28s ease-in-out infinite alternate;
+    animation: journey-lantern-a-mobile 28s ease-in-out infinite alternate, journey-lantern-pulse 6s ease-in-out infinite;
   }
   @keyframes journey-lantern-a-mobile {
     from {
@@ -740,7 +777,8 @@ const REVEAL_CSS = `
     height: 900px;
     bottom: -8%;
     right: -25%;
-    animation: journey-lantern-b-mobile 36s ease-in-out infinite alternate;
+    animation: journey-lantern-b-mobile 36s ease-in-out infinite alternate, journey-lantern-pulse 7s ease-in-out infinite;
+    animation-delay: 0s, -3.5s;
   }
   @keyframes journey-lantern-b-mobile {
     from {
@@ -828,6 +866,9 @@ const REVEAL_CSS = `
   .journey-rings {
     transform: translate(-50%, -50%) scale(1.08) !important;
     transition: none !important;
+  }
+  .journey-rings circle {
+    animation: none !important;
   }
   .journey-instrument-active svg * {
     animation: none !important;
@@ -975,7 +1016,7 @@ export default function Manifesto() {
         className="journey-lantern-a"
         style={{
           background:
-            "radial-gradient(circle, rgba(8, 89, 212, 0.35) 0%, rgba(8, 89, 212, 0.18) 45%, rgba(8, 89, 212, 0) 70%)",
+            "radial-gradient(circle, rgba(8, 89, 212, 0.40) 0%, rgba(8, 89, 212, 0.22) 30%, rgba(8, 89, 212, 0) 55%)",
         }}
       />
       <div
@@ -983,7 +1024,7 @@ export default function Manifesto() {
         className="journey-lantern-b"
         style={{
           background:
-            "radial-gradient(circle, rgba(8, 89, 212, 0.25) 0%, rgba(8, 89, 212, 0) 70%)",
+            "radial-gradient(circle, rgba(8, 89, 212, 0.35) 0%, rgba(8, 89, 212, 0) 55%)",
         }}
       />
       <div
@@ -991,7 +1032,7 @@ export default function Manifesto() {
         className="journey-lantern-c"
         style={{
           background:
-            "radial-gradient(circle, rgba(255, 255, 255, 0.08) 0%, rgba(255, 255, 255, 0) 70%)",
+            "radial-gradient(circle, rgba(255, 255, 255, 0.10) 0%, rgba(255, 255, 255, 0) 60%)",
         }}
       />
       <div style={{ position: "relative", zIndex: 1, maxWidth: 1160, margin: "0 auto" }}>
@@ -1059,7 +1100,7 @@ export default function Manifesto() {
                 cy={1200}
                 r={r}
                 fill="none"
-                stroke="rgba(255, 255, 255, 0.06)"
+                stroke="rgba(255, 255, 255, 0.15)"
                 strokeWidth={1}
                 vectorEffect="non-scaling-stroke"
               />
