@@ -22,6 +22,7 @@ import "./styles/section-slide.css";
  */
 const Hero = lazy(() => import("./sections/Hero"));
 const Quote = lazy(() => import("./sections/Quote"));
+const QuoteToServices = lazy(() => import("./sections/QuoteToServices"));
 const Services = lazy(() => import("./sections/Services"));
 const Manifesto = lazy(() => import("./sections/Manifesto"));
 const Profile = lazy(() => import("./sections/Profile"));
@@ -37,6 +38,7 @@ function HomePage() {
       >
         <Hero />
         <Quote />
+        <QuoteToServices />
         <Services />
         <Manifesto />
         <Profile />

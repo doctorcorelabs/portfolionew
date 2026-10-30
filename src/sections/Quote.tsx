@@ -38,6 +38,7 @@
  */
 
 import { useEffect, useRef, useState } from "react";
+import { setSeed } from "../lib/transitionSeed";
 
 const INK = "#010101";
 const GRAPHITE = "#3C3C38";
@@ -147,6 +148,14 @@ export default function Quote() {
     const ringRect = ring.getBoundingClientRect();
     const stickyRect = sticky.getBoundingClientRect();
     autoBloomFiredRef.current = true;
+    /* Transition seed: stash the ring's viewport center for the
+       Quote to Services ink zone. Behavior-preserving: the rects are
+       already measured above, so this adds no visual or timing
+       change to the bloom itself. */
+    setSeed(
+      ringRect.left + ringRect.width / 2,
+      ringRect.top + ringRect.height / 2,
+    );
     setBloom((prev) => ({
       x: ringRect.left + ringRect.width / 2 - stickyRect.left,
       y: ringRect.top + ringRect.height / 2 - stickyRect.top,
