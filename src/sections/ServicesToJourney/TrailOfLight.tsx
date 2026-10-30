@@ -13,10 +13,11 @@ import type { ReactElement } from "react";
  * luminous fading trail behind it, a faint echo trail offset to one
  * side, sparse sparkle flecks drifting near the trail, and a subtle
  * vertical light column washing the comet's path. Near the top the
- * point blooms into a soft lantern blue glow that expands while its
- * alpha fades, and the whole canvas crossfades #010101 to #111111 so
- * that at progress 1 the frame is pixel identical to the Journey
- * section's top edge and the sticky hand-off is invisible.
+ * point blooms into a soft lantern blue glow that expands and settles
+ * into an exact clone of Journey's Lantern A (same stops, radius, and
+ * joint-relative center), and the whole canvas crossfades #010101 to
+ * #111111 so that at progress 1 the frame is pixel identical to the
+ * Journey section's top edge and the sticky hand-off is invisible.
  *
  * Pure function of the `progress` prop (0..1). No timers, no rAF loop,
  * no wall clock inside: the only phase motion comes from progress
@@ -30,8 +31,14 @@ export type TLBreakpoint = "mobile" | "tablet" | "desktop";
 export interface TLParams {
   dprCap: number;
   trailScale: number;
-  bloomScale: number;
-  driftX: number;
+  /* Lantern-A clone geometry for the seamless joint. lanternR is the CSS
+     farthest-corner radius (divSize/2)*sqrt(2). lanternCX is the lantern
+     center x as a fraction of viewport width. lanternCYK is the lantern
+     center y as a fraction of the Journey section height, above the joint
+     (negative). The joint is the canvas bottom edge = Journey top edge. */
+  lanternR: number;
+  lanternCX: number;
+  lanternCYK: number;
 }
 
 export interface TrailOfLightProps {
@@ -47,11 +54,11 @@ export function getBreakpoint(width: number): TLBreakpoint {
 export function getTrailParams(bp: TLBreakpoint): TLParams {
   switch (bp) {
     case "mobile":
-      return { dprCap: 1.25, trailScale: 0.3, bloomScale: 0.45, driftX: 0.7 };
+      return { dprCap: 1.25, trailScale: 0.3, lanternR: 350 * Math.SQRT2, lanternCX: -0.2, lanternCYK: -0.04 };
     case "tablet":
-      return { dprCap: 1.5, trailScale: 0.34, bloomScale: 0.55, driftX: 0.22 };
+      return { dprCap: 1.5, trailScale: 0.34, lanternR: 350 * Math.SQRT2, lanternCX: -0.2, lanternCYK: -0.04 };
     case "desktop":
-      return { dprCap: 2, trailScale: 0.38, bloomScale: 0.6, driftX: 0.22 };
+      return { dprCap: 2, trailScale: 0.38, lanternR: 550 * Math.SQRT2, lanternCX: -0.08, lanternCYK: -0.06 };
   }
 }
 
@@ -94,6 +101,7 @@ interface TLState {
   h: number;
   params: TLParams;
   sparkles: SparkleSeed[];
+  journeyH: number;
 }
 
 function createTLState(
@@ -116,6 +124,7 @@ function createTLState(
     h: 0,
     params: getTrailParams("desktop"),
     sparkles,
+    journeyH: 4000,
   };
 }
 
@@ -291,31 +300,32 @@ function drawBloom(
   x: number,
   y: number
 ): void {
-  /* Bloom: instead of fading out, the light grows into the next section's
-   ambient lantern glow. Radius expands to cover the viewport, the center
-   drifts upper-left toward the lantern spill, alpha settles at lantern
-   strength, and the gradient hue settles from the comet's sky tint into
-   the lantern's deep blue. Float-safe: b is clamped, easeOutCubic uses an
-   integer exponent, alpha never leaves [0.38, 0.55]. */
+  /* Bloom morphs into a clone of Journey's Lantern A so the section joint
+   * is invisible: at b=1 the gradient stops, radius, and center relative
+   * to the joint (canvas bottom = Journey top) match the lantern exactly.
+   * Float-safe: b is clamped, easeOutCubic uses an integer exponent, all
+   * stop offsets stay ordered in [0,1], all alphas stay in range. */
   if (p < 0.82) return;
   const b = clamp01((p - 0.82) / 0.18);
   const e = easeOutCubic(b);
-  const rEnd = Math.max(st.w, st.h);
-  const r = 24 + e * (rEnd - 24);
-  const cx = x + (st.w * st.params.driftX - x) * e;
-  const cy = y + (st.h * 0.06 - y) * e;
-  const a = 0.55 - 0.17 * e;
-  /* Hue settles from the comet's sky tint into the lantern's deep blue. */
+  const prm = st.params;
+  const r = 24 + e * (prm.lanternR - 24);
+  const cx = x + e * (prm.lanternCX * st.w - x);
+  const cy = y + e * (st.h + prm.lanternCYK * st.journeyH - y);
   const cr = Math.round(91 - 83 * e);
   const cg = Math.round(155 - 66 * e);
   const cb = Math.round(255 - 43 * e);
+  const a0 = 0.55 - 0.15 * e;
+  const off1 = 0.4 - 0.1 * e;
+  const a1 = a0 * (0.25 + 0.3 * e);
+  const tEnd = 1 - 0.45 * e;
+  const col = (a: number): string =>
+    "rgba(" + cr + "," + cg + "," + cb + "," + a.toFixed(3) + ")";
   const g = ctx.createRadialGradient(cx, cy, 0, cx, cy, r);
-  g.addColorStop(0, "rgba(" + cr + "," + cg + "," + cb + "," + a.toFixed(3) + ")");
-  g.addColorStop(
-    0.4,
-    "rgba(" + cr + "," + cg + "," + cb + "," + (0.25 * a).toFixed(3) + ")"
-  );
-  g.addColorStop(1, "rgba(" + cr + "," + cg + "," + cb + ",0)");
+  g.addColorStop(0, col(a0));
+  g.addColorStop(off1, col(a1));
+  g.addColorStop(tEnd, col(0));
+  g.addColorStop(1, col(0));
   ctx.fillStyle = g;
   ctx.beginPath();
   ctx.arc(cx, cy, r, 0, TAU);
@@ -367,8 +377,14 @@ export function TrailOfLight(props: TrailOfLightProps): ReactElement {
     if (!ctx) return;
     const st = createTLState(canvas, ctx);
     stRef.current = st;
+    const measureJourney = (): void => {
+      const el = document.getElementById("manifesto");
+      const h = el ? el.getBoundingClientRect().height : 0;
+      st.journeyH = h > 0 ? Math.round(h) : 4000;
+    };
     const applySize = (): void => {
       resizeTLState(st);
+      measureJourney();
       lastKeyRef.current = "";
       drawNow();
     };
@@ -378,6 +394,7 @@ export function TrailOfLight(props: TrailOfLightProps): ReactElement {
       (entries) => {
         visRef.current = entries.some((e) => e.isIntersecting);
         if (visRef.current) {
+          measureJourney();
           lastKeyRef.current = "";
           drawNow();
         }
