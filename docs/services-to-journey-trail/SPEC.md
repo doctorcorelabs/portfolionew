@@ -84,3 +84,16 @@ backgrounds are #010101, so no white band or gap can show.
   zone. Zone wrapper is a div, so the App section sweep (which observes
   main > section) is unaffected.
 - 0 em dashes, 0 en dashes anywhere in the added files.
+
+## Float safety
+
+In drawBloom, `b = (p - 0.82) / 0.18` evaluated to
+1.0000000000000002 at p = 1 exactly (IEEE754), so `1 - b` went tiny
+negative, `Math.pow(negative, 1.4)` returned NaN, the `a < 0.004` guard
+missed it, and the color string "rgba(91,155,255,NaN)" made Safari's
+addColorStop throw, white-screening the page on iPhone. Rule: clamp
+any normalized progress to [0,1] with clamp01 before feeding it to
+Math.pow with a fractional exponent or into a color string. Fix:
+`const b = clamp01((p - 0.82) / 0.18);`. Note that `< epsilon` guards
+never catch NaN (all NaN comparisons are false), so guards alone are
+not sufficient.

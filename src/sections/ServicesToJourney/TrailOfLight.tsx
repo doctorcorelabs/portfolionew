@@ -293,7 +293,7 @@ function drawBloom(
   /* The lantern bloom: an expanding soft blue glow whose alpha fades
      to zero, so at p=1 only the flat #111111 background remains. */
   if (p < 0.82) return;
-  const b = (p - 0.82) / 0.18;
+  const b = clamp01((p - 0.82) / 0.18);
   const maxR = Math.min(st.w, st.h) * st.params.bloomScale;
   const r = 24 + b * b * maxR;
   const a = 0.55 * Math.pow(1 - b, 1.4);
@@ -308,47 +308,18 @@ function drawBloom(
   ctx.fill();
 }
 
-/* Temporary diagnostic instrumentation: records which draw layer was
- * active when a frame throws, so the error boundary can report the
- * exact layer + progress. The frame is a pure function of progress,
- * so those two values let us reproduce the exact failing call.
- * REMOVE after the Safari root cause is found and fixed. */
-let diagLayer = "none";
-
 function renderFrame(st: TLState, p: number): void {
   const ctx = st.ctx;
-  try {
-    ctx.clearRect(0, 0, st.w, st.h);
-    diagLayer = "background";
-    drawBackground(ctx, st, p);
-    const { x, y, arrived } = cometPos(st, p);
-    diagLayer = "column";
-    drawColumn(ctx, st, p, x);
-    const small = st.w * st.h > PERF_PIXEL_GATE;
-    diagLayer = "trail";
-    drawTrail(ctx, st, p, x, y, 0, 1);
-    if (!small) drawTrail(ctx, st, p, x, y, st.w * 0.006, 0.4);
-    diagLayer = "head";
-    drawHead(ctx, p, x, y, arrived);
-    diagLayer = "sparkles";
-    drawSparkles(ctx, st, p, x, y);
-    diagLayer = "bloom";
-    drawBloom(ctx, st, p, x, y);
-    diagLayer = "done";
-  } catch (err) {
-    const original = err instanceof Error ? err.message : String(err);
-    const msg =
-      "TrailOfLight diag: layer=" + diagLayer +
-      " progress=" + p +
-      " size=" + st.w + "x" + st.h +
-      " :: " + original;
-    try {
-      (window as unknown as { __lastPageError?: string }).__lastPageError = msg;
-    } catch {
-      /* noop */
-    }
-    throw new Error(msg);
-  }
+  ctx.clearRect(0, 0, st.w, st.h);
+  drawBackground(ctx, st, p);
+  const { x, y, arrived } = cometPos(st, p);
+  drawColumn(ctx, st, p, x);
+  const small = st.w * st.h > PERF_PIXEL_GATE;
+  drawTrail(ctx, st, p, x, y, 0, 1);
+  if (!small) drawTrail(ctx, st, p, x, y, st.w * 0.006, 0.4);
+  drawHead(ctx, p, x, y, arrived);
+  drawSparkles(ctx, st, p, x, y);
+  drawBloom(ctx, st, p, x, y);
 }
 
 /* ---------------- component ---------------- */
