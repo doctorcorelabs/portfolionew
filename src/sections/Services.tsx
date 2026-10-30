@@ -141,6 +141,7 @@ export default function Services() {
   const containerRef = useRef<HTMLDivElement | null>(null);
   const cardRefs = useRef<Array<HTMLDivElement | null>>([]);
   const chipRefs = useRef<Array<HTMLSpanElement | null>>([]);
+  const spotRef = useRef<boolean[]>([false, false, false]);
   const [reducedMotion, setReducedMotion] = useState(false);
   const [started, setStarted] = useState(false);
   const [parked, setParked] = useState<Array<{ x: number; y: number }> | null>(null);
@@ -157,6 +158,8 @@ export default function Services() {
     containerRight: number;
     cardTops: number[];
     cardBottoms: number[];
+    cardLefts: number[];
+    cardRights: number[];
   };
   type TravelerChipState = {
     x: number;
@@ -276,6 +279,8 @@ export default function Services() {
       containerRight: cRect.right - sRect.left,
       cardTops: cardRects.map((cr) => cr.top - sRect.top),
       cardBottoms: cardRects.map((cr) => cr.bottom - sRect.top),
+      cardLefts: cardRects.map((cr) => cr.left - sRect.left),
+      cardRights: cardRects.map((cr) => cr.right - sRect.left),
     };
   };
 
@@ -285,6 +290,39 @@ export default function Services() {
     minY: 12,
     maxY: Math.max(12, geom.sectionH - geom.chipH[i] - 12),
   });
+
+  /* Spotlight overlap: is chip i (top-left x/y in section coords)
+     over a card? Trigger rule: the chip CENTER must sit inside a
+     card rect with an 8px inset. Docked-phase chips park above
+     their card (center 40px above the card top on desktop, 22.5px
+     when stacked), so the disc never fires while docked; it only
+     appears while a chip travels across a card. Card rects come
+     from the cached geom (refreshed on resize), so this costs 3
+     comparisons per chip per frame with no layout reads. */
+  const spotOn = (geom: TravelerGeom, x: number, y: number, i: number): boolean => {
+    const cx = x + geom.chipW[i] / 2;
+    const cy = y + geom.chipH[i] / 2;
+    for (let k = 0; k < geom.cardLefts.length; k++) {
+      if (
+        cx > geom.cardLefts[k] + 8 &&
+        cx < geom.cardRights[k] - 8 &&
+        cy > geom.cardTops[k] + 8 &&
+        cy < geom.cardBottoms[k] - 8
+      ) {
+        return true;
+      }
+    }
+    return false;
+  };
+
+  /* Toggle the spotlight disc class directly on the chip element,
+     skipping redundant DOM writes via the previous boolean. */
+  const setSpot = (i: number, on: boolean) => {
+    if (spotRef.current[i] === on) return;
+    spotRef.current[i] = on;
+    const el = chipRefs.current[i];
+    if (el) el.classList.toggle("svc-chip-spot", on);
+  };
 
   const pickFree = (geom: TravelerGeom, i: number): { x: number; y: number } => {
     const b = boundsFor(geom, i);
@@ -374,6 +412,7 @@ export default function Services() {
   const updateChips = (now: number) => {
     const sim = simRef.current;
     if (!sim.geom) return;
+    const geom = sim.geom;
     sim.chips.forEach((chip, i) => {
       if (chip.phase === "leg") {
         const p = Math.min(1, Math.max(0, (now - chip.legStart) / chip.legDur));
@@ -404,6 +443,7 @@ export default function Services() {
       }
       const el = chipRefs.current[i];
       if (el) el.style.transform = `translate3d(${chip.x}px, ${chip.y}px, 0)`;
+      setSpot(i, spotOn(geom, chip.x, chip.y, i));
     });
   };
 
@@ -456,6 +496,7 @@ export default function Services() {
     sim.chips.forEach((chip, i) => {
       const el = chipRefs.current[i];
       if (el) el.style.transform = `translate3d(${chip.x}px, ${chip.y}px, 0)`;
+      setSpot(i, spotOn(geom, chip.x, chip.y, i));
     });
     if (sim.running) startRaf();
   };
@@ -479,12 +520,14 @@ export default function Services() {
     sim.stackedMode = geom.stacked;
     if (reducedRef.current) {
       setParked(geom.docks);
+      geom.docks.forEach((d, i) => setSpot(i, spotOn(geom, d.x, d.y, i)));
       return;
     }
     if (!sim.startedFlag) {
       geom.docks.forEach((d, i) => {
         const el = chipRefs.current[i];
         if (el) el.style.transform = `translate3d(${d.x}px, ${d.y}px, 0)`;
+        setSpot(i, spotOn(geom, d.x, d.y, i));
       });
       return;
     }
@@ -509,6 +552,7 @@ export default function Services() {
       sim.chips.forEach((chip, i) => {
         const el = chipRefs.current[i];
         if (el) el.style.transform = `translate3d(${chip.x}px, ${chip.y}px, 0)`;
+        setSpot(i, spotOn(geom, chip.x, chip.y, i));
       });
     } else if (mode === "resize") {
       sim.chips.forEach((chip, i) => {
@@ -517,6 +561,7 @@ export default function Services() {
         chip.y = Math.min(Math.max(chip.y, b.minY), b.maxY);
         const el = chipRefs.current[i];
         if (el) el.style.transform = `translate3d(${chip.x}px, ${chip.y}px, 0)`;
+        setSpot(i, spotOn(geom, chip.x, chip.y, i));
       });
     }
   };
@@ -678,7 +723,9 @@ export default function Services() {
           inset: 0;
           overflow: hidden;
           pointer-events: none;
-          z-index: 0;
+          /* Above the cards (cards are z-auto, motifs z-2), so the
+             spotlight disc paints over the card fill. */
+          z-index: 3;
         }
         .svc-chip {
           position: absolute;
@@ -697,9 +744,43 @@ export default function Services() {
           border-radius: 0;
           opacity: 0;
           transition: opacity 0.4s ease;
+          /* Isolated stacking context: the ::before disc with
+             z-index -1 paints behind the chip label but above
+             the card fill. */
+          isolation: isolate;
         }
         .svc-chip.svc-chip-on {
           opacity: 1;
+        }
+        /* Spotlight disc: when a traveler chip overlaps a blue
+           card, a soft dark pool fades in behind the chip so its
+           white label stays readable over the #0859D4 fill. The
+           border/background/label styling of the chip itself is
+           untouched. Toggled by JS (svc-chip-spot) from the rAF
+           loop; no React state per frame. */
+        .svc-chip::before {
+          content: "";
+          position: absolute;
+          left: 50%;
+          top: 50%;
+          width: 150px;
+          height: 150px;
+          transform: translate(-50%, -50%);
+          border-radius: 50%;
+          background: radial-gradient(circle, rgba(1, 1, 1, 0.78) 0%, rgba(1, 1, 1, 0.5) 45%, rgba(1, 1, 1, 0) 70%);
+          opacity: 0;
+          transition: opacity 0.35s ease;
+          pointer-events: none;
+          z-index: -1;
+        }
+        .svc-chip.svc-chip-spot::before {
+          opacity: 1;
+        }
+        @media (max-width: 720px) {
+          .svc-chip::before {
+            width: 110px;
+            height: 110px;
+          }
         }
         @media (max-width: 1023px) {
           .svc-chip {
@@ -856,6 +937,9 @@ export default function Services() {
           }
           .svc-chip {
             animation: none;
+          }
+          .svc-chip::before {
+            transition: none;
           }
           .svc-motif {
             opacity: 1;
