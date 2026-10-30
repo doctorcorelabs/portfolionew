@@ -31,6 +31,7 @@ export interface TLParams {
   dprCap: number;
   trailScale: number;
   bloomScale: number;
+  driftX: number;
 }
 
 export interface TrailOfLightProps {
@@ -46,11 +47,11 @@ export function getBreakpoint(width: number): TLBreakpoint {
 export function getTrailParams(bp: TLBreakpoint): TLParams {
   switch (bp) {
     case "mobile":
-      return { dprCap: 1.25, trailScale: 0.3, bloomScale: 0.45 };
+      return { dprCap: 1.25, trailScale: 0.3, bloomScale: 0.45, driftX: 0.7 };
     case "tablet":
-      return { dprCap: 1.5, trailScale: 0.34, bloomScale: 0.55 };
+      return { dprCap: 1.5, trailScale: 0.34, bloomScale: 0.55, driftX: 0.22 };
     case "desktop":
-      return { dprCap: 2, trailScale: 0.38, bloomScale: 0.6 };
+      return { dprCap: 2, trailScale: 0.38, bloomScale: 0.6, driftX: 0.22 };
   }
 }
 
@@ -290,21 +291,34 @@ function drawBloom(
   x: number,
   y: number
 ): void {
-  /* The lantern bloom: an expanding soft blue glow whose alpha fades
-     to zero, so at p=1 only the flat #111111 background remains. */
+  /* Bloom: instead of fading out, the light grows into the next section's
+   ambient lantern glow. Radius expands to cover the viewport, the center
+   drifts upper-left toward the lantern spill, alpha settles at lantern
+   strength, and the gradient hue settles from the comet's sky tint into
+   the lantern's deep blue. Float-safe: b is clamped, easeOutCubic uses an
+   integer exponent, alpha never leaves [0.38, 0.55]. */
   if (p < 0.82) return;
   const b = clamp01((p - 0.82) / 0.18);
-  const maxR = Math.min(st.w, st.h) * st.params.bloomScale;
-  const r = 24 + b * b * maxR;
-  const a = 0.55 * Math.pow(1 - b, 1.4);
-  if (a < 0.004) return;
-  const g = ctx.createRadialGradient(x, y, 0, x, y, r);
-  g.addColorStop(0, "rgba(91,155,255," + a.toFixed(3) + ")");
-  g.addColorStop(0.4, "rgba(91,155,255," + (0.25 * a).toFixed(3) + ")");
-  g.addColorStop(1, "rgba(91,155,255,0)");
+  const e = easeOutCubic(b);
+  const rEnd = Math.max(st.w, st.h);
+  const r = 24 + e * (rEnd - 24);
+  const cx = x + (st.w * st.params.driftX - x) * e;
+  const cy = y + (st.h * 0.06 - y) * e;
+  const a = 0.55 - 0.17 * e;
+  /* Hue settles from the comet's sky tint into the lantern's deep blue. */
+  const cr = Math.round(91 - 83 * e);
+  const cg = Math.round(155 - 66 * e);
+  const cb = Math.round(255 - 43 * e);
+  const g = ctx.createRadialGradient(cx, cy, 0, cx, cy, r);
+  g.addColorStop(0, "rgba(" + cr + "," + cg + "," + cb + "," + a.toFixed(3) + ")");
+  g.addColorStop(
+    0.4,
+    "rgba(" + cr + "," + cg + "," + cb + "," + (0.25 * a).toFixed(3) + ")"
+  );
+  g.addColorStop(1, "rgba(" + cr + "," + cg + "," + cb + ",0)");
   ctx.fillStyle = g;
   ctx.beginPath();
-  ctx.arc(x, y, r, 0, TAU);
+  ctx.arc(cx, cy, r, 0, TAU);
   ctx.fill();
 }
 

@@ -32,10 +32,19 @@ because the comet is a calmer gesture.
   canvases over 1.3M px, same pixel-count gate as sparkles), a subtle vertical light column wash (alpha <= 0.10,
   fades in 0.35 to 0.5, out 0.78 to 0.92), and 6 seeded sparkle flecks
   near the trail (visible 0.25 to 0.85, drift phase from p only).
-- p in [0.82, 1]: comet rests at the top; lantern bloom expands
-  (radius 24px to bloomScale of min(w,h): 0.6 desktop, 0.55 tablet,
-  0.45 mobile) while its alpha
-  fades 0.55 to 0; comet head swells 2.6x then fades out by p = 1.
+- p in [0.82, 1]: comet rests at the top; the bloom grows into the
+  next section's lantern glow instead of fading out: radius 24 to
+  max(w,h) with easeOutCubic, center drifts from the comet end
+  position (x ~= w/2, y ~= 0.16h) to (driftX*w, 0.06h) upper-left,
+  driftX 0.22 desktop/tablet, 0.70 mobile (mobile Lantern A center
+  near 0.70w: 700px wide, left -20%), alpha 0.55 to 0.38 (never
+  reaches 0), gradient RGB eases (91,155,255) to (8,89,212) as e
+  rises, stops a / 0.25a / transparent, landing on #111111 to
+  meet Journey's Lantern A (1100px, top -6%/left -8%,
+  rgba(8,89,212,0.40)); comet head swells 2.6x then fades out by
+  p = 1.
+- st.params.bloomScale is now unused by drawBloom; kept in the
+  params interface for compatibility.
 - Background crossfade: smoothstep(0.55, 1.0, p) blends #010101 to
   #111111. At p = 1 the frame is flat #111111, pixel identical to the
   Journey section's top edge, so the sticky hand-off is invisible.
