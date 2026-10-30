@@ -41,6 +41,9 @@ export interface TLParams {
   lanternCX: number;
   lanternCYK: number;
   lanternHalf: number;
+  /* Pillar charge end in progress units. The pillar ramps from p=0.05 to
+     pillarEnd; mobile gets a 20% longer charge (user 2026-10-30). */
+  pillarEnd: number;
 }
 
 export interface TrailOfLightProps {
@@ -56,11 +59,11 @@ export function getBreakpoint(width: number): TLBreakpoint {
 export function getTrailParams(bp: TLBreakpoint): TLParams {
   switch (bp) {
     case "mobile":
-      return { dprCap: 1.25, trailScale: 0.3, lanternR: 350 * Math.SQRT2, lanternCX: -0.2, lanternCYK: -0.04, lanternHalf: 350 };
+      return { dprCap: 1.25, trailScale: 0.3, lanternR: 350 * Math.SQRT2, lanternCX: -0.2, lanternCYK: -0.04, lanternHalf: 350, pillarEnd: 0.79 };
     case "tablet":
-      return { dprCap: 1.5, trailScale: 0.34, lanternR: 350 * Math.SQRT2, lanternCX: -0.2, lanternCYK: -0.04, lanternHalf: 350 };
+      return { dprCap: 1.5, trailScale: 0.34, lanternR: 350 * Math.SQRT2, lanternCX: -0.2, lanternCYK: -0.04, lanternHalf: 350, pillarEnd: 0.67 };
     case "desktop":
-      return { dprCap: 2, trailScale: 0.38, lanternR: 550 * Math.SQRT2, lanternCX: -0.08, lanternCYK: -0.06, lanternHalf: 550 };
+      return { dprCap: 2, trailScale: 0.38, lanternR: 550 * Math.SQRT2, lanternCX: -0.08, lanternCYK: -0.06, lanternHalf: 550, pillarEnd: 0.67 };
   }
 }
 
@@ -76,10 +79,11 @@ const smoothstep = (a: number, b: number, x: number): number => {
 };
 
 /* Pillar charge: 0 until the comet is underway, ramps to 1 as it climbs
- * (15% shorter than the original 0.05-0.78, user 2026-10-30), holds 1
- * through the bloom phase (where the pillar itself fades out). */
-function pillarStrength(p: number): number {
-  return smoothstep(0.05, 0.67, p);
+ * (15% shorter than the original 0.05-0.78, user 2026-10-30; mobile gets
+ * 20% longer via params.pillarEnd), holds 1 through the bloom phase
+ * (where the pillar itself fades out). */
+function pillarStrength(p: number, end: number): number {
+  return smoothstep(0.05, end, p);
 }
 
 const easeOutCubic = (t: number): number => 1 - Math.pow(1 - clamp01(t), 3);
@@ -212,7 +216,7 @@ function drawTrail(
   const headIn = clamp01(p / 0.03);
   /* The trail yields to the pillar it charges: per-sample alpha is
      dimmed as the beam strengthens, so the comet still reads over it. */
-  const yieldMul = 1 - 0.65 * pillarStrength(p);
+  const yieldMul = 1 - 0.65 * pillarStrength(p, st.params.pillarEnd);
   const base = 0.5 * headIn * trailFade * alphaMul * yieldMul;
   if (base < 0.004) return;
   const maxTrail = Math.min(st.h, 700) * st.params.trailScale;
@@ -305,7 +309,7 @@ function drawPillar(
   p: number,
   beamX: number
 ): void {
-  const s = pillarStrength(p);
+  const s = pillarStrength(p, st.params.pillarEnd);
   if (s <= 0) return;
   const w = st.w;
   const h = st.h;

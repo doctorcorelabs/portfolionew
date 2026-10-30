@@ -34,8 +34,10 @@ because the comet is a calmer gesture.
   p only), and a full-height light pillar the comet charges as it climbs.
   The old weak column wash (alpha <= 0.10, faded in 0.35-0.5, out
   0.78-0.92) is gone, replaced by the pillar.
-- Light pillar: pillarStrength(p) = smoothstep(0.05, 0.67, p). 0 until
-  the comet is underway, full by p = 0.67, holds through the bloom phase.
+- Light pillar: pillarStrength(p) = smoothstep(0.05, pillarEnd, p).
+  pillarEnd 0.67 tablet/desktop, 0.79 mobile (20% longer charge, user
+  2026-10-30). 0 until the comet is underway, full by pillarEnd, holds
+  through the bloom phase.
   Full-height vertical beam centered on the comet head's x, including the
   sway term (recomputed identically so it stays under the head). Width
   ramps 10px to 16% of viewport width; alpha ramps to 0.55 with a brighter
