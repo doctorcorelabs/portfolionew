@@ -3,10 +3,16 @@
  * the white Quote section and the black Services section (#010101).
  *
  * The zone is a plain block of 100svh plus a per-breakpoint scroll
- * runway (765px mobile, 935px tablet, 1190px desktop). A sticky
+ * runway (689px mobile, 842px tablet, 1071px desktop). A sticky
  * viewport-height child pins while the runway scrolls; progress
  * 0..1 is a pure rAF-throttled function of scroll position through
  * the runway, so scrolling back reverses every phase exactly.
+ *
+ * The sticky is sized to the LARGE viewport (lvh, stable) rather than
+ * svh, so on iPhone Safari the zone always covers the full visual
+ * viewport whether the toolbar is shown or hidden. Progress travel
+ * is measured from the sticky's live height, so pin timing stays
+ * exact in both toolbar states.
  *
  * The canvas renderer (QuoteInkTransition) is a pure function of the
  * progress prop; this wrapper owns pinning, progress mapping, and
@@ -28,7 +34,7 @@ function clamp01(value: number): number {
 const ZONE_STYLE = `
 .q2s-wrap {
   position: relative;
-  height: calc(100svh + 1190px);
+  height: calc(100svh + 1071px);
   background: #FFFFFF;
   margin-bottom: -2px;
   width: calc(100% + 2px);
@@ -37,23 +43,25 @@ const ZONE_STYLE = `
   position: sticky;
   top: -1px;
   height: calc(100svh + 2px);
+  height: calc(100lvh + 2px);
   overflow: hidden;
   background: #FFFFFF;
 }
 @media (max-width: 1100px) {
   .q2s-wrap {
-    height: calc(100svh + 935px);
+    height: calc(100svh + 842px);
   }
 }
 @media (max-width: 720px) {
   .q2s-wrap {
-    height: calc(100svh + 765px);
+    height: calc(100svh + 689px);
   }
 }
 `;
 
 export default function QuoteToServices(): ReactElement | null {
   const wrapRef = useRef<HTMLDivElement | null>(null);
+  const stickyRef = useRef<HTMLDivElement | null>(null);
   const [progress, setProgress] = useState(0);
   const [reducedMotion, setReducedMotion] = useState(
     () =>
@@ -78,14 +86,19 @@ export default function QuoteToServices(): ReactElement | null {
 
   /* Scroll progress: one passive scroll listener plus resize,
      rAF-throttled with a ticking flag, gated by an
-     IntersectionObserver on the wrap. progress = clamp01(-rect.top
-     / ZONE) with ZONE = rect.height - innerHeight, copied from the
-     proven Quote pattern. Touch momentum works because progress
+     IntersectionObserver on the wrap. Travel is measured from live
+     layout, not from window.innerHeight: the pin distance is exactly
+     wrapH - stickyH + 1, because the sticky (top: -1px) unsticks when
+     its bottom edge meets the wrap's bottom edge. This keeps pin
+     timing exact on iPhone Safari whether the toolbar is shown or
+     hidden (the visual viewport changes size, but the measured
+     heights do not desync). Touch momentum works because progress
      derives from actual scroll position. */
   useEffect(() => {
     if (reducedMotion) return;
     const wrap = wrapRef.current;
-    if (!wrap) return;
+    const sticky = stickyRef.current;
+    if (!wrap || !sticky) return;
     let ticking = false;
     let active = false;
 
@@ -93,8 +106,9 @@ export default function QuoteToServices(): ReactElement | null {
       ticking = false;
       if (!active) return;
       const rect = wrap.getBoundingClientRect();
-      const zone = rect.height - window.innerHeight;
-      const p = zone > 0 ? clamp01(-rect.top / zone) : 0;
+      const stickyH = sticky.getBoundingClientRect().height;
+      const travel = rect.height - stickyH + 1;
+      const p = travel > 0 ? clamp01(-rect.top / travel) : 0;
       setProgress((prev) => (prev === p ? prev : p));
     };
 
@@ -129,7 +143,7 @@ export default function QuoteToServices(): ReactElement | null {
     <>
       <style>{ZONE_STYLE}</style>
       <div ref={wrapRef} className="q2s-wrap" aria-hidden="true">
-        <div className="q2s-sticky">
+        <div ref={stickyRef} className="q2s-sticky">
           <QuoteInkTransition progress={progress} />
         </div>
       </div>

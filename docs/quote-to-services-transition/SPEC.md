@@ -12,6 +12,15 @@ Per user order 2026-10-30, two changes, reflected throughout:
    is marked SUPERSEDED and no longer describes the shipped component.
 2. The scroll runway is 15% shorter: 1400/1100/900 px becomes 1190/935/765
    px for desktop/tablet/mobile.
+3. Revision (2026-10-30, second): the runway is 10% shorter again,
+   1190/935/765 px becomes 1071/842/689 px for desktop/tablet/mobile;
+   the sticky is sized to the LARGE viewport (`100lvh`, stable) with a
+   `100svh` fallback line, and progress travel is measured from the
+   sticky's live height instead of `window.innerHeight`. Root cause:
+   on iPhone Safari scrolling hides the toolbar, so the visual
+   viewport (lvh) grows taller than the svh-sized sticky and the
+   uncovered bottom strip showed the wrap's white background as a
+   brief white band before the dots finished merging to black.
 
 ## 0. Goal
 
@@ -57,8 +66,8 @@ In `src/App.tsx`, between the existing adjacent lines:
   where ZONE is the per-breakpoint scroll runway (section 6). The extra page
   height is intentional: the choreography needs scroll distance. It does not
   shift Services content, it only pushes it further down the page.
-- `.q2s-sticky`: `position: sticky; top: -1px; height: calc(100svh + 2px); overflow: hidden;
-  background: #FFFFFF;` (the 1px overlap top and bottom hides subpixel hairlines of the wrap background, fix 2026-10-30)
+- `.q2s-sticky`: `position: sticky; top: -1px; height: calc(100svh + 2px); height: calc(100lvh + 2px); overflow: hidden;
+  background: #FFFFFF;` (the 1px overlap top and bottom hides subpixel hairlines of the wrap background, fix 2026-10-30; the second height line sizes the sticky to the LARGE viewport so iPhone Safari's toolbar show/hide cannot uncover a white strip at the bottom, fix 2026-10-30; the svh line stays as fallback where lvh is unsupported)
 - `.q2s-canvas`: `position: absolute; inset: 0; width: 100%; height: 100%;
   display: block;` Sized in JS to `clientWidth * DPR` / `clientHeight * DPR`.
 - The whole component is `aria-hidden`; it renders no text and no
@@ -105,8 +114,16 @@ Copy the proven pattern from `Quote.tsx`:
   flag. No wheel hijacking, no scroll snapping, no programmatic scrolling.
   Touch momentum works because progress derives from actual scroll position,
   not from gesture events.
-- `progress = clamp01(-rect.top / ZONE)` where `rect` is the wrap's
-  `getBoundingClientRect()` and `ZONE = rect.height - window.innerHeight`.
+- `progress = clamp01(-rect.top / travel)` where `rect` is the wrap's
+  `getBoundingClientRect()`, `stickyH` is the sticky's live
+  `getBoundingClientRect().height` (re-measured on every compute, so it
+  tracks resizes), and `travel = rect.height - stickyH + 1`. The pin
+  distance is exactly wrap height minus sticky height plus the 1px
+  top overlap: the sticky (top: -1px) unsticks when its bottom edge
+  meets the wrap's bottom edge. Measuring both heights from layout
+  keeps pin timing exact on iPhone Safari whether the toolbar is shown
+  or hidden; `window.innerHeight` is never used, so toolbar-driven
+  viewport changes cannot desync progress.
 - Progress is a pure function of scroll position, so scrolling back reverses
   every phase exactly. No timers drive progress; time is used only for the
   ambient dot pulse, which is cosmetic and stateless.
@@ -227,7 +244,7 @@ the brief's bands independently since it is a separate component.)
 
 | Parameter | Mobile <=720px | Tablet 721-1100px | Desktop >1100px |
 |---|---|---|---|
-| Zone scroll runway ZONE | 765px | 935px | 1190px |
+| Zone scroll runway ZONE | 689px | 842px | 1071px |
 | DPR cap | 1.5 | 1.75 | 2 |
 | Dot pitch floor (k in `14 - k*inv`) | 11px (k=3) | 11.5px (k=2.5) | 12px (k=2) |
 | Offset grid pitch | base * 1.6 | base * 1.6 | base * 1.6 |
@@ -238,8 +255,9 @@ the brief's bands independently since it is a separate component.)
 | Front traversal (p window) | SUPERSEDED | SUPERSEDED | SUPERSEDED |
 
 Rationale for zone lengths: 15% shorter than the original 1400/1100/900 px
-per user order 2026-10-30. 765px on mobile keeps it snappy (about one full
-swipe), 1190px on desktop gives the dot field room to densify without
+per user order 2026-10-30, then 10% shorter again (1071/842/689 px) per
+user order later the same day. 689px on mobile keeps it snappy (under one
+full swipe), 1071px on desktop gives the dot field room to densify without
 dragging. With no ink front to traverse, zone length only sets how
 gradually the field inverts.
 
