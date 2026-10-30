@@ -642,6 +642,31 @@ export default function Services() {
       }}
     >
       <style>{`
+        /* 25% shorter dead-black scroll between the dot transition
+           end and the Services heading (user order 2026-10-30).
+           pullUp = 0.25 * tail, tail = (Hw + P - vh) - 0.95 * T,
+           with Hw = 100svh + R (transition wrap height),
+           T = Hw - (100lvh + 2px) + 1px (pin travel, progress hits 1
+           exactly at unstick), vh = 100lvh (toolbar hides while
+           scrolling down), P = 130px (section padding-top; the
+           kicker carries no top margin). The heading then peeks at
+           p = 0.95 + 0.75 * tail / T >= 0.95, i.e. only once the
+           canvas reads fully black, on any device and toolbar state.
+           Where lvh/svh are unsupported the declaration is dropped
+           and behavior falls back to today. */
+        .svc-anim {
+          margin-top: calc(-0.25 * ((100svh + 1071px + 130px) - 100lvh - 0.95 * ((100svh + 1071px) - (100lvh + 2px) + 1px)));
+        }
+        @media (max-width: 1100px) {
+          .svc-anim {
+            margin-top: calc(-0.25 * ((100svh + 842px + 130px) - 100lvh - 0.95 * ((100svh + 842px) - (100lvh + 2px) + 1px)));
+          }
+        }
+        @media (max-width: 720px) {
+          .svc-anim {
+            margin-top: calc(-0.25 * ((100svh + 689px + 130px) - 100lvh - 0.95 * ((100svh + 689px) - (100lvh + 2px) + 1px)));
+          }
+        }
         .svc-grid {
           display: grid;
           grid-template-columns: repeat(3, 1fr);
