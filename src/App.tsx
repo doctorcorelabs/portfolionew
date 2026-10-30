@@ -11,6 +11,10 @@ import ExperiencePage from "./pages/ExperiencePage";
 import EducationPage from "./pages/EducationPage";
 import CertificationsPage from "./pages/CertificationsPage";
 import "./styles/section-slide.css";
+import {
+  SectionErrorBoundary,
+  installPageErrorCapture,
+} from "./components/SectionErrorBoundary";
 
 /**
  * Homepage section order, Onlines anatomy: hero giant word, quote claim,
@@ -37,22 +41,47 @@ function HomePage() {
       <Suspense
         fallback={<p className="page-loading">Loading section...</p>}
       >
-        <Hero />
-        <Quote />
-        <QuoteToServices />
-        <Services />
-        <ServicesToJourney />
-        <Manifesto />
-        <Profile />
-        <Works />
-        <Affiliations />
-        <Contact />
+        <SectionErrorBoundary sectionName="Hero">
+          <Hero />
+        </SectionErrorBoundary>
+        <SectionErrorBoundary sectionName="Quote">
+          <Quote />
+        </SectionErrorBoundary>
+        <SectionErrorBoundary sectionName="QuoteToServices">
+          <QuoteToServices />
+        </SectionErrorBoundary>
+        <SectionErrorBoundary sectionName="Services">
+          <Services />
+        </SectionErrorBoundary>
+        <SectionErrorBoundary sectionName="ServicesToJourney">
+          <ServicesToJourney />
+        </SectionErrorBoundary>
+        <SectionErrorBoundary sectionName="Manifesto">
+          <Manifesto />
+        </SectionErrorBoundary>
+        <SectionErrorBoundary sectionName="Profile">
+          <Profile />
+        </SectionErrorBoundary>
+        <SectionErrorBoundary sectionName="Works">
+          <Works />
+        </SectionErrorBoundary>
+        <SectionErrorBoundary sectionName="Affiliations">
+          <Affiliations />
+        </SectionErrorBoundary>
+        <SectionErrorBoundary sectionName="Contact">
+          <Contact />
+        </SectionErrorBoundary>
       </Suspense>
     </main>
   );
 }
 
 export default function App() {
+  /* Global error capture: records the latest page-level error on
+   * window.__lastPageError for diagnosis. Renders nothing. */
+  useEffect(() => {
+    installPageErrorCapture();
+  }, []);
   /* CANVAS_ROUTE_BEGIN - DEV-only, tidak masuk navigasi.
    * Route #canvas dimuat lewat dynamic import di dalam guard
    * import.meta.env.DEV. Di build produksi cabang ini gugur, jadi
