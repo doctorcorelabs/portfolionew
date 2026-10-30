@@ -4,9 +4,9 @@
  * (top edge #111111, the first stop of its gradient to #0E1626).
  *
  * The zone is a plain block of 100svh plus a per-breakpoint scroll
- * runway (218px mobile, 270px tablet, 364px desktop): 20% shorter again
- * (user 2026-10-30, after the 35% cut from 420/520/700), because the comet
- * is a calmer gesture. A sticky
+ * runway (174px mobile, 216px tablet, 291px desktop): 20% shorter again
+ * (user 2026-10-30: trim the black scroll before the light pillar), because
+ * the comet is a calmer gesture. A sticky
  * viewport-height child pins while the runway scrolls; progress 0..1
  * is a pure rAF-throttled function of scroll position through the
  * runway, so scrolling back reverses every phase exactly.
@@ -39,7 +39,7 @@ function clamp01(value: number): number {
 const ZONE_STYLE = `
 .s2j-wrap {
   position: relative;
-  height: calc(100svh + 364px);
+  height: calc(100svh + 291px);
   background: #010101;
   margin-bottom: -2px;
   width: calc(100% + 2px);
@@ -54,12 +54,12 @@ const ZONE_STYLE = `
 }
 @media (max-width: 1100px) {
   .s2j-wrap {
-    height: calc(100svh + 270px);
+    height: calc(100svh + 216px);
   }
 }
 @media (max-width: 720px) {
   .s2j-wrap {
-    height: calc(100svh + 218px);
+    height: calc(100svh + 174px);
   }
 }
 `;

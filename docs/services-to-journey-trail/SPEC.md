@@ -18,8 +18,8 @@ Progress: `p = clamp01(-wrapRect.top / (wrapRect.height - stickyRect.height + 1)
 measured live via getBoundingClientRect on every scroll (rAF-throttled,
 passive listener, IntersectionObserver gate). p = 1 exactly at unstick.
 
-RUNWAY per breakpoint: 218px mobile (<=720px), 270px tablet (<=1100px),
-364px desktop. Shorter than the dot zone's runway (689/842/1071)
+RUNWAY per breakpoint: 174px mobile (<=720px), 216px tablet (<=1100px),
+291px desktop. Shorter than the dot zone's runway (689/842/1071)
 because the comet is a calmer gesture.
 
 ## Scene (all a pure function of p)
