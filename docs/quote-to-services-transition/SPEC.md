@@ -1,22 +1,31 @@
 # Quote to Services Transition: Implementation Spec
 
+## Revision (2026-10-30)
+
+Per user order 2026-10-30, two changes, reflected throughout:
+
+1. The ink bleed is REMOVED. The transition is now dot-field inversion
+   only: the Quote's ambient dot field grows, darkens, and densifies with
+   scroll progress until the dots merge and a fill floor takes the screen
+   to flat `#010101`. Every ink-specific passage (seed blob, rising front,
+   tendrils, satellite droplets, seed vignette, blue spark, V6 seed stash)
+   is marked SUPERSEDED and no longer describes the shipped component.
+2. The scroll runway is 15% shorter: 1400/1100/900 px becomes 1190/935/765
+   px for desktop/tablet/mobile.
+
 ## 0. Goal
 
 Replace the hard cut between the white Quote section and the black Services
-section (`#010101`) with one continuous scroll-driven metamorphosis that fuses
-two ideas into a single read:
+section (`#010101`) with one continuous scroll-driven metamorphosis: the
+Quote's ambient dot field inverts, dots grow, darken, and densify with
+scroll progress until the field merges into flat black.
 
-- (2) the Quote's ambient dot field inverts: dots grow, darken, and densify
-  until the screen goes black;
-- (1) an organic ink-bleed with an irregular blobby edge spreads and swallows
-  the white.
-
-The two must read as ONE event, not two stacked effects. The binding
-mechanism is a **shared noise field**: the same deterministic noise function
-shapes the ink front's edge and makes dots swell just ahead of that front, so
-the dots appear to sense the ink coming. Narrative seed: the darkness is born
-from the spot where the V6 trail ring pulsed at the end of the Quote runway,
-so the black feels grown from the Quote itself, not dropped on top of it.
+SUPERSEDED 2026-10-30: the original design fused a second idea, an organic
+ink-bleed with an irregular blobby edge that spread and swallowed the white,
+bound to the dots by a shared noise field and seeded at the V6 trail ring's
+remembered position. The user ordered the ink bleed removed; the transition
+is now dot-field inversion only. Every ink-specific passage in this spec is
+marked SUPERSEDED and no longer describes the shipped component.
 
 This spec covers placement, progress mapping, choreography, parameters,
 performance, reduced motion, and integration constraints. It does not change
@@ -100,8 +109,7 @@ Copy the proven pattern from `Quote.tsx`:
   `getBoundingClientRect()` and `ZONE = rect.height - window.innerHeight`.
 - Progress is a pure function of scroll position, so scrolling back reverses
   every phase exactly. No timers drive progress; time is used only for the
-  ambient dot pulse and edge shimmer (section 4.4), which are cosmetic and
-  stateless.
+  ambient dot pulse, which is cosmetic and stateless.
 - Rendering gate: an `IntersectionObserver` on the wrap sets an `active`
   flag. The rAF draw loop runs only while `active` is true. When the zone is
   off-screen, no frames are drawn.
@@ -114,19 +122,17 @@ A single 2D canvas draws all layers each frame, back to front:
 2. Offset dot grid (the Quote's second dot layer: half-pitch-shifted, faint,
    slow pulse). Drawn first so it sits under the base grid, matching Quote.
 3. Base dot grid (the Quote's primary dot layer: 14px pitch, 0.7px dots,
-   30% alpha at rest).
-4. Seed vignette (one cached radial gradient at the seed point, section 5).
-5. Seed blob (expanding noisy black disc at the seed point).
-6. Ink front (black region rising from the bottom with a noisy top edge).
-7. Optional faint blue rim along the front edge (2px, `rgba(8, 89, 212, 0.22)`,
-   tunable, default on). It echoes the V6 blue center dot and the brand
-   accent without fighting the ink metaphor.
+   30% alpha at rest), inverting with progress per section 5.
+4. Global fill floor: `F(p) = smoothstep(0.72, 1.0, p)` maxed over the dot
+   field, guaranteeing flat `#010101` at p = 1.
 
-Why canvas instead of DOM layers: the "dots swell just ahead of the front"
-behavior needs per-dot radius/alpha as a function of distance to the moving
-front, modulated by the shared noise field. That is one loop in canvas; in
-DOM it would require mask juggling plus an SVG filter whose per-frame cost
-on mobile is worse and whose edge the mask pipeline would straighten out.
+SUPERSEDED 2026-10-30: the original stack had four more layers, a seed
+vignette, a seed blob, a rising ink front, and an optional blue rim (old
+items 4-7). All removed with the ink bleed.
+
+Why canvas instead of DOM layers: per-dot radius, alpha, and pitch as
+continuous functions of progress is one loop in canvas; in DOM it would
+require thousands of nodes updated per frame, worse on mobile.
 
 DPR handling: `dpr = min(window.devicePixelRatio || 1, DPR_CAP)` per
 breakpoint (section 6). Canvas backing store = CSS size * dpr; `ctx.scale`
@@ -134,6 +140,12 @@ breakpoint (section 6). Canvas backing store = CSS size * dpr; `ctx.scale`
 px. Recompute on resize (debounced, ~150ms).
 
 ## 4. Shared noise field
+
+SUPERSEDED 2026-10-30. The noise field existed to shape the ink front's
+edge and to modulate the dot swell ahead of that front. With the ink bleed
+removed there is no front, so this section no longer describes the shipped
+component. The deterministic easing `smootherstep(a, b, p)` below is still
+used for the dot inversion curves. (Original text kept as design history.)
 
 One deterministic function drives the front edge, the blob edge, and the
 dot swell, which is what makes the two phases read as one event.
@@ -159,14 +171,14 @@ Easing used throughout: `smootherstep(a, b, p)` =
 
 ## 5. Phase choreography (progress 0..1)
 
-### Phase A: dot-field inversion, p in [0, 0.55]
+### Phase A: dot-field inversion, p in [0, 1]
 
 The canvas opens in the Quote's exact dot-field visual language so the seam
 (section 1.3) is continuous: white ground, base grid 14px pitch / 0.7px
 radius / 30% black alpha, offset grid shifted by half pitch at low alpha
 with the slow pulse.
 
-With `inv = smootherstep(0, 0.55, p)`:
+With `inv = smootherstep(0, 1, p)`:
 
 - Dot radius: `0.7 + 1.5 * inv` CSS px.
 - Dot alpha: `0.30 + 0.58 * inv` (cap 0.88).
@@ -177,71 +189,35 @@ With `inv = smootherstep(0, 0.55, p)`:
   pulse(t), `pulse(t) = 0.5 + 0.5 * sin(2 * PI * t / 9000)` (the Quote's 9s
   pulse, same period so it feels like the same field).
 
+As the dots grow and the pitch tightens, neighboring dots touch and merge;
+the field stops reading as discrete points and becomes a thickening black
+texture.
+
 ### Swell band ahead of the front (the fusion detail), active p > 0.32
 
-For each base-grid dot at `(x, y)`, let `d = frontMeanY(p) - y` (positive
-when the dot is above the front). When `0 < d < 160`:
-
-```
-swell = exp(-((d / 160) ** 2) * 3) * (0.75 + 0.5 * field(x, seed))
-radius += 1.8 * swell
-alpha = min(0.95, alpha + 0.30 * swell)
-```
-
-Dots within ~160px above the ink front grow up to ~4px and near-black just
-before the front reaches them, then are swallowed. This is the single most
-important detail for fusing the two ideas: the field reacts to the ink.
+SUPERSEDED 2026-10-30. There is no ink front anymore, so there is nothing
+for the dots to anticipate. The per-dot swell ahead of a moving front is
+removed; dot growth is now a pure function of progress (Phase A above).
 
 ### Phase B: ink-bleed, p in [0.30, 1.0]
 
-Overlaps Phase A from p = 0.30 so the inversion is well underway when the
-first black appears, and the swell band (active from 0.32) is already alive.
+SUPERSEDED 2026-10-30. The seed vignette, seed blob, rising ink front, and
+blue rim were removed with the ink bleed. This section no longer describes
+the shipped component.
 
-1. **Seed vignette**, p in [0.30, 0.60]: a soft radial darkening centered on
-   the seed point (section 7), radius `18vmin * smootherstep(0.30, 0.42, p)`,
-   alpha `0.32 * (1 - smootherstep(0.42, 0.60, p))`. It reads as the ink
-   gathering before it breaks the surface, then hands off to the blob.
+### End state, p = 1
 
-2. **Seed blob**, p in [0.36, 0.62]: a black disc growing from the seed
-   point, radius `38vmin * smootherstep(0.36, 0.62, p)`, edge displaced by
-   the angular noise at `0.18 * radius`. Drawn as a 64-segment path. Same
-   `#010101` as the front, so where blob and front overlap they merge
-   seamlessly with no compositing trick.
-
-3. **Ink front**, p in [0.45, 1.0]: the main black mass rising from below.
-   Mean front position: `frontMeanY(p) = H * (1.08 - 1.16 *
-   smootherstep(0.45, 1.0, p))`, H = viewport height. Starts 8% below the
-   viewport, ends 8% above it, so at p = 1 the screen is fully black with
-   margin. Edge shape at horizontal x:
-
-   ```
-   edgeY(x) = frontMeanY
-            + field(x, seed) * amp(p)          // organic wobble
-            - lobeH(p) * gauss(x - seedX)      // seed lobe reaches up first
-   amp(p)   = 12 + 24 * smootherstep(0.45, 1.0, p)   // 12px -> 36px
-   lobeH(p) = 22vh * smootherstep(0.45, 0.70, p)
-   gauss(x) = exp(-((x) / (0.12 * W)) ** 2)          // sigma 12% of width
-   ```
-
-   The seed lobe means the first tendril of black visibly reaches upward
-   from the exact remembered spot of the V6 ring before the broad front
-   follows. Draw the front as a filled path: start at `(0, edgeY(0))`,
-   sample every ~24 CSS px across the width, line down to bottom corners,
-   close, fill `#010101`.
-
-4. **End state**, p = 1: front above viewport, blob merged, canvas fully
-   `#010101`. The sticky child's own background is `#FFFFFF` at rest but
-   the canvas is opaque full-bleed, so no ground shows through at any point.
-   Behind the canvas, set the sticky background to `#010101` as a
-   belt-and-braces measure against sub-pixel seams on overscroll.
+The dots have merged into a near-solid field and the global fill floor
+`F(p) = smoothstep(0.72, 1.0, p)` is maxed over the canvas, so at p = 1 the
+screen is flat `#010101` with margin to spare. The sticky child's own
+background is `#FFFFFF` at rest but the canvas is opaque full-bleed, so no
+ground shows through at any point. Behind the canvas, set the sticky
+background to `#010101` as a belt-and-braces measure against sub-pixel
+seams on overscroll.
 
 ### Ambient life (cosmetic, stateless)
 
 - The offset-grid 9s pulse (above) continues through the transition.
-- Optional edge shimmer: `field(x, seed + t * 0.0002)` adds a barely
-  perceptible living wobble to the front edge, amplitude included in
-  `amp(p)`. Keep it subtle; it must never read as animation for its own
-  sake. Under reduced motion the whole component is absent anyway.
 
 ## 6. Per-breakpoint parameters
 
@@ -251,24 +227,29 @@ the brief's bands independently since it is a separate component.)
 
 | Parameter | Mobile <=720px | Tablet 721-1100px | Desktop >1100px |
 |---|---|---|---|
-| Zone scroll runway ZONE | 900px | 1100px | 1400px |
+| Zone scroll runway ZONE | 765px | 935px | 1190px |
 | DPR cap | 1.5 | 1.75 | 2 |
 | Dot pitch floor (k in `14 - k*inv`) | 11px (k=3) | 11.5px (k=2.5) | 12px (k=2) |
 | Offset grid pitch | base * 1.6 | base * 1.6 | base * 1.6 |
-| Swell band height | 140px | 160px | 180px |
-| Swell radius bonus | 1.6px | 1.8px | 2.0px |
-| Blob max radius | 38vmin | 38vmin | 38vmin |
-| Front edge sample step | 24px | 24px | 24px |
-| Front traversal (p window) | 0.45 -> 1.0 | 0.45 -> 1.0 | 0.45 -> 1.0 |
+| Swell band height | SUPERSEDED | SUPERSEDED | SUPERSEDED |
+| Swell radius bonus | SUPERSEDED | SUPERSEDED | SUPERSEDED |
+| Blob max radius | SUPERSEDED | SUPERSEDED | SUPERSEDED |
+| Front edge sample step | SUPERSEDED | SUPERSEDED | SUPERSEDED |
+| Front traversal (p window) | SUPERSEDED | SUPERSEDED | SUPERSEDED |
 
-Rationale for zone lengths: the choreography has ~5 overlapping sub-phases;
-900px on mobile keeps it snappy (about one full swipe-plus-a-bit), 1400px on
-desktop gives the front time to feel weighty without dragging. Front speed
-is implicit: it traverses 116% of viewport height over 55% of the zone, so
-roughly 1.9 viewport-heights per zone on desktop, 2.1 on mobile. Slightly
-faster on mobile compensates for shorter attention spans.
+Rationale for zone lengths: 15% shorter than the original 1400/1100/900 px
+per user order 2026-10-30. 765px on mobile keeps it snappy (about one full
+swipe), 1190px on desktop gives the dot field room to densify without
+dragging. With no ink front to traverse, zone length only sets how
+gradually the field inverts.
 
 ## 7. Narrative seed plumbing
+
+SUPERSEDED 2026-10-30. The seed existed to originate the ink at the V6
+trail ring's remembered position. With the ink bleed removed there is no
+seed, no blob, and no front, so the seed stash and the
+`src/lib/transitionSeed.ts` module are no longer required by the
+transition. (Original text kept as design history.)
 
 The ink must originate where the V6 trail ring pulsed at Quote progress 1.0.
 
@@ -315,8 +296,7 @@ The ink must originate where the V6 trail ring pulsed at Quote progress 1.0.
   viewports.
 - Primitives: dots drawn with `ctx.arc` + `fill` (batched by alpha bucket
   where trivially possible; no shadows, no gradients per dot, no
-  `globalCompositeOperation` changes mid-frame). The single seed-vignette
-  radial gradient is created once per resize and cached. No SVG filters, no
+  `globalCompositeOperation` changes mid-frame). No SVG filters, no
   `backdrop-filter`, no CSS blur anywhere in the zone.
 - DPR caps per section 6 keep backing-store memory bounded (e.g. 390x844 at
   1.5 = 585x1266, trivial).
@@ -327,8 +307,7 @@ The ink must originate where the V6 trail ring pulsed at Quote progress 1.0.
   highest-visibility failure mode of the whole feature, so the implementer
   must test on a real mid-range Android device (or Chrome DevTools 4x CPU
   throttle as a proxy) and, if frames drop, first reduce the offset grid
-  density, then the DPR cap, in that order. Do not reduce the front-edge
-  sample step below 32px as a first resort; edge fidelity is the feature.
+  density, then the DPR cap, in that order.
 
 ## 10. Integration constraints and acceptance checklist
 
@@ -336,9 +315,10 @@ The ink must originate where the V6 trail ring pulsed at Quote progress 1.0.
       no text).
 - [ ] No em dashes appear in the component source, its comments, or this
       spec's implementation notes.
-- [ ] `Quote.tsx`: exactly one addition, the seed stash (section 7), plus
-      the new `transitionSeed.ts` module. Bloom, marker sweep, trail, pin
-      geometry, and all styles byte-identical.
+- [ ] `Quote.tsx`: SUPERSEDED 2026-10-30, the seed stash (section 7) is no
+      longer required. If the stash already shipped, it is harmless but
+      unused. Bloom, marker sweep, trail, pin geometry, and all styles
+      byte-identical.
 - [ ] `Services.tsx`: zero changes. Its scroll-triggered card reveal fires
       as before when the section enters the viewport.
 - [ ] `App.tsx`: one lazy import + one JSX line between `<Quote />` and
@@ -354,9 +334,9 @@ The ink must originate where the V6 trail ring pulsed at Quote progress 1.0.
 - [ ] Scrolling back from Services through the zone to Quote reverses every
       phase smoothly (progress is a pure function of scroll).
 - [ ] `prefers-reduced-motion: reduce` renders no zone at all (hard cut).
-- [ ] The swell band is perceptible: at p ~0.5 on desktop, dots within the
-      band above the front are visibly larger and darker than the field
-      average in a Netlify preview screen recording.
+- [ ] The dot merge is perceptible: at p ~0.6 on desktop the field reads as
+      a thickening black texture rather than discrete dots in a Netlify
+      preview screen recording.
 - [ ] 60fps sustained through the zone on a mid-range phone per section 9.
 
 ## 11. Files

@@ -1,16 +1,16 @@
 /**
- * QuoteToServices.tsx - scroll-driven ink transition zone between the
- * white Quote section and the black Services section (#010101).
+ * QuoteToServices.tsx - scroll-driven dot-field transition zone between
+ * the white Quote section and the black Services section (#010101).
  *
  * The zone is a plain block of 100svh plus a per-breakpoint scroll
- * runway (900px mobile, 1100px tablet, 1400px desktop). A sticky
+ * runway (765px mobile, 935px tablet, 1190px desktop). A sticky
  * viewport-height child pins while the runway scrolls; progress
  * 0..1 is a pure rAF-throttled function of scroll position through
  * the runway, so scrolling back reverses every phase exactly.
  *
  * The canvas renderer (QuoteInkTransition) is a pure function of the
- * progress prop; this wrapper owns pinning, progress mapping, the
- * reduced-motion gate, and seed plumbing. No z-index anywhere, no
+ * progress prop; this wrapper owns pinning, progress mapping, and
+ * the reduced-motion gate. No z-index anywhere, no
  * stacking context, no scroll-jacking, no new dependencies.
  *
  * Reduced motion: renders nothing at all, so the page keeps the
@@ -20,21 +20,15 @@
 import { useEffect, useRef, useState } from "react";
 import type { ReactElement } from "react";
 import { QuoteInkTransition } from "./QuoteInkTransition/QuoteInkTransition";
-import { getSeed } from "../lib/transitionSeed";
 
 function clamp01(value: number): number {
   return Math.min(1, Math.max(0, value));
 }
 
-interface Seed {
-  x: number | null;
-  y: number | null;
-}
-
 const ZONE_STYLE = `
 .q2s-wrap {
   position: relative;
-  height: calc(100svh + 1400px);
+  height: calc(100svh + 1190px);
   background: #FFFFFF;
 }
 .q2s-sticky {
@@ -46,12 +40,12 @@ const ZONE_STYLE = `
 }
 @media (max-width: 1100px) {
   .q2s-wrap {
-    height: calc(100svh + 1100px);
+    height: calc(100svh + 935px);
   }
 }
 @media (max-width: 720px) {
   .q2s-wrap {
-    height: calc(100svh + 900px);
+    height: calc(100svh + 765px);
   }
 }
 `;
@@ -59,7 +53,6 @@ const ZONE_STYLE = `
 export default function QuoteToServices(): ReactElement | null {
   const wrapRef = useRef<HTMLDivElement | null>(null);
   const [progress, setProgress] = useState(0);
-  const [seed, setSeedState] = useState<Seed>(() => getSeed());
   const [reducedMotion, setReducedMotion] = useState(
     () =>
       typeof window !== "undefined" &&
@@ -94,13 +87,6 @@ export default function QuoteToServices(): ReactElement | null {
     let ticking = false;
     let active = false;
 
-    const readSeed = () => {
-      const next = getSeed();
-      setSeedState((prev) =>
-        prev.x === next.x && prev.y === next.y ? prev : next,
-      );
-    };
-
     const compute = () => {
       ticking = false;
       if (!active) return;
@@ -120,11 +106,6 @@ export default function QuoteToServices(): ReactElement | null {
     const io = new IntersectionObserver(
       (entries) => {
         active = entries.some((e) => e.isIntersecting);
-        /* The V6 seed may arrive late (Quote fires it at progress
-           1.0, potentially after the zone is already visible), so
-           re-read on every activation; the canvas applies seed
-           changes live and stays a pure function of its props. */
-        readSeed();
         onScroll();
       },
       { threshold: 0 },
@@ -147,11 +128,7 @@ export default function QuoteToServices(): ReactElement | null {
       <style>{ZONE_STYLE}</style>
       <div ref={wrapRef} className="q2s-wrap" aria-hidden="true">
         <div className="q2s-sticky">
-          <QuoteInkTransition
-            progress={progress}
-            seedX={seed.x}
-            seedY={seed.y}
-          />
+          <QuoteInkTransition progress={progress} />
         </div>
       </div>
     </>

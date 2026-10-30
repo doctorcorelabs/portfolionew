@@ -1,34 +1,53 @@
 # Quote → Services Transition: Visual Design
 
-**Ink-bleed + dot-inversion, scroll-driven, fully procedural canvas. No image assets.**
+**Dot-field inversion, scroll-driven, fully procedural canvas. No image assets.**
+*(Ink-bleed removed per user order 2026-10-30; ink passages below are marked SUPERSEDED.)*
+
+## Revision (2026-10-30)
+
+Per user order 2026-10-30:
+
+1. The ink bleed is REMOVED. The transition is now dot-field inversion
+   only: the Quote's dot field grows, darkens, and densifies with scroll
+   progress, the dots merge, and a fill floor `smoothstep(0.72, 1.0, p)`
+   guarantees flat `#010101` at the end. Every ink-specific passage
+   (seed, front, tendrils, droplets, vignette, blue spark) is marked
+   SUPERSEDED below.
+2. The scroll runway is 15% shorter: desktop 1400 -> 1190px, tablet
+   1100 -> 935px, mobile 900 -> 765px.
 
 ## 0. Concept in one paragraph
 
-The white of the Quote section does not wipe away. It is *consumed*. The last
-blue spark of the V6 trail (the pulsing `#0859D4` dot) swells, turns black, and
-becomes the seed of an ink blot that grows with an organic, never-straight
-edge. Ahead of the front, the ambient dot field - the exact same 14px field
-the visitor has been staring at - swells, darkens, densifies, and is absorbed
-dot by dot. Satellite droplets leap ahead of the front and are reabsorbed.
-At progress 1 the viewport is flat `#010101`, and the Services section
-continues that black invisibly. One continuous metamorphosis, pure function
-of scroll progress, fully reversible on scroll-back.
+The white of the Quote section does not wipe away. It is *absorbed* by its
+own dot field. The ambient dot field, the exact same 14px field the visitor
+has been staring at, swells, darkens, and densifies with scroll progress:
+dots grow from 0.7 to 2.2px, alpha rises, the pitch tightens, neighbors
+touch and merge until the field reads as black texture, and a fill floor
+`smoothstep(0.72, 1.0, p)` guarantees flat `#010101` at progress 1, where
+the Services section continues that black invisibly. One continuous
+metamorphosis, pure function of scroll progress, fully reversible on
+scroll-back.
+
+SUPERSEDED 2026-10-30: the original concept fused an ink blot grown from
+the last blue spark of the V6 trail, with tendrils, satellite droplets, and
+a noisy organic edge. The user ordered the ink bleed removed.
 
 **Why no image assets:** an image cannot reversibly track scroll, cannot
 match the live dot field the Quote section renders in the DOM, and would
-band on the soft edge. Everything here is analytic: a distance field for
-the ink, per-dot math for the field. Deterministic, seeded, zero network.
+band on gradients. Everything here is analytic: per-dot math for the field,
+deterministic, seeded, zero network.
 
 ## 1. Structure and continuity contract
 
 - A standalone `<section>` sits between `Quote` and `Services` in DOM order.
   It mirrors Quote's pinned pattern: wrapper
-  `height: calc(100svh + RUNWAY)` (`RUNWAY` = 1100px desktop, 800px at
-  max-width 1023px), sticky child `top: 0; min-height: 100svh`.
+  `height: calc(100svh + RUNWAY)` (`RUNWAY` = 1190px desktop, 935px at
+  max-width 1100px, 765px at max-width 720px), sticky child `top: 0;
+  min-height: 100svh`.
   Section background `#FFFFFF` so overscroll above the strip stays white.
 - The sticky viewport holds exactly one full-bleed `<canvas>`,
   `aria-hidden="true"`. No text, no headlines, no CTAs inside the strip.
-  It is pure atmosphere; the story is told by the ink.
+  It is pure atmosphere; the story is told by the field inverting.
 - **Continuity contract:** at p=0 the canvas renders *byte-identical* dot
   aesthetics to Quote's end state (14px pitch, 0.7px dots,
   `rgba(1,1,1,0.30)`, plus the 7px-offset echo layer). The cut from
@@ -36,11 +55,16 @@ the ink, per-dot math for the field. Deterministic, seeded, zero network.
   same field, so the eye reads it as one unbroken surface. The strip
   then takes over the narrative.
 - `prefers-reduced-motion`: no wrapper runway, no pinning, no canvas.
-  The section renders at its end state: flat `#010101`, minimal padding.
-  Same convention as Quote's static branch. Content is never trapped
+  The page goes straight from Quote to Services with the previous hard
+  cut. Same convention as Quote's static branch. Content is never trapped
   behind scroll.
 
 ## 2. The ink edge function
+
+SUPERSEDED 2026-10-30. The entire ink edge system below (seed, star-shaped
+front, tendrils, soft band, low-res mask, coverage guarantee) was removed
+with the ink bleed. Kept as design history; none of it describes the
+shipped component.
 
 ### 2.1 Seed
 
@@ -124,39 +148,31 @@ a white corner, and the handoff to Services is pixel-perfect `#010101`.
 - Pitch 14px, dot radius 0.7px, `rgba(1,1,1,0.30)`, the `q-dot-base` recipe.
 - Echo layer: same pitch, offset (7px, 7px), alpha ramping
   `0 → 0.25` over p = 0 → 0.15 (a one-way echo of Quote's 9s pulse,
-  now progress-driven). iPad keeps it; mobile drops it (see §6).
+  now progress-driven). Kept on all breakpoints.
 
-### 3.2 Per-dot lifecycle, driven by distance to the front
+### 3.2 Per-dot lifecycle, driven by progress
 
-For each dot, `d` = signed distance to the ink front (same field as §2.3):
+Each dot's radius, alpha, and color are pure functions of progress `p`,
+shared across the field with slight per-dot variation from the seeded noise
+so the field never pulses in lockstep:
 
-- `d < −band/2`, **absorbed**: not drawn. The ink owns it.
-- `−band/2 ≤ d ≤ +band/2`, **being swallowed**: drawn under the soft
-  band, radius shrinking `0.7 → 0.3px`, color lerping to `#010101`.
-- `0 < d < INFLUENCE` (`INFLUENCE` = 150px desktop/iPad, 110px mobile),
-  **the swell**: the signature moment. Dots grow and darken *ahead* of
-  the front, as if the ink's gravity reaches forward:
+- Radius: `0.7 + 1.5 * smootherstep(0, 1, p)` px (0.7 -> 2.2px).
+- Alpha: `0.30 + 0.58 * smootherstep(0, 1, p)`, capped at 0.88.
+- Color: the field decays through Quote's own palette as it densifies,
+  `rgba(1,1,1,0.30)` -> `#6F6F68` -> `#3C3C38` -> `#010101`, so the dots
+  die as ink, never as gray.
+- Pitch: `14 - k * smootherstep(0, 1, p)` px (`k` per breakpoint, §6);
+  the lattice resamples continuously, no popping.
 
-```
-t = 1 − d / INFLUENCE
-radius = 0.7 + 3.5 * easeOutCubic(t)        // max 4.2px
-color  = ramp(t): rgba(1,1,1,0.30) → #6F6F68 → #3C3C38 → #1D1D1F
-```
-
-  The 4.2px max is deliberate: it echoes the V6 trail's 4px dots.
-  Dots die as trail-dots. The color ramp reuses Quote's own palette
-  (`#6F6F68` MARGIN_GREY, `#3C3C38` GRAPHITE), the field literally
-  decays through the site's ink scale into `#010101`.
-- `d ≥ INFLUENCE`, untouched ambient dot.
+SUPERSEDED 2026-10-30: the original lifecycle was driven by signed distance
+to the ink front (absorbed / being-swallowed / swell / untouched bands).
+With no front the bands are gone; the palette decay above is retained.
 
 ### 3.3 Density increase
 
-Inside the influence band, a **second fine grid** fades in: same 14px
-pitch offset by (7px, 7px) (the Quote offset-layer geometry), alpha
-`0 → 0.5 * easeOutCubic(t)`, radius 0.5px, same color ramp. The field
-visibly *thickens* just before absorption, then vanishes. Desktop and
-iPad only, mobile conveys density through the swell alone
-(§6: why this doesn't look cheap).
+SUPERSEDED 2026-10-30. The second fine grid was not implemented; density
+is conveyed through the base grid's growth and the pitch tightening alone
+on all breakpoints.
 
 ## 4. Easing curves (whole 0 → 1)
 
@@ -164,15 +180,18 @@ All curves are named; implementers use these exact functions.
 
 | What | Curve | Notes |
 |---|---|---|
-| `R(p)` base radius | Piecewise: `easeOutCubic` on p∈[0,0.10] (seed 5→46px); `easeInOutCubic` on p∈[0.10,0.90] (46px→R_max); `easeOutQuad` settle on p∈[0.90,1.0] | Slow birth, confident middle, gentle landing. The middle must feel *inevitable*, not rushed. |
+| Dot inversion | `smootherstep(0, 1, p)` | Radius 0.7->2.2px, alpha 0.30->0.88, pitch 14->floor |
 | Fill floor `F(p)` | `smoothstep(0.72, 1.0, p)` | Coverage guarantee; invisible below 0.72 |
-| Seed spark pulse | `easeOutCubic` on p∈[0,0.06] | One breath, then swallowed |
-| Tendril growth | `easeInOutSine` on p∈[0.15,0.85] | Fingers reach mid-journey |
-| Dot swell | `easeOutCubic` | Snappy growth, soft landing into absorption |
-| Droplet envelope | `smoothstep` in, `easeInQuad` out | Quick reabsorption snap (see below) |
-| Echo layer alpha | linear on p∈[0,0.15] | Quiet entrance, no drama |
+| Echo layer alpha | linear on p in [0,0.15] | Quiet entrance, no drama |
+| Seed spark pulse | SUPERSEDED | Removed with the ink bleed |
+| `R(p)` base radius | SUPERSEDED | Removed with the ink bleed |
+| Tendril growth | SUPERSEDED | Removed with the ink bleed |
+| Droplet envelope | SUPERSEDED | Removed with the ink bleed |
 
 ### Micro-detail: satellite droplets
+
+SUPERSEDED 2026-10-30. Removed with the ink bleed. (Original text kept as
+design history.)
 
 4-6 droplets (desktop), 4 (iPad), 3 (mobile). Each droplet `j` has
 seeded `(θ_j, distFactor_j ∈ [1.08, 1.35], spawnP_j ∈ [0.30, 0.55],
@@ -197,44 +216,39 @@ is ever blue, ever warm, ever muddy-gray.
 
 | p | State | Exact colors |
 |---|---|---|
-| 0.00 | White field, ambient dots, one blue spark | bg `#FFFFFF`; dots `rgba(1,1,1,0.30)`; spark `#0859D4` 10px |
-| 0.06 | Spark swallowed; ink seed born | ink core `#010101` r≈18px; band `#010101`→`#FFFFFF` over ~64px |
-| 0.25 | Splat established, tendrils reaching | interior `#010101`; dots ahead ramping `#6F6F68`→`#3C3C38` |
-| 0.45 | Front past mid-screen; droplets aloft | droplets `#010101`; fine grid at 0.5 alpha in band |
-| 0.65 | Majority black; white pocket upper-right | pocket edge band dark-biased (`t^1.6`) |
-| 0.85 | Fill floor engaged; last white remnant | remnant shrinks; no gray halo wider than band |
+| 0.00 | White field, ambient dots | bg `#FFFFFF`; dots `rgba(1,1,1,0.30)` |
+| 0.30 | Field thickening | dots larger, ramping `#6F6F68` |
+| 0.60 | Majority dark texture | dots near-merged, `#3C3C38` -> `#010101` |
+| 0.85 | Fill floor engaged | last white remnant shrinks; no gray halo |
 | 1.00 | Flat black | `#010101` everywhere. Services continues `#010101`. |
 
-**Rules:** the ink is always `#010101`, never `#000000` (pure black
+**Rules:** the black is always `#010101`, never `#000000` (pure black
 would bloom against Services' `#010101` on OLED and break the seam).
-The soft band is alpha-composited ink-over-white with dark bias,
-never a literal gray fill. Blue appears exactly once (the seed spark,
-p < 0.06) and never tints the ink, the band, or the dots: blue is
-reserved for the spark's memory and Services' cards.
+The mid-transition field is dots-over-white with dark bias, never a
+literal gray fill. SUPERSEDED 2026-10-30: the seed-spark blue exception
+is gone with the ink; the transition contains no blue at all. Blue
+remains reserved for Services' cards.
 
 ## 6. Breakpoint tuning and perf
 
-| Param | Desktop (>1024) | iPad (721-1100) | Mobile (≤720) |
+| Param | Desktop (>1100) | iPad (721-1100) | Mobile (≤720) |
 |---|---|---|---|
 | Dot pitch | 14px (Quote match) | 14px | 16px |
 | Canvas DPR cap | 1.5 | 1.5 | 1.25 |
-| Noise octaves | 4 | 3 | 2 |
-| Noise A0 | 0.16·R | 0.17·R | 0.20·R |
-| Tendrils | 5 | 4 | 3 |
-| Droplets | 6 | 4 | 3 |
-| Fine grid layer | yes | yes | **no** |
-| Edge band | 64+0.02R | 56+0.02R | 44+0.02R |
-| Influence band | 150px | 150px | 110px |
-| Runway | 100svh + 1100px | 100svh + 800px | 100svh + 800px |
-| Mask offscreen scale | 1/3 | 1/3 | 1/4 |
+| Noise octaves | SUPERSEDED | SUPERSEDED | SUPERSEDED |
+| Noise A0 | SUPERSEDED | SUPERSEDED | SUPERSEDED |
+| Tendrils | SUPERSEDED | SUPERSEDED | SUPERSEDED |
+| Droplets | SUPERSEDED | SUPERSEDED | SUPERSEDED |
+| Fine grid layer | SUPERSEDED | SUPERSEDED | SUPERSEDED |
+| Edge band | SUPERSEDED | SUPERSEDED | SUPERSEDED |
+| Influence band | SUPERSEDED | SUPERSEDED | SUPERSEDED |
+| Runway | 100svh + 1190px | 100svh + 935px | 100svh + 765px |
+| Mask offscreen scale | SUPERSEDED | SUPERSEDED | SUPERSEDED |
 
-**Why mobile doesn't look cheap:** the two most expensive things
-(octaves 3-4, fine grid) are detail the eye can't resolve at 390px
-anyway. What mobile *keeps* is the signature: the swell-absorb
-lifecycle, the tendril fingers (3 is plenty at small scale), the
-droplets, and the dark-biased band. Bigger `A0` (0.20) compensates
-for fewer octaves, the edge stays dramatic, just chunkier, which
-reads *better* on a phone.
+**Why mobile doesn't look cheap:** the dot field is the whole show, and
+dots are cheap. What mobile *keeps* is the signature: the swell-darken
+lifecycle of every dot and the pitch tightening, at the same curves as
+desktop. The shorter 765px runway keeps it snappy on a phone.
 
 **Perf rules (non-negotiable):**
 - Scroll handler rAF-throttled, `{ passive: true }`, exactly like
@@ -242,8 +256,6 @@ reads *better* on a phone.
 - Dot count at 1440×900, 14px pitch: ~6,600 base (+~6,600 echo/fine
   when fully faded in), fine for canvas arcs during scroll.
   Mobile 390×844 at 16px: ~1,300 dots. Trivial.
-- Ink mask per-pixel work happens at 1/3-1/4 scale: ~480×300 px
-  worst case. Negligible.
 - Never exceed the DPR caps; never run per-pixel at full res.
 - No `shadowBlur`, no gradients-as-fill on the main canvas per frame
   (the band is the alpha mask, precomputed).
@@ -256,16 +268,15 @@ reads *better* on a phone.
 2. **No muddy mid-tones.** The band is dark-biased (`t^1.6`) and
    narrow. A wide soft gray transition reads as fog, not ink.
    When in doubt, shrink the band, don't widen it.
-3. **No blue ink.** The `#0859D4` accent belongs to the seed spark
-   (p < 0.06) and to Services' cards. Blue-tinted ink, blue edge
-   glow, blue droplets, all forbidden. They would fight the one
-   accent the site owns.
+3. **No blue ink.** The `#0859D4` accent belongs to Services' cards.
+   SUPERSEDED 2026-10-30: the seed-spark exception is gone with the
+   ink; the transition contains no blue at all.
 4. **No text in the strip.** No captions, no counters, no "scroll"
    hints. The metamorphosis is the content.
 5. **No wall-clock animation.** Every quantity is a pure function of
    scroll progress `p`. Scroll-back must reverse every frame exactly:
-   droplets un-merge, dots un-absorb, the spark un-swallows. Test
-   this by scrubbing, not just scrolling down.
+   dots un-grow and un-darken. Test this by scrubbing, not just
+   scrolling down.
 6. **No competing pattern at the handoff.** The strip ends in *flat*
    `#010101`, no halftone, no dots, no texture, so Services'
    halftone pan and card entrance read as a fresh event, not a
