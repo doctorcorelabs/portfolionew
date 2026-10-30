@@ -9,15 +9,16 @@ import type { ReactElement } from "react";
  * At progress 0 the canvas is flat #010101; the comet head fades in over
  * p in [0, 0.03] and rests near the bottom center like a lantern just
  * lit. As progress
- * rises the point climbs with an easeOutCubic profile, leaving a
- * luminous fading trail behind it, a faint echo trail offset to one
- * side, sparse sparkle flecks drifting near the trail, and a subtle
- * vertical light column washing the comet's path. Near the top the
- * point blooms into a soft lantern blue glow that expands and settles
- * into an exact clone of Journey's Lantern A (same stops, radius, and
- * joint-relative center), and the whole canvas crossfades #010101 to
- * #111111 so that at progress 1 the frame is pixel identical to the
- * Journey section's top edge and the sticky hand-off is invisible.
+ * rises the point climbs with an easeOutCubic profile, charging a
+ * full-height light pillar beneath it, leaving a luminous fading trail
+ * behind it, a faint echo trail offset to one side, and sparse
+ * sparkle flecks drifting near the trail. Near the top the point
+ * blooms into a soft lantern blue glow that floods the frame mid-phase
+ * and settles into an exact clone of Journey's Lantern A (same stops,
+ * radius, and joint-relative center), and the whole canvas crossfades
+ * #010101 to #111111 so that at progress 1 the frame is pixel
+ * identical to the Journey section's top edge and the sticky hand-off
+ * is invisible.
  *
  * Pure function of the `progress` prop (0..1). No timers, no rAF loop,
  * no wall clock inside: the only phase motion comes from progress
@@ -73,6 +74,12 @@ const smoothstep = (a: number, b: number, x: number): number => {
   const t = clamp01((x - a) / (b - a));
   return t * t * (3 - 2 * t);
 };
+
+/* Pillar charge: 0 until the comet is underway, ramps to 1 as it climbs,
+ * holds 1 through the bloom phase (where the pillar itself fades out). */
+function pillarStrength(p: number): number {
+  return smoothstep(0.05, 0.78, p);
+}
 
 const easeOutCubic = (t: number): number => 1 - Math.pow(1 - clamp01(t), 3);
 
@@ -186,26 +193,6 @@ function drawBackground(ctx: CanvasRenderingContext2D, st: TLState, p: number): 
   ctx.fillRect(0, 0, st.w, st.h);
 }
 
-function drawColumn(
-  ctx: CanvasRenderingContext2D,
-  st: TLState,
-  p: number,
-  x: number
-): void {
-  /* A very subtle vertical light column behind the comet while it
-     climbs, fading in after the start and out before the bloom. */
-  const a =
-    0.1 * smoothstep(0.35, 0.5, p) * (1 - smoothstep(0.78, 0.92, p));
-  if (a < 0.004) return;
-  const colW = st.w * 0.05;
-  const g = ctx.createLinearGradient(x - colW, 0, x + colW, 0);
-  g.addColorStop(0, "rgba(91,155,255,0)");
-  g.addColorStop(0.5, "rgba(91,155,255," + a.toFixed(3) + ")");
-  g.addColorStop(1, "rgba(91,155,255,0)");
-  ctx.fillStyle = g;
-  ctx.fillRect(x - colW, 0, colW * 2, st.h);
-}
-
 function drawTrail(
   ctx: CanvasRenderingContext2D,
   st: TLState,
@@ -222,7 +209,10 @@ function drawTrail(
   const trailFade = 1 - smoothstep(0.85, 1.0, p);
   if (trailFade < 0.01) return;
   const headIn = clamp01(p / 0.03);
-  const base = 0.5 * headIn * trailFade * alphaMul;
+  /* The trail yields to the pillar it charges: per-sample alpha is
+     dimmed as the beam strengthens, so the comet still reads over it. */
+  const yieldMul = 1 - 0.65 * pillarStrength(p);
+  const base = 0.5 * headIn * trailFade * alphaMul * yieldMul;
   if (base < 0.004) return;
   const maxTrail = Math.min(st.h, 700) * st.params.trailScale;
   const n = 14;
@@ -250,12 +240,14 @@ function drawHead(
   arrived: number
 ): void {
   /* Bright core with layered glow; swells slightly as the bloom
-     arrives, then fades so the frame ends on flat #111111. */
+     arrives, then fades so the frame ends on flat #111111. The outer
+     glow is wider than the original column-era design and the core is
+     a touch brighter to read over the light pillar. */
   const alpha = clamp01(p / 0.03) * (1 - smoothstep(0.9, 1.0, p));
   if (alpha < 0.004) return;
   const swell = 1 + arrived * 1.6;
   const headR = 4 * swell;
-  const outerR = headR * 6;
+  const outerR = headR * 9;
   const go = ctx.createRadialGradient(x, y, 0, x, y, outerR);
   go.addColorStop(0, "rgba(91,155,255," + (0.35 * alpha).toFixed(3) + ")");
   go.addColorStop(1, "rgba(91,155,255,0)");
@@ -264,7 +256,7 @@ function drawHead(
   ctx.arc(x, y, outerR, 0, TAU);
   ctx.fill();
   const gm = ctx.createRadialGradient(x, y, 0, x, y, headR * 2.6);
-  gm.addColorStop(0, "rgba(160,195,255," + (0.85 * alpha).toFixed(3) + ")");
+  gm.addColorStop(0, "rgba(160,195,255," + (0.95 * alpha).toFixed(3) + ")");
   gm.addColorStop(1, "rgba(160,195,255,0)");
   ctx.fillStyle = gm;
   ctx.beginPath();
@@ -272,7 +264,7 @@ function drawHead(
   ctx.fill();
   ctx.fillStyle = "rgba(255,255,255," + alpha.toFixed(3) + ")";
   ctx.beginPath();
-  ctx.arc(x, y, headR * 0.9, 0, TAU);
+  ctx.arc(x, y, headR * 1.0, 0, TAU);
   ctx.fill();
 }
 
@@ -303,6 +295,35 @@ function drawSparkles(
   }
 }
 
+/* The light pillar: a full-height vertical beam the comet charges as it
+ * climbs. Width ramps 10px to 16% of viewport width, alpha to 0.55, with
+ * a bright core. During the bloom phase it yields to the flood. */
+function drawPillar(
+  ctx: CanvasRenderingContext2D,
+  st: TLState,
+  p: number,
+  beamX: number
+): void {
+  const s = pillarStrength(p);
+  if (s <= 0) return;
+  const w = st.w;
+  const h = st.h;
+  const b = p > 0.82 ? clamp01((p - 0.82) / 0.18) : 0;
+  const fade = 1 - easeOutCubic(b);
+  const halfW = (10 + (w * 0.16 - 10) * s) / 2;
+  const aMax = 0.55 * s * fade;
+  if (aMax <= 0.001 || halfW <= 0) return;
+  const g = ctx.createLinearGradient(beamX - halfW, 0, beamX + halfW, 0);
+  const edge = (a: number): string => "rgba(8,89,212," + a.toFixed(3) + ")";
+  g.addColorStop(0, edge(0));
+  g.addColorStop(0.32, edge(aMax * 0.4));
+  g.addColorStop(0.5, "rgba(140,180,255," + aMax.toFixed(3) + ")");
+  g.addColorStop(0.68, edge(aMax * 0.4));
+  g.addColorStop(1, edge(0));
+  ctx.fillStyle = g;
+  ctx.fillRect(beamX - halfW, 0, halfW * 2, h);
+}
+
 function drawBloom(
   ctx: CanvasRenderingContext2D,
   st: TLState,
@@ -310,13 +331,17 @@ function drawBloom(
   x: number,
   y: number
 ): void {
-  /* Bloom morphs into Journey's Lantern A so the joint is seamless. At b=1
-   * the end state matches the lantern: same stops, same farthest-corner
-   * radius, same center relative to the joint (canvas bottom = Journey
-   * top). The lantern div is lanternHalf*2 px square, so its gradient
-   * center is (left+half, top+half) from the div's top-left corner.
-   * Geometry comes from a live DOM measurement when available (captures
-   * drift/pulse phase), else from the lantern's CSS values. Float-safe. */
+  /* Bloom morphs into Journey's Lantern A so the joint is seamless. The
+   * bloom floods the frame mid-phase (radius overshoots toward
+   * max(w,h), alpha boosted up to 1.5x) then settles into the exact
+   * lantern clone; sin(pi*b) is 0 at both ends so the start and end
+   * states are unchanged. At b=1 the end state matches the lantern:
+   * same stops, same farthest-corner radius, same center relative to
+   * the joint (canvas bottom = Journey top). The lantern div is
+   * lanternHalf*2 px square, so its gradient center is (left+half,
+   * top+half) from the div's top-left corner. Geometry comes from a
+   * live DOM measurement when available (captures drift/pulse phase),
+   * else from the lantern's CSS values. Float-safe. */
   if (p < 0.82) return;
   const b = clamp01((p - 0.82) / 0.18);
   const e = easeOutCubic(b);
@@ -327,13 +352,20 @@ function drawBloom(
   const cyEnd = st.h + (live ? live.cy : prm.lanternCYK * st.journeyH + prm.lanternHalf);
   const op = live ? live.op : 1;
   const opE = 1 + e * (op - 1);
-  const r = 24 + e * (rEnd - 24);
+  /* Mid-phase flood: radius overshoots toward the frame diagonal while
+     alpha peaks at 1.5x, then both settle to the exact lantern clone.
+     sin(pi*b) is 0 at b=0 and b=1 (with an explicit guard at b=1 for
+     float-exactness), so the start and end states are unchanged. */
+  const flood = b >= 1 ? 0 : Math.sin(Math.PI * b);
+  const maxR = Math.max(st.w, st.h);
+  const r = 24 + e * (rEnd - 24) + flood * Math.max(0, maxR - rEnd);
   const cx = x + e * (cxEnd - x);
   const cy = y + e * (cyEnd - y);
   const cr = Math.round(91 - 83 * e);
   const cg = Math.round(155 - 66 * e);
   const cb = Math.round(255 - 43 * e);
-  const a0 = (0.55 - 0.15 * e) * opE;
+  const aBoost = 1 + 0.5 * flood;
+  const a0 = (0.55 - 0.15 * e) * opE * aBoost;
   const off1 = 0.4 - 0.1 * e;
   const a1 = a0 * (0.25 + 0.3 * e);
   const tEnd = 1 - 0.45 * e;
@@ -355,10 +387,13 @@ function renderFrame(st: TLState, p: number): void {
   ctx.clearRect(0, 0, st.w, st.h);
   drawBackground(ctx, st, p);
   const { x, y, arrived } = cometPos(st, p);
-  drawColumn(ctx, st, p, x);
+  /* The pillar rides the comet head's current x, using the exact same
+     formula (including the sway term) so it stays under the head. */
+  const beamX = st.w / 2 + Math.sin(Math.min(p, 0.82) * Math.PI) * st.w * 0.015;
+  drawPillar(ctx, st, p, beamX);
   const small = st.w * st.h > PERF_PIXEL_GATE;
-  drawTrail(ctx, st, p, x, y, 0, 1);
   if (!small) drawTrail(ctx, st, p, x, y, st.w * 0.006, 0.4);
+  drawTrail(ctx, st, p, x, y, 0, 1);
   drawHead(ctx, p, x, y, arrived);
   drawSparkles(ctx, st, p, x, y);
   drawBloom(ctx, st, p, x, y);

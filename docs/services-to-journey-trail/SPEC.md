@@ -29,12 +29,31 @@ because the comet is a calmer gesture.
   easeOutCubic, plus a gentle sinusoidal x sway (amplitude 1.5% of
   width). Behind it: a 14-sample fading trail (radius and alpha shrink
   with distance), a fainter echo trail offset 0.6% of width (skipped on
-  canvases over 1.3M px, same pixel-count gate as sparkles), a subtle vertical light column wash (alpha <= 0.10,
-  fades in 0.35 to 0.5, out 0.78 to 0.92), and 6 seeded sparkle flecks
-  near the trail (visible 0.25 to 0.85, drift phase from p only).
+  canvases over 1.3M px, same pixel-count gate as sparkles), 6 seeded
+  sparkle flecks near the trail (visible 0.25 to 0.85, drift phase from
+  p only), and a full-height light pillar the comet charges as it climbs.
+  The old weak column wash (alpha <= 0.10, faded in 0.35-0.5, out
+  0.78-0.92) is gone, replaced by the pillar.
+- Light pillar: pillarStrength(p) = smoothstep(0.05, 0.78, p). 0 until
+  the comet is underway, full by p = 0.78, holds through the bloom phase.
+  Full-height vertical beam centered on the comet head's x, including the
+  sway term (recomputed identically so it stays under the head). Width
+  ramps 10px to 16% of viewport width; alpha ramps to 0.55 with a brighter
+  core stop (rgba(140,180,255, aMax) flanked by rgba(8,89,212, ...) edges).
+  Fades out over the bloom phase: fade = 1 - easeOutCubic(b), yielding to
+  the flood.
+- Trail/echo yield: every trail and echo sample's alpha is multiplied by
+  (1 - 0.65 * pillarStrength(p)), so the dot trail recedes as the beam
+  takes over.
+- Comet boost: outer glow radius +50% over the column-era design, core
+  slightly brighter, so the head reads over the pillar.
 - p in [0.82, 1]: comet rests at the top; the bloom grows into an
   exact clone of Journey's Lantern A (no fade-out) so the joint (canvas bottom
-  edge = Journey top edge) is invisible. End state at p = 1: gradient stops
+  edge = Journey top edge) is invisible. Mid-phase the bloom floods the
+  frame: flood = sin(pi*b), 0 at both ends (explicit guard at b = 1 for
+  float-exactness), radius overshoots toward max(w,h), alpha boosted up to
+  1.5x via aBoost = 1 + 0.5*flood, then settles into the exact lantern
+  clone. Start and end states unchanged. End state at p = 1: gradient stops
   (0, rgba(8,89,212,0.40)), (0.30, rgba(8,89,212,0.22)), (0.55, transparent);
   radius = CSS farthest-corner = (divSize/2)*sqrt(2): 495 mobile/tablet
   (700px div), 778 desktop (1100px div); center joint-relative, matching the
@@ -52,6 +71,10 @@ because the comet is a calmer gesture.
 - Background crossfade: smoothstep(0.55, 1.0, p) blends #010101 to
   #111111. At p = 1 the frame is flat #111111, pixel identical to the
   Journey section's top edge, so the sticky hand-off is invisible.
+
+## Draw order
+
+background, pillar, echo trail, trail, comet head, sparkles, bloom.
 
 ## Colors
 
