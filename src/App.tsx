@@ -24,6 +24,7 @@ const Hero = lazy(() => import("./sections/Hero"));
 const Quote = lazy(() => import("./sections/Quote"));
 const QuoteToServices = lazy(() => import("./sections/QuoteToServices"));
 const Services = lazy(() => import("./sections/Services"));
+const ServicesToJourney = lazy(() => import("./sections/ServicesToJourney"));
 const Manifesto = lazy(() => import("./sections/Manifesto"));
 const Profile = lazy(() => import("./sections/Profile"));
 const Works = lazy(() => import("./sections/Works"));
@@ -40,6 +41,7 @@ function HomePage() {
         <Quote />
         <QuoteToServices />
         <Services />
+        <ServicesToJourney />
         <Manifesto />
         <Profile />
         <Works />
