@@ -200,5 +200,8 @@ const styles: Record<string, React.CSSProperties> = {
     color: "rgba(66, 66, 66, 0.85)",
     textDecoration: "none",
     overflowWrap: "anywhere",
+    /* 44px-class hit area; the nav gap absorbs the visual change. */
+    padding: "12px 6px",
+    margin: "-12px -6px",
   },
 };

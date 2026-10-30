@@ -159,6 +159,7 @@ const metaStyle: React.CSSProperties = {
   textTransform: "uppercase",
   color: MARGIN_GREY,
   margin: "0 0 8px",
+  overflowWrap: "anywhere",
 };
 
 const titleStyle: React.CSSProperties = {
@@ -203,7 +204,7 @@ export default function ResearchIndex() {
             margin: "0 0 24px",
           }}
         >
-          <Link to="/" style={{ color: INK }}>
+          <Link to="/" style={{ color: INK, display: "inline-block", padding: "12px 12px 12px 0" }}>
             Home
           </Link>{" "}
           / Research
@@ -261,7 +262,7 @@ export default function ResearchIndex() {
               <h3 style={titleStyle}>
                 <Link
                   to={`/research/${item.id}`}
-                  style={{ color: INK, textDecoration: "underline" }}
+                  style={{ color: INK, textDecoration: "underline", display: "inline-block", padding: "8px 0" }}
                 >
                   {item.shortTitle}
                 </Link>
@@ -273,6 +274,7 @@ export default function ResearchIndex() {
                   fontFamily: MONO,
                   fontSize: 12,
                   marginTop: 8,
+                  overflowWrap: "anywhere",
                 }}
               >
                 {item.venue} | {item.role}
@@ -380,7 +382,7 @@ export default function ResearchIndex() {
         </Reveal>
 
         <p style={{ borderTop: `1px solid ${HAIRLINE}`, paddingTop: 20 }}>
-          <Link to="/" style={{ color: INK }}>
+          <Link to="/" style={{ color: INK, display: "inline-block", padding: "12px 0" }}>
             Back to home
           </Link>
         </p>

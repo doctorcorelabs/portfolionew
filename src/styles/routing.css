@@ -33,7 +33,7 @@
 }
 
 .breadcrumb a:hover {
-  color: var(--red);
+  color: var(--blue);
 }
 
 .research-detail {
@@ -76,17 +76,6 @@
 .research-links {
   list-style: none;
   padding-left: 0;
-}
-
-.not-found {
-  padding: 96px 24px;
-}
-
-.not-found h1 {
-  font-family: var(--font-display);
-  font-size: clamp(48px, 10vw, 120px);
-  line-height: 0.95;
-  margin: 0 0 16px;
 }
 
 .container {

@@ -52,7 +52,7 @@ const MONO =
   "'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, monospace";
 
 /* Plot geometry. The SVG scales to its container width. */
-const WIDTH = 960;
+const WIDTH = 1010;
 const LABEL_X = 8;
 const PLOT_X = 308;
 const PLOT_WIDTH = 412;
@@ -122,13 +122,17 @@ export default function ForestPlot({ rows, studyLabel }: ForestPlotProps) {
           {studyLabel}
         </figcaption>
       ) : null}
+      {/* On narrow screens the plot scrolls horizontally instead of
+         shrinking to an unreadable size; the wrapper contains it so the
+         page never overflows. */}
+      <div style={{ overflowX: "auto", WebkitOverflowScrolling: "touch" }}>
       <svg
         className="fp-plot"
         viewBox={`0 0 ${WIDTH} ${height}`}
         width="100%"
         role="img"
         aria-label="Forest plot of reporting odds ratios with 95 percent confidence intervals on a log scale"
-        style={{ display: "block", background: "#FFFFFF" }}
+        style={{ display: "block", background: "#FFFFFF", minWidth: 640 }}
       >
         {/* Column headers */}
         <text
@@ -328,9 +332,12 @@ export default function ForestPlot({ rows, studyLabel }: ForestPlotProps) {
           </text>
         ))}
       </svg>
+      </div>
 
       {/* Companion table: complete without hover; hovering a table row
-         highlights the matching plot row, and vice versa. */}
+         highlights the matching plot row, and vice versa. The wrapper lets
+         phones reach every column by scrolling sideways. */}
+      <div style={{ overflowX: "auto", WebkitOverflowScrolling: "touch" }}>
       <table
         style={{
           width: "100%",
@@ -380,6 +387,7 @@ export default function ForestPlot({ rows, studyLabel }: ForestPlotProps) {
             ))}
         </tbody>
       </table>
+      </div>
       {unstable.length > 0 ? (
         <p style={{ fontFamily: MONO, fontSize: 12, color: MARGIN_GREY, lineHeight: 1.6 }}>
           {unstable.length} row{unstable.length === 1 ? "" : "s"} with fewer than 3 cases

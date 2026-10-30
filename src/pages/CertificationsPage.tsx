@@ -15,7 +15,7 @@ import { useEffect } from "react";
 
 function useMvReveal() {
   useEffect(() => {
-    const els = Array.from(document.querySelectorAll<HTMLElement>(".mv-rv"));
+    const els = Array.from(document.querySelectorAll<HTMLElement>("[data-mv]"));
     if (els.length === 0) return;
     if (typeof IntersectionObserver === "undefined") {
       els.forEach((el) => el.classList.add("mv-in"));
@@ -38,12 +38,12 @@ function useMvReveal() {
 }
 
 const MV_CSS = `
-.mv-rv {
+[data-mv] {
   opacity: 0;
   transform: translateY(14px);
   transition: opacity 600ms ease, transform 600ms cubic-bezier(0.22, 1, 0.36, 1);
 }
-.mv-rv.mv-in {
+[data-mv].mv-in {
   opacity: 1;
   transform: none;
 }
@@ -59,7 +59,7 @@ const MV_CSS = `
   background-size: 100% 1px;
 }
 @media (prefers-reduced-motion: reduce) {
-  .mv-rv {
+  [data-mv] {
     opacity: 1;
     transform: none;
     transition: none;
@@ -202,6 +202,7 @@ export default function CertificationsPage() {
             letterSpacing: "-0.03em",
             fontWeight: 700,
             margin: "0 0 24px",
+            overflowWrap: "break-word",
           }}
         >
           Certifications.
@@ -249,12 +250,25 @@ export default function CertificationsPage() {
                 letterSpacing: "0.08em",
                 textTransform: "uppercase",
                 color: GREY,
-                margin: "0 0 20px",
+                margin: group.note ? "0 0 8px" : "0 0 20px",
               }}
             >
               {group.provider}
-              {group.note ? ` - ${group.note}` : ""}
             </p>
+            {group.note ? (
+              <p
+                style={{
+                  fontFamily: MONO,
+                  fontSize: 12,
+                  letterSpacing: "0.04em",
+                  textTransform: "uppercase",
+                  color: GREY,
+                  margin: "0 0 20px",
+                }}
+              >
+                {group.note}
+              </p>
+            ) : null}
             <ul style={{ listStyle: "none", margin: 0, padding: 0 }}>
               {group.titles.map((title, ti) => (
                 <li

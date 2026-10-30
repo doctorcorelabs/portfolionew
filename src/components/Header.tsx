@@ -47,6 +47,7 @@ export default function Header() {
           background-repeat: no-repeat;
           background-position: 0 100%;
           padding-bottom: 3px;
+          white-space: nowrap;
           transition: background-size 300ms ease, color 300ms ease;
         }
         .onlines-nav a.hdr-nav-link:hover,
@@ -128,19 +129,21 @@ export default function Header() {
           .hdr-menu-btn { display: none; }
           .hdr-mobile-nav { display: none; }
         }
-        /* Tablets 721-1160px: taller nav tap targets (about 44px) while
-           keeping the dotted underline 3px below the text. */
-        @media (min-width: 721px) and (max-width: 1160px) {
+        /* Tablets 721-1366px: taller nav tap targets (about 44px) while
+           keeping the dotted underline 3px below the text. The band
+           reaches iPad landscape so touch gets full targets there. */
+        @media (min-width: 721px) and (max-width: 1366px) {
           .onlines-nav a.hdr-nav-link {
             padding: 12px 0 13px;
             background-position: 0 calc(100% - 10px);
           }
         }
-        /* Safety band 721-800px: slightly smaller links and gaps so the
+        /* Safety band 720-800px: slightly smaller links and gaps so the
            single row fits with slack at the narrow end. The !important
            flags are required because the nav font size and gap are set
-           inline below. */
-        @media (min-width: 721px) and (max-width: 800px) {
+           inline below. At exactly 720px the nav is display:none
+           anyway, so extending the lower bound is harmless. */
+        @media (min-width: 720px) and (max-width: 800px) {
           .onlines-nav a.hdr-nav-link {
             font-size: 14px !important;
           }

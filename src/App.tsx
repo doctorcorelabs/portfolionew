@@ -124,8 +124,9 @@ export default function App() {
    * viewport slides left to right over 700ms whenever the user
    * enters a new section. Sections are the direct section children
    * of <main> (only 3 of 8 homepage sections carry an id, so an
-   * id selector would miss most of them; archive pages render no
-   * <main>, so the sweep disables itself there). The observer band
+   * id selector would miss most of them; the sweep is homepage-only
+   * and exits early on other routes, where <main> holds content
+   * lists rather than homepage sections). The observer band
    * sits at the upper third of the viewport, and a MutationObserver
    * picks up sections that arrive later via lazy loading. Under
    * reduced motion the sweep never runs. It never blocks clicks,
@@ -133,6 +134,7 @@ export default function App() {
   const sweepRef = useRef<HTMLDivElement | null>(null);
 
   useEffect(() => {
+    if (location.pathname !== "/") return;
     const bar = sweepRef.current;
     if (!bar) return;
     if (

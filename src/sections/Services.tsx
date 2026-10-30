@@ -717,6 +717,16 @@ export default function Services() {
           opacity: 0.35;
           transition: opacity 0.6s ease;
         }
+        /* 1024-1180px: the motif can graze the wrapped title, so
+           shrink it proportionally (40px to 32px). */
+        @media (max-width: 1180px) {
+          .svc-motif {
+            width: 32px;
+            height: 32px;
+            top: 28px;
+            right: 28px;
+          }
+        }
         .svc-card.svc-docked .svc-motif {
           opacity: 1;
           transition: opacity 0.4s ease-out;
@@ -755,7 +765,8 @@ export default function Services() {
         }
         .svc-pill a {
           display: inline-block;
-          padding: 10px 22px;
+          /* 14px vertical padding gives a 44px-class tap target. */
+          padding: 14px 24px;
           border: 1px solid rgba(255, 255, 255, 0.9);
           border-radius: 999px;
           background: transparent;

@@ -32,6 +32,14 @@ html,
 body {
   overflow-x: clip;
 }
+/* Legacy fallback: browsers without overflow: clip support ignore the
+   rule above, so fall back to hidden there. */
+@supports not (overflow: clip) {
+  html,
+  body {
+    overflow-x: hidden;
+  }
+}
 
 body {
   margin: 0;

@@ -114,7 +114,11 @@ function resizeQITState(st: QITState): void {
   if (w < 1 || h < 1) return;
   st.w = w;
   st.h = h;
-  st.params = getTransitionParams(getBreakpoint(w));
+  /* Breakpoint from the viewport, not the canvas width: the wrap is
+     2px wider than the viewport, so getBreakpoint(w) disagreed with
+     the CSS media queries in a 2px band at 720/1100. Dot layout
+     still uses the canvas size above. */
+  st.params = getTransitionParams(getBreakpoint(window.innerWidth));
   const dpr = Math.min(window.devicePixelRatio || 1, st.params.dprCap);
   st.canvas.width = Math.round(w * dpr);
   st.canvas.height = Math.round(h * dpr);
@@ -165,6 +169,7 @@ function drawDots(st: QITState, p: number): void {
   };
   const cols = Math.ceil(st.w / pitch);
   const rows = Math.ceil(st.h / pitch);
+  const baseCount = (cols + 1) * (rows + 1);
   for (let j = 0; j <= rows; j++) {
     const y = (j + 0.5) * pitch;
     for (let i = 0; i <= cols; i++) {
@@ -174,10 +179,14 @@ function drawDots(st: QITState, p: number): void {
   }
   /* Offset echo layer: Quote half-pitch geometry, alpha ramps in over
    * p 0..0.15 so p=0 matches Quote byte-identical, then follows a
-   * progress-driven pulse (no wall-clock, scroll-back stays exact). */
+   * progress-driven pulse (no wall-clock, scroll-back stays exact).
+   * Perf gate: skip the echo layer when the base layer already
+   * exceeds ~14000 dots (1920x1080 reaches ~24.5k total), gated on
+   * the computed base count rather than the breakpoint so behavior
+   * below the threshold is identical everywhere. */
   const pulse = 0.5 + 0.5 * Math.sin(TAU * p);
   const offA = baseA * 0.25 * pulse * clamp01(p / 0.15);
-  if (offA >= 0.004) {
+  if (offA >= 0.004 && baseCount <= 14000) {
     const pitch2 = pitch * 1.6;
     const off = pitch / 2;
     const cols2 = Math.ceil(st.w / pitch2);

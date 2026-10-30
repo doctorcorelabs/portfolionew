@@ -108,13 +108,23 @@ export default function Quote() {
   useEffect(() => {
     if (reducedMotion) return;
     const wrapper = wrapperRef.current;
-    if (!wrapper) return;
+    const sticky = stickyRef.current;
+    if (!wrapper || !sticky) return;
     let ticking = false;
     const update = () => {
       ticking = false;
       const rect = wrapper.getBoundingClientRect();
-      const runway = rect.height - window.innerHeight;
-      setProgress(runway > 0 ? clamp01(-rect.top / runway) : 1);
+      /* Measured travel, independent of window.innerHeight: the iOS
+         Safari toolbar swings innerHeight by 50-70px as it
+         shows/hides, which used to wobble progress by 4-6%. The
+         sticky is top: 0, so the exact pin distance is wrapH -
+         stickyH: p = 0 when rect.top = 0 (wrap top hits viewport
+         top), and unstick happens when sticky bottom meets wrap
+         bottom (viewportTop + Hs = wrapTop + Hw, i.e. -rect.top =
+         Hw - Hs), so p hits exactly 1 at unstick. Both heights are
+         measured live, so toolbar motion cannot desync progress. */
+      const travel = rect.height - sticky.getBoundingClientRect().height;
+      setProgress(travel > 0 ? clamp01(-rect.top / travel) : 1);
     };
     const onScroll = () => {
       if (!ticking) {
@@ -511,6 +521,7 @@ export default function Quote() {
     >
       <style>{`
         .q-pin-wrap {
+          height: calc(100vh + 1875px + 240px);
           height: calc(100svh + 1875px + 240px);
         }
         .q-pin-sticky {
@@ -522,6 +533,7 @@ export default function Quote() {
              trapped wheel scrolling inside the pinned section.
              Now the child grows past viewport height when needed
              and only the page scrollbar exists. */
+          min-height: 100vh;
           min-height: 100svh;
           display: flex;
           align-items: center;
@@ -591,11 +603,16 @@ export default function Quote() {
         }
         @media (max-width: 1023px) {
           .q-pin-wrap {
+            height: calc(100vh + 1125px + 140px);
             height: calc(100svh + 1125px + 140px);
           }
           .q-pin-sticky {
             padding: 70px 24px;
           }
+        }
+        /* The drift ring floats through the right empty area, which
+           only exists on wide screens; keep it hidden below 1440px. */
+        @media (max-width: 1439px) {
           .q-drift-ring {
             display: none;
           }

@@ -93,6 +93,14 @@ const FRAME_HANDLES: Array<React.CSSProperties> = [
 ];
 
 const REVEAL_CSS = `
+.mvP-section {
+  padding: 130px 24px;
+}
+@media (max-width: 720px) {
+  .mvP-section {
+    padding: 88px 24px;
+  }
+}
 .mvP-armed .mvP-reveal {
   opacity: 0;
   transform: translateY(18px);
@@ -153,6 +161,11 @@ const REVEAL_CSS = `
 @media (max-width: 900px) {
   .mvP-grid {
     grid-template-columns: 1fr;
+  }
+  /* Stacked portrait: cap below the 675px source so it never
+     upscales on tablets. */
+  .mvP-frame {
+    max-width: 440px;
   }
 }
 .mvP-frame {
@@ -279,11 +292,11 @@ export default function Profile() {
       id="profile"
       ref={sectionRef}
       aria-labelledby="profile-heading"
+      className="mvP-section"
       style={{
         background: "#FAFAFA",
         color: "#010101",
         fontFamily: DISPLAY,
-        padding: "130px 24px",
       }}
     >
       <style>{REVEAL_CSS}</style>

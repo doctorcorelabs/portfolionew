@@ -421,13 +421,11 @@ export default function Contact() {
             </a>
           </span>
           <span className="contact-mv-social" style={{ transitionDelay: "750ms" }}>
-            {" | "}
             <a href="https://orcid.org/0009-0000-2528-8459" target="_blank" rel="noreferrer" style={styles.link}>
               ORCID
             </a>
           </span>
           <span className="contact-mv-social" style={{ transitionDelay: "850ms" }}>
-            {" | "}
             <a href="https://www.instagram.com/ddaiivan/" target="_blank" rel="noreferrer" style={styles.link}>
               Instagram
             </a>
@@ -474,10 +472,17 @@ const styles: Record<string, React.CSSProperties> = {
     fontFamily: "'Inter Display', Inter, Arial, sans-serif",
     fontSize: 16,
     color: "#1D1D1F",
+    display: "flex",
+    flexWrap: "wrap",
+    alignItems: "center",
+    gap: "12px 20px",
   },
   link: {
     color: "#0859D4",
     textDecoration: "none",
+    /* 44px-class hit area; negative margin keeps visual rhythm. */
+    padding: "12px 10px",
+    margin: "-12px -10px",
   },
   action: {
     display: "inline-block",

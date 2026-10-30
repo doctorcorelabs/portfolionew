@@ -4,7 +4,7 @@ import { useEffect } from "react";
 
 function useMvReveal() {
   useEffect(() => {
-    const els = Array.from(document.querySelectorAll<HTMLElement>(".mv-rv"));
+    const els = Array.from(document.querySelectorAll<HTMLElement>("[data-mv]"));
     if (els.length === 0) return;
     if (typeof IntersectionObserver === "undefined") {
       els.forEach((el) => el.classList.add("mv-in"));
@@ -27,12 +27,12 @@ function useMvReveal() {
 }
 
 const MV_CSS = `
-.mv-rv {
+[data-mv] {
   opacity: 0;
   transform: translateY(14px);
   transition: opacity 600ms ease, transform 600ms cubic-bezier(0.22, 1, 0.36, 1);
 }
-.mv-rv.mv-in {
+[data-mv].mv-in {
   opacity: 1;
   transform: none;
 }
@@ -48,13 +48,45 @@ const MV_CSS = `
   background-size: 100% 1px;
 }
 @media (prefers-reduced-motion: reduce) {
-  .mv-rv {
+  [data-mv] {
     opacity: 1;
     transform: none;
     transition: none;
   }
   .mv-link {
     transition: none;
+  }
+}
+.xp-main {
+  padding: 80px 24px 130px;
+}
+.xp-role {
+  display: grid;
+  grid-template-columns: 180px 1fr;
+  gap: 24px;
+}
+.xp-role > * {
+  min-width: 0;
+}
+.xp-intro {
+  margin: 0 0 80px;
+}
+.xp-section {
+  margin-top: 80px;
+}
+@media (max-width: 640px) {
+  .xp-main {
+    padding: 56px 20px 65px;
+  }
+  .xp-role {
+    grid-template-columns: 1fr;
+    gap: 8px;
+  }
+  .xp-intro {
+    margin-bottom: 40px;
+  }
+  .xp-section {
+    margin-top: 40px;
   }
 }
 `;
@@ -201,11 +233,11 @@ export default function ExperiencePage() {
   useMvReveal();
   return (
     <main
+      className="xp-main"
       style={{
         background: "#ffffff",
         color: INK,
         fontFamily: DISPLAY,
-        padding: "80px 24px 130px",
       }}
     >
       <style>{MV_CSS}</style>
@@ -225,7 +257,7 @@ export default function ExperiencePage() {
         <h1
           data-mv
           style={{
-            fontSize: "clamp(56px, 9vw, 96px)",
+            fontSize: "clamp(48px, 13vw, 96px)",
             lineHeight: 1,
             letterSpacing: "-0.03em",
             fontWeight: 700,
@@ -235,12 +267,12 @@ export default function ExperiencePage() {
           Experience.
         </h1>
         <p
+          className="xp-intro"
           style={{
             fontSize: 18,
             lineHeight: 1.65,
             color: GREY,
             maxWidth: 640,
-            margin: "0 0 80px",
           }}
         >
           A chronological record of contributions to healthcare, research,
@@ -252,13 +284,11 @@ export default function ExperiencePage() {
             <article
               key={`${item.role}-${item.org}`}
               data-mv
+              className="xp-role"
               style={{
                 transitionDelay: `${Math.min(i, 11) * 80}ms`,
                 borderBottom: `1px solid ${HAIRLINE}`,
                 padding: "32px 0",
-                display: "grid",
-                gridTemplateColumns: "180px 1fr",
-                gap: "24px",
               }}
             >
               <p
@@ -323,7 +353,7 @@ export default function ExperiencePage() {
           ))}
         </div>
 
-        <section style={{ marginTop: 80 }}>
+        <section className="xp-section">
           <h2
             data-mv
             style={{

@@ -4,7 +4,7 @@ import { useEffect } from "react";
 
 function useMvReveal() {
   useEffect(() => {
-    const els = Array.from(document.querySelectorAll<HTMLElement>(".mv-rv"));
+    const els = Array.from(document.querySelectorAll<HTMLElement>("[data-mv]"));
     if (els.length === 0) return;
     if (typeof IntersectionObserver === "undefined") {
       els.forEach((el) => el.classList.add("mv-in"));
@@ -27,12 +27,12 @@ function useMvReveal() {
 }
 
 const MV_CSS = `
-.mv-rv {
+[data-mv] {
   opacity: 0;
   transform: translateY(14px);
   transition: opacity 600ms ease, transform 600ms cubic-bezier(0.22, 1, 0.36, 1);
 }
-.mv-rv.mv-in {
+[data-mv].mv-in {
   opacity: 1;
   transform: none;
 }
@@ -48,13 +48,45 @@ const MV_CSS = `
   background-size: 100% 1px;
 }
 @media (prefers-reduced-motion: reduce) {
-  .mv-rv {
+  [data-mv] {
     opacity: 1;
     transform: none;
     transition: none;
   }
   .mv-link {
     transition: none;
+  }
+}
+.edu-main {
+  padding: 80px 24px 130px;
+}
+.edu-entry {
+  display: grid;
+  grid-template-columns: 180px 1fr;
+  gap: 24px;
+}
+.edu-entry > * {
+  min-width: 0;
+}
+.edu-status {
+  margin: 0 0 80px;
+}
+.edu-section {
+  margin-top: 80px;
+}
+@media (max-width: 640px) {
+  .edu-main {
+    padding: 56px 20px 96px;
+  }
+  .edu-entry {
+    grid-template-columns: 1fr;
+    gap: 8px;
+  }
+  .edu-status {
+    margin-bottom: 56px;
+  }
+  .edu-section {
+    margin-top: 56px;
   }
 }
 `;
@@ -88,9 +120,9 @@ const ENTRIES: Entry[] = [
   {
     institution: "Islamic University of Indonesia",
     program: "Bachelor of Medicine",
-    period: "2021 - Present",
+    period: "2022 - Present",
     detail:
-      "Undergraduate, Faculty of Medicine. Current GPA 3.90/4.0 as recorded.",
+      "Undergraduate, Faculty of Medicine. Current GPA 3.90 out of 4.0 as recorded.",
     notes: [
       "Most Outstanding Student UII 2025",
       "Awardee, Beasiswa Unggulan, Ministry of Education, Culture, Research, and Technology, 2023",
@@ -131,11 +163,11 @@ export default function EducationPage() {
   useMvReveal();
   return (
     <main
+      className="edu-main"
       style={{
         background: "#ffffff",
         color: INK,
         fontFamily: DISPLAY,
-        padding: "80px 24px 130px",
       }}
     >
       <style>{MV_CSS}</style>
@@ -155,7 +187,7 @@ export default function EducationPage() {
         <h1
           data-mv
           style={{
-            fontSize: "clamp(56px, 9vw, 96px)",
+            fontSize: "clamp(48px, 9vw, 96px)",
             lineHeight: 1,
             letterSpacing: "-0.03em",
             fontWeight: 700,
@@ -178,6 +210,7 @@ export default function EducationPage() {
           at Chulalongkorn University, and senior high school at SMAN 1 Blora.
         </p>
         <p
+          className="edu-status"
           style={{
             background: LIGHT,
             borderLeft: `2px solid ${BLUE}`,
@@ -186,7 +219,6 @@ export default function EducationPage() {
             lineHeight: 1.65,
             color: INK,
             maxWidth: 680,
-            margin: "0 0 80px",
           }}
         >
           Current status note: since 5 October 2026, Daivan is a clinical
@@ -200,13 +232,11 @@ export default function EducationPage() {
             <article
               key={entry.institution}
               data-mv
+              className="edu-entry"
               style={{
                 transitionDelay: `${Math.min(i, 11) * 80}ms`,
                 borderBottom: `1px solid ${HAIRLINE}`,
                 padding: "32px 0",
-                display: "grid",
-                gridTemplateColumns: "180px 1fr",
-                gap: "24px",
               }}
             >
               <p
@@ -270,7 +300,7 @@ export default function EducationPage() {
           ))}
         </div>
 
-        <section style={{ marginTop: 80 }}>
+        <section className="edu-section">
           <h2
             data-mv
             style={{

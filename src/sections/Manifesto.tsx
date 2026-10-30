@@ -56,7 +56,7 @@
  *   Touch: no hover-dependent content, no scroll hijack, no drag.
  */
 
-import { useEffect, useRef, useState, type CSSProperties } from "react";
+import { useEffect, useLayoutEffect, useRef, useState, type CSSProperties } from "react";
 import { Fragment } from "react";
 import { BeadExpand } from "./journey/BeadExpand";
 
@@ -936,6 +936,41 @@ export default function Manifesto() {
     setExpandedBead(opening ? year : null);
   };
 
+  /* Latest progress for async re-measures (transitionend) that must not
+     capture a stale render closure. */
+  const progressRef = useRef(0);
+  progressRef.current = progress;
+
+  /* Mobile bead position (spec 2.3): interpolate the measured mobile
+     node centers by the bead index from progress. Shared by the
+     scroll/resize update below and the expandedBead layout effect. */
+  const measureBeadTop = (p: number) => {
+    const section = sectionRef.current;
+    if (!section) return;
+    const grid = section.querySelector(".journey-grid");
+    if (!grid) {
+      setBeadTop((prev) => (prev === null ? prev : null));
+      return;
+    }
+    const gridRect = grid.getBoundingClientRect();
+    const centers: number[] = [];
+    grid.querySelectorAll(".journey-node-mobile").forEach((dot) => {
+      const r = dot.getBoundingClientRect();
+      centers.push(r.top + 8 - gridRect.top);
+    });
+    if (centers.length !== 5) {
+      setBeadTop((prev) => (prev === null ? prev : null));
+      return;
+    }
+    const b = beadStateFromProgress(p).beadIndex;
+    const i0 = Math.floor(b);
+    const i1 = Math.min(4, Math.ceil(b));
+    const top = centers[i0] + (b - i0) * (centers[i1] - centers[i0]);
+    setBeadTop((prev) =>
+      prev === null || Math.abs(prev - top) >= 0.5 ? top : prev,
+    );
+  };
+
   useEffect(() => {
     const section = sectionRef.current;
     if (!section) return;
@@ -993,28 +1028,7 @@ export default function Manifesto() {
       // Mobile bead position (spec 2.3): interpolate the measured
       // mobile node centers by the same bead index. Runs inside the
       // existing throttled update only; no new listener.
-      const grid = section.querySelector(".journey-grid");
-      if (grid) {
-        const gridRect = grid.getBoundingClientRect();
-        const centers: number[] = [];
-        grid.querySelectorAll(".journey-node-mobile").forEach((dot) => {
-          const r = dot.getBoundingClientRect();
-          centers.push(r.top + 8 - gridRect.top);
-        });
-        if (centers.length === 5) {
-          const b = beadStateFromProgress(p).beadIndex;
-          const i0 = Math.floor(b);
-          const i1 = Math.min(4, Math.ceil(b));
-          const top = centers[i0] + (b - i0) * (centers[i1] - centers[i0]);
-          setBeadTop((prev) =>
-            prev === null || Math.abs(prev - top) >= 0.5 ? top : prev,
-          );
-        } else {
-          setBeadTop((prev) => (prev === null ? prev : null));
-        }
-      } else {
-        setBeadTop((prev) => (prev === null ? prev : null));
-      }
+      measureBeadTop(p);
     };
     const onScroll = () => {
       if (!raf) raf = requestAnimationFrame(update);
@@ -1029,6 +1043,27 @@ export default function Manifesto() {
       observer?.disconnect();
     };
   }, []);
+
+  /* The traveling bead interpolates the measured mobile node centers,
+     but those only recompute on scroll/resize. Opening or closing a
+     bead card moves the nodes below it (up to ~350px) with no scroll
+     event, so re-measure when the expanded bead changes. Two passes:
+     once right after commit, and again when the card's grid
+     expand/collapse transition ends, because the centers keep moving
+     for the whole animation and the commit-time read captures
+     start-of-transition geometry. progressRef keeps the async pass on
+     live progress. Deps are intentionally [expandedBead] only. */
+  useLayoutEffect(() => {
+    const measure = () => measureBeadTop(progressRef.current);
+    measure();
+    const section = sectionRef.current;
+    if (!section) return;
+    const onTransitionEnd = (e: TransitionEvent) => {
+      if (e.propertyName === "grid-template-rows") measure();
+    };
+    section.addEventListener("transitionend", onTransitionEnd);
+    return () => section.removeEventListener("transitionend", onTransitionEnd);
+  }, [expandedBead]);
 
   const { beadIndex, arrivalIdx } = beadStateFromProgress(progress);
 

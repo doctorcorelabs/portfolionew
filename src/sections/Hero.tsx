@@ -1481,11 +1481,6 @@ export default function Hero() {
             bottom: 5% !important;
           }
         }
-        @media (min-width: 720px) and (max-width: 1400px) {
-          .mv-collage-hide-720-1400 {
-            display: none;
-          }
-        }
         @media (min-width: 1401px) {
           .mv-collage-hide-min-1400 {
             display: none;
@@ -1503,11 +1498,6 @@ export default function Hero() {
         }
         @media (max-width: 1000px) {
           .mv-collage-hide-1000 {
-            display: none;
-          }
-        }
-        @media (max-height: 700px) {
-          .mv-collage-hide-short {
             display: none;
           }
         }

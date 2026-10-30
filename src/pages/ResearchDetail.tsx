@@ -79,7 +79,7 @@ export default function ResearchDetail() {
       <main className="container research-detail">
         <Reveal>
         <nav className="breadcrumb" aria-label="Breadcrumb">
-          <Link to="/">Home</Link> / <Link to="/research">Research</Link> /{" "}
+          <Link to="/" style={{ display: "inline-block", padding: "12px 12px 12px 0" }}>Home</Link> / <Link to="/research" style={{ display: "inline-block", padding: "12px 0" }}>Research</Link> /{" "}
           {oldPub.title}
         </nav>
         </Reveal>
@@ -105,7 +105,7 @@ export default function ResearchDetail() {
           source. {oldPub.authorsNote}
         </p>
         <p>
-          <Link to="/research">Back to research</Link>
+          <Link to="/research" style={{ display: "inline-block", padding: "12px 0" }}>Back to research</Link>
         </p>
       </main>
     );
@@ -116,7 +116,7 @@ export default function ResearchDetail() {
       <main className="container research-detail">
         <Reveal>
         <nav className="breadcrumb" aria-label="Breadcrumb">
-          <Link to="/">Home</Link> / Research
+          <Link to="/" style={{ display: "inline-block", padding: "12px 12px 12px 0" }}>Home</Link> / Research
         </nav>
         </Reveal>
         <Reveal delay={160}>
@@ -128,7 +128,7 @@ export default function ResearchDetail() {
           available from a verified source.
         </p>
         <p>
-          <Link to="/">Back to home</Link>
+          <Link to="/" style={{ display: "inline-block", padding: "12px 0" }}>Back to home</Link>
         </p>
       </main>
     );
@@ -151,7 +151,7 @@ export default function ResearchDetail() {
     <main className="container research-detail">
       <Reveal>
       <nav className="breadcrumb" aria-label="Breadcrumb">
-        <Link to="/">Home</Link> / <Link to="/research">Research</Link> /{" "}
+        <Link to="/" style={{ display: "inline-block", padding: "12px 12px 12px 0" }}>Home</Link> / <Link to="/research" style={{ display: "inline-block", padding: "12px 0" }}>Research</Link> /{" "}
         {item.shortTitle}
       </nav>
       </Reveal>

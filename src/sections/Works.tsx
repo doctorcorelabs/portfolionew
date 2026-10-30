@@ -289,10 +289,11 @@ export default function Works() {
           transform: scaleY(1);
         }
         /* Traveler dot riding the dashed route line, top to bottom
-           and back. It sits above the line (z-index 1) and below row
-           content (rows carry z-index 2). Geometrically it never
-           overlaps row text, which starts at 150px padding (88px on
-           mobile) while the dot rides at 70px (34px on mobile). */
+           and back. It sits above the giant numerals (z-index 3,
+           rows carry z-index 2) so the dot reads on top of them.
+           Geometrically it never overlaps row text, which starts at
+           150px padding (88px on mobile) while the dot rides at 70px
+           (34px on mobile). */
         @keyframes wkTravel {
           from { top: 0%; }
           to { top: 100%; }
@@ -307,7 +308,7 @@ export default function Works() {
           background: #0859D4;
           transform: translate(-50%, -50%);
           pointer-events: none;
-          z-index: 1;
+          z-index: 3;
           animation: wkTravel 14s ease-in-out infinite alternate;
         }
         /* Per-row visual tag: mono type label plus a tiny glyph. */
@@ -390,12 +391,21 @@ export default function Works() {
         }
         .wk-row:hover .wk-title { transform: translateX(4px); }
         .wk-link {
+          /* Stretched-link pattern: the whole row (.wk-row is
+             position relative) becomes the tap target. The giant
+             numeral is pointer-events none, so nothing conflicts. */
+          position: static;
           text-decoration: none;
           background-image: linear-gradient(#0859d4, #0859d4);
           background-size: 0% 1px;
           background-repeat: no-repeat;
           background-position: 0 100%;
           transition: background-size 300ms cubic-bezier(0.22, 1, 0.36, 1), color 300ms cubic-bezier(0.22, 1, 0.36, 1);
+        }
+        .wk-link::after {
+          content: "";
+          position: absolute;
+          inset: 0;
         }
         .wk-row:hover .wk-link, .wk-link:hover {
           background-size: 100% 1px;
@@ -567,7 +577,8 @@ export default function Works() {
             fontFamily: MONO,
             fontSize: 12,
             lineHeight: 1.7,
-            color: MUTED,
+            /* 4.5:1 on white for this note; MUTED stays site-wide. */
+            color: "#6E6E73",
           }}
         >
           FAERS results are hypothesis-generating: they measure reporting

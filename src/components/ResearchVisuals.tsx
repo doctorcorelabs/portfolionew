@@ -103,9 +103,9 @@ function BpaVisual() {
     { n: "44", label: "in qualitative synthesis" },
     { n: "22", label: "in meta-analysis" },
   ];
-  const mobileRowTop = [30, 180, 330, 480, 630];
+  const mobileRowTop = [30, 220, 410, 600, 790];
   const mobileX = (v: number) => 20 + (v + 1.5) * 194.2857;
-  const flowTop = [780, 880, 980, 1080];
+  const flowTop = [980, 1080, 1180, 1280];
   return (
     <Shell
       label="Forest plot of pooled standardized mean differences for BPA exposure by outcome, with a screening flow strip."
@@ -158,9 +158,9 @@ function BpaVisual() {
           </g>
         ))}
       </svg>
-      <svg className="rv-m" viewBox="0 0 720 1180" role="presentation">
+      <svg className="rv-m" viewBox="0 0 720 1400" role="presentation">
         {[-1, 0, 1, 2].map((g) => (
-          <text key={g} x={mobileX(g)} y={20} textAnchor="middle" fontFamily={MONO} fontSize={11} fill={MUTED}>
+          <text key={g} x={mobileX(g)} y={20} textAnchor="middle" fontFamily={MONO} fontSize={20} fill={MUTED}>
             {g}
           </text>
         ))}
@@ -168,18 +168,21 @@ function BpaVisual() {
           const top = mobileRowTop[i];
           return (
             <g key={row.label}>
-              <text x={20} y={top + 16} fontFamily={DISPLAY} fontSize={15} fontWeight={600} fill={INK}>
+              <text x={20} y={top + 24} fontFamily={DISPLAY} fontSize={20} fontWeight={600} fill={INK}>
                 {row.label}
               </text>
               {[-1, 0, 1, 2].map((g) => (
-                <line key={g} x1={mobileX(g)} y1={top + 35} x2={mobileX(g)} y2={top + 75} stroke={g === 0 ? INK : HAIRLINE} strokeWidth={g === 0 ? 2 : 1} />
+                <line key={g} x1={mobileX(g)} y1={top + 50} x2={mobileX(g)} y2={top + 100} stroke={g === 0 ? INK : HAIRLINE} strokeWidth={g === 0 ? 2 : 1} />
               ))}
-              <line x1={mobileX(row.lo)} y1={top + 55} x2={mobileX(row.hi)} y2={top + 55} stroke={INK} strokeWidth={1.5} />
-              <line x1={mobileX(row.lo)} y1={top + 51} x2={mobileX(row.lo)} y2={top + 59} stroke={INK} strokeWidth={1.5} />
-              <line x1={mobileX(row.hi)} y1={top + 51} x2={mobileX(row.hi)} y2={top + 59} stroke={INK} strokeWidth={1.5} />
-              <rect x={mobileX(row.point) - 5} y={top + 50} width={10} height={10} fill={BLUE} />
-              <text x={20} y={top + 100} fontFamily={MONO} fontSize={12} fill={MARGIN_GREY}>
-                {row.point.toFixed(2)} ({row.lo.toFixed(2)} to {row.hi.toFixed(2)}) | {row.counts} | {row.hetero}
+              <line x1={mobileX(row.lo)} y1={top + 75} x2={mobileX(row.hi)} y2={top + 75} stroke={INK} strokeWidth={1.5} />
+              <line x1={mobileX(row.lo)} y1={top + 71} x2={mobileX(row.lo)} y2={top + 79} stroke={INK} strokeWidth={1.5} />
+              <line x1={mobileX(row.hi)} y1={top + 71} x2={mobileX(row.hi)} y2={top + 79} stroke={INK} strokeWidth={1.5} />
+              <rect x={mobileX(row.point) - 5} y={top + 70} width={10} height={10} fill={BLUE} />
+              <text x={20} y={top + 128} fontFamily={MONO} fontSize={20} fill={MARGIN_GREY}>
+                {row.point.toFixed(2)} ({row.lo.toFixed(2)} to {row.hi.toFixed(2)}) | {row.counts}
+              </text>
+              <text x={20} y={top + 156} fontFamily={MONO} fontSize={20} fill={MARGIN_GREY}>
+                {row.hetero}
               </text>
             </g>
           );
@@ -190,11 +193,11 @@ function BpaVisual() {
             <text x={40} y={flowTop[i] + 32} fontFamily={DISPLAY} fontSize={20} fontWeight={800} fill={INK}>
               {box.n}
             </text>
-            <text x={40} y={flowTop[i] + 56} fontFamily={MONO} fontSize={11} fill={MARGIN_GREY}>
+            <text x={40} y={flowTop[i] + 60} fontFamily={MONO} fontSize={20} fill={MARGIN_GREY}>
               {box.label}
             </text>
             {i < 3 && (
-              <text x={360} y={flowTop[i] + 96} textAnchor="middle" fontFamily={MONO} fontSize={14} fill={MUTED}>
+              <text x={360} y={flowTop[i] + 98} textAnchor="middle" fontFamily={MONO} fontSize={20} fill={MUTED}>
                 v
               </text>
             )}
@@ -305,14 +308,14 @@ function AmomumVisual() {
           {AMOMUM_LEADS[3]}
         </text>
       </svg>
-      <svg className="rv-m" viewBox="0 0 720 800" role="presentation">
-        <text x={20} y={40} fontFamily={MONO} fontSize={12} fill={MARGIN_GREY}>
+      <svg className="rv-m" viewBox="0 0 720 810" role="presentation">
+        <text x={20} y={40} fontFamily={MONO} fontSize={20} fill={MARGIN_GREY}>
           22 compounds (C1 to C22), LC-MS identified
         </text>
         {Array.from({ length: 22 }, (_, i) => (
           <circle key={i} cx={30 + i * 30} cy={90} r={8} fill={LIGHTGREY} stroke={INK} strokeWidth={1} />
         ))}
-        <text x={20} y={150} fontFamily={MONO} fontSize={12} fill={MARGIN_GREY}>
+        <text x={20} y={150} fontFamily={MONO} fontSize={20} fill={MARGIN_GREY}>
           36 shared targets
         </text>
         <rect x={20} y={170} width={680} height={240} fill={OFFWHITE} stroke={HAIRLINE} />
@@ -325,13 +328,13 @@ function AmomumVisual() {
             <text x={hub.x + 16} y={hub.y + 38} fontFamily={DISPLAY} fontSize={20} fontWeight={800} fill={INK}>
               {hub.name}
             </text>
-            <text x={hub.x + 16} y={hub.y + 64} fontFamily={MONO} fontSize={12} fill={MARGIN_GREY}>
+            <text x={hub.x + 16} y={hub.y + 66} fontFamily={MONO} fontSize={20} fill={MARGIN_GREY}>
               centrality {hub.centrality}
             </text>
           </g>
         ))}
         {AMOMUM_LEADS.map((lead, i) => (
-          <text key={lead} x={20} y={690 + i * 26} fontFamily={MONO} fontSize={12} fill={BLUE}>
+          <text key={lead} x={20} y={690 + i * 34} fontFamily={MONO} fontSize={20} fill={BLUE}>
             {lead}
           </text>
         ))}
@@ -362,7 +365,7 @@ const LYT_ROWS: LytRow[] = [
 function LytechinusVisual() {
   const rowY = [80, 160, 240, 320, 400];
   const scale = 640 / 12;
-  const mobileTop = [30, 180, 330, 480, 630];
+  const mobileTop = [110, 260, 410, 560, 710];
   const mobileScale = 680 / 12;
   return (
     <Shell
@@ -425,33 +428,41 @@ function LytechinusVisual() {
           50 ns dynamics, C-alpha RMSD
         </text>
       </svg>
-      <svg className="rv-m" viewBox="0 0 720 1100" role="presentation">
-        <text x={20} y={20} fontFamily={MONO} fontSize={11} fill={MARGIN_GREY}>
+      <svg className="rv-m" viewBox="0 0 720 1140" role="presentation">
+        <text x={20} y={20} fontFamily={MONO} fontSize={20} fill={MARGIN_GREY}>
           kcal/mol, more negative means stronger predicted binding
+        </text>
+        <rect x={20} y={38} width={16} height={16} fill={BLUE} />
+        <text x={44} y={52} fontFamily={MONO} fontSize={20} fill={INK}>
+          Peptide 7
+        </text>
+        <rect x={220} y={38} width={16} height={16} fill={BAR_GREY} />
+        <text x={244} y={52} fontFamily={MONO} fontSize={20} fill={INK}>
+          Reference inhibitor
         </text>
         {LYT_ROWS.map((row, i) => {
           const top = mobileTop[i];
           return (
             <g key={row.target}>
-              <text x={20} y={top + 16} fontFamily={DISPLAY} fontSize={15} fontWeight={600} fill={INK}>
+              <text x={20} y={top + 22} fontFamily={DISPLAY} fontSize={20} fontWeight={600} fill={INK}>
                 {row.target}
               </text>
-              <rect x={20} y={top + 30} width={Math.abs(row.peptide) * mobileScale} height={16} fill={BLUE} />
-              <text x={20 + Math.abs(row.peptide) * mobileScale + 8} y={top + 43} fontFamily={MONO} fontSize={12} fill={INK}>
+              <rect x={20} y={top + 36} width={Math.abs(row.peptide) * mobileScale} height={16} fill={BLUE} />
+              <text x={20 + Math.abs(row.peptide) * mobileScale + 8} y={top + 50} fontFamily={MONO} fontSize={20} fill={INK}>
                 {row.peptide.toFixed(2)}
               </text>
-              <rect x={20} y={top + 54} width={Math.abs(row.reference) * mobileScale} height={16} fill={BAR_GREY} />
-              <text x={20 + Math.abs(row.reference) * mobileScale + 8} y={top + 67} fontFamily={MONO} fontSize={12} fill={INK}>
+              <rect x={20} y={top + 60} width={Math.abs(row.reference) * mobileScale} height={16} fill={BAR_GREY} />
+              <text x={20 + Math.abs(row.reference) * mobileScale + 8} y={top + 74} fontFamily={MONO} fontSize={20} fill={INK}>
                 {row.reference.toFixed(2)}
               </text>
             </g>
           );
         })}
-        <text x={20} y={800} fontFamily={MONO} fontSize={11} fill={MARGIN_GREY}>
+        <text x={20} y={880} fontFamily={MONO} fontSize={20} fill={MARGIN_GREY}>
           50 ns dynamics, C-alpha RMSD
         </text>
         {LYT_ROWS.map((row, i) => (
-          <text key={row.target} x={20} y={830 + i * 40} fontFamily={MONO} fontSize={12} fill={MARGIN_GREY}>
+          <text key={row.target} x={20} y={910 + i * 40} fontFamily={MONO} fontSize={20} fill={MARGIN_GREY}>
             {row.stability}
           </text>
         ))}
@@ -526,7 +537,7 @@ function MirnaVisual() {
           Not yet a biopsy replacement.
         </text>
       </svg>
-      <svg className="rv-m" viewBox="0 0 720 840" role="presentation">
+      <svg className="rv-m" viewBox="0 0 720 860" role="presentation">
         <text x={20} y={40} fontFamily={DISPLAY} fontSize={18} fontWeight={600} fill={INK}>
           Sensitivity
         </text>
@@ -542,20 +553,20 @@ function MirnaVisual() {
           0.81
         </text>
         <rect x={290} y={210} width={140} height={120} fill={PAPER} stroke={INK} strokeWidth={2} />
-        <text x={360} y={250} textAnchor="middle" fontFamily={MONO} fontSize={12} fill={MARGIN_GREY}>
+        <text x={360} y={250} textAnchor="middle" fontFamily={MONO} fontSize={20} fill={MARGIN_GREY}>
           AUC
         </text>
         <text x={360} y={302} textAnchor="middle" fontFamily={DISPLAY} fontSize={40} fontWeight={800} fill={BLUE}>
           0.91
         </text>
-        <text x={20} y={360} fontFamily={MONO} fontSize={11} fill={MARGIN_GREY}>
+        <text x={20} y={360} fontFamily={MONO} fontSize={20} fill={MARGIN_GREY}>
           First value sensitivity, second specificity.
         </text>
         {mobilePairs.map((pair, i) => {
           const top = 390 + i * 90;
           return (
             <g key={pair.label}>
-              <text x={20} y={top} fontFamily={MONO} fontSize={12} fontWeight={700} fill={INK}>
+              <text x={20} y={top} fontFamily={MONO} fontSize={20} fontWeight={700} fill={INK}>
                 {pair.label} {pair.sens.toFixed(2)} / {pair.spec.toFixed(2)}
               </text>
               <rect x={20} y={top + 12} width={pair.sens * 400} height={10} fill={INK} />
@@ -563,10 +574,13 @@ function MirnaVisual() {
             </g>
           );
         })}
-        <text x={20} y={780} fontFamily={MONO} fontSize={12} fill={MARGIN_GREY}>
-          12 articles, 52 studies, 1098 cases, 957 controls. I-squared about 77 to 82%.
+        <text x={20} y={772} fontFamily={MONO} fontSize={20} fill={MARGIN_GREY}>
+          12 articles, 52 studies, 1098 cases, 957 controls.
         </text>
-        <text x={20} y={814} fontFamily={DISPLAY} fontSize={17} fontWeight={800} fill={INK}>
+        <text x={20} y={800} fontFamily={MONO} fontSize={20} fill={MARGIN_GREY}>
+          I-squared about 77 to 82%.
+        </text>
+        <text x={20} y={836} fontFamily={DISPLAY} fontSize={17} fontWeight={800} fill={INK}>
           Not yet a biopsy replacement.
         </text>
       </svg>
@@ -592,10 +606,10 @@ function EchinometraVisual() {
     { x1: 680, y1: 300, x2: 912, y2: 505, dx: 912, dy: 505 },
   ];
   const mobileCards = [
-    { name: "EGFR", value: "-10.17 kcal/mol", stab: "mean RMSD 2.11 A, most stable group", x: 20, y: 220 },
-    { name: "BRAF V600E", value: "-10.60 kcal/mol", stab: "mean RMSD 3.17 A, least stable", x: 370, y: 220 },
-    { name: "VEGFR2", value: "-10.33 kcal/mol", stab: "mean RMSD 1.88 A, most stable", x: 20, y: 380 },
-    { name: "AKT1", value: "-11.79 kcal/mol", stab: "mean RMSD 2.99 A", x: 370, y: 380 },
+    { name: "EGFR", value: "-10.17 kcal/mol", stab1: "mean RMSD 2.11 A,", stab2: "most stable group", x: 20, y: 220 },
+    { name: "BRAF V600E", value: "-10.60 kcal/mol", stab1: "mean RMSD 3.17 A,", stab2: "least stable", x: 370, y: 220 },
+    { name: "VEGFR2", value: "-10.33 kcal/mol", stab1: "mean RMSD 1.88 A,", stab2: "most stable", x: 20, y: 380 },
+    { name: "AKT1", value: "-11.79 kcal/mol", stab1: "mean RMSD 2.99 A", stab2: "", x: 370, y: 380 },
   ];
   return (
     <Shell
@@ -640,12 +654,12 @@ function EchinometraVisual() {
           13 peptides tested, all predicted non-toxic, 50 ns simulation, in silico only, lab validation still needed.
         </text>
       </svg>
-      <svg className="rv-m" viewBox="0 0 720 600" role="presentation">
+      <svg className="rv-m" viewBox="0 0 720 640" role="presentation">
         <rect x={260} y={20} width={200} height={160} fill={PAPER} stroke={INK} strokeWidth={2} />
         <text x={360} y={95} textAnchor="middle" fontFamily={DISPLAY} fontSize={24} fontWeight={800} fill={INK}>
           Peptide A
         </text>
-        <text x={360} y={125} textAnchor="middle" fontFamily={MONO} fontSize={14} fill={MARGIN_GREY}>
+        <text x={360} y={125} textAnchor="middle" fontFamily={MONO} fontSize={20} fill={MARGIN_GREY}>
           FLMLVDGHN
         </text>
         <line x1={185} y1={180} x2={185} y2={220} stroke={HAIRLINE} strokeWidth={1.5} strokeDasharray="6 4" />
@@ -656,20 +670,28 @@ function EchinometraVisual() {
             <text x={card.x + 16} y={card.y + 34} fontFamily={DISPLAY} fontSize={18} fontWeight={800} fill={INK}>
               {card.name}
             </text>
-            <text x={card.x + 16} y={card.y + 64} fontFamily={MONO} fontSize={15} fill={BLUE}>
+            <text x={card.x + 16} y={card.y + 64} fontFamily={MONO} fontSize={20} fill={BLUE}>
               {card.value}
             </text>
-            <text x={card.x + 16} y={card.y + 90} fontFamily={MONO} fontSize={12} fill={MARGIN_GREY}>
-              {card.stab}
+            <text x={card.x + 16} y={card.y + 94} fontFamily={MONO} fontSize={20} fill={MARGIN_GREY}>
+              {card.stab1}
             </text>
+            {card.stab2 && (
+              <text x={card.x + 16} y={card.y + 118} fontFamily={MONO} fontSize={20} fill={MARGIN_GREY}>
+                {card.stab2}
+              </text>
+            )}
           </g>
         ))}
-        <rect x={20} y={530} width={680} height={56} fill={LIGHTGREY} />
-        <text x={360} y={552} textAnchor="middle" fontFamily={MONO} fontSize={11} fill={INK}>
-          13 peptides tested, all predicted non-toxic, 50 ns simulation,
+        <rect x={20} y={530} width={680} height={110} fill={LIGHTGREY} />
+        <text x={360} y={556} textAnchor="middle" fontFamily={MONO} fontSize={20} fill={INK}>
+          13 peptides tested, all predicted non-toxic,
         </text>
-        <text x={360} y={570} textAnchor="middle" fontFamily={MONO} fontSize={11} fill={INK}>
-          in silico only, lab validation still needed.
+        <text x={360} y={584} textAnchor="middle" fontFamily={MONO} fontSize={20} fill={INK}>
+          50 ns simulation, in silico only,
+        </text>
+        <text x={360} y={612} textAnchor="middle" fontFamily={MONO} fontSize={20} fill={INK}>
+          lab validation still needed.
         </text>
       </svg>
     </Shell>
