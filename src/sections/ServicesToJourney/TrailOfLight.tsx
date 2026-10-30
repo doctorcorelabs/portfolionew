@@ -75,10 +75,11 @@ const smoothstep = (a: number, b: number, x: number): number => {
   return t * t * (3 - 2 * t);
 };
 
-/* Pillar charge: 0 until the comet is underway, ramps to 1 as it climbs,
- * holds 1 through the bloom phase (where the pillar itself fades out). */
+/* Pillar charge: 0 until the comet is underway, ramps to 1 as it climbs
+ * (15% shorter than the original 0.05-0.78, user 2026-10-30), holds 1
+ * through the bloom phase (where the pillar itself fades out). */
 function pillarStrength(p: number): number {
-  return smoothstep(0.05, 0.78, p);
+  return smoothstep(0.05, 0.67, p);
 }
 
 const easeOutCubic = (t: number): number => 1 - Math.pow(1 - clamp01(t), 3);
