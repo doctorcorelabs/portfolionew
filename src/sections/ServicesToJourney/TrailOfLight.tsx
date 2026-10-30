@@ -31,14 +31,15 @@ export type TLBreakpoint = "mobile" | "tablet" | "desktop";
 export interface TLParams {
   dprCap: number;
   trailScale: number;
-  /* Lantern-A clone geometry for the seamless joint. lanternR is the CSS
-     farthest-corner radius (divSize/2)*sqrt(2). lanternCX is the lantern
-     center x as a fraction of viewport width. lanternCYK is the lantern
-     center y as a fraction of the Journey section height, above the joint
-     (negative). The joint is the canvas bottom edge = Journey top edge. */
+  /* Lantern-A clone geometry. The lantern div is lanternHalf*2 px square;
+     its CSS radial-gradient(circle) centers in the div, so the gradient
+     center is (left+half, top+half) and the farthest-corner radius is
+     half*sqrt(2) = lanternR. lanternCX = div left as fraction of viewport
+     width; lanternCYK = div top as fraction of Journey height (negative). */
   lanternR: number;
   lanternCX: number;
   lanternCYK: number;
+  lanternHalf: number;
 }
 
 export interface TrailOfLightProps {
@@ -54,11 +55,11 @@ export function getBreakpoint(width: number): TLBreakpoint {
 export function getTrailParams(bp: TLBreakpoint): TLParams {
   switch (bp) {
     case "mobile":
-      return { dprCap: 1.25, trailScale: 0.3, lanternR: 350 * Math.SQRT2, lanternCX: -0.2, lanternCYK: -0.04 };
+      return { dprCap: 1.25, trailScale: 0.3, lanternR: 350 * Math.SQRT2, lanternCX: -0.2, lanternCYK: -0.04, lanternHalf: 350 };
     case "tablet":
-      return { dprCap: 1.5, trailScale: 0.34, lanternR: 350 * Math.SQRT2, lanternCX: -0.2, lanternCYK: -0.04 };
+      return { dprCap: 1.5, trailScale: 0.34, lanternR: 350 * Math.SQRT2, lanternCX: -0.2, lanternCYK: -0.04, lanternHalf: 350 };
     case "desktop":
-      return { dprCap: 2, trailScale: 0.38, lanternR: 550 * Math.SQRT2, lanternCX: -0.08, lanternCYK: -0.06 };
+      return { dprCap: 2, trailScale: 0.38, lanternR: 550 * Math.SQRT2, lanternCX: -0.08, lanternCYK: -0.06, lanternHalf: 550 };
   }
 }
 
@@ -94,6 +95,13 @@ interface SparkleSeed {
   phase: number;
 }
 
+interface LanternLive {
+  cx: number; // lantern center x, viewport coords (= canvas x, full width)
+  cy: number; // lantern center y RELATIVE TO THE JOINT (section top edge)
+  r: number;  // gradient radius px
+  op: number; // live opacity (pulse phase)
+}
+
 interface TLState {
   canvas: HTMLCanvasElement;
   ctx: CanvasRenderingContext2D;
@@ -102,6 +110,7 @@ interface TLState {
   params: TLParams;
   sparkles: SparkleSeed[];
   journeyH: number;
+  lanternLive: LanternLive | null;
 }
 
 function createTLState(
@@ -125,6 +134,7 @@ function createTLState(
     params: getTrailParams("desktop"),
     sparkles,
     journeyH: 4000,
+    lanternLive: null,
   };
 }
 
@@ -300,22 +310,30 @@ function drawBloom(
   x: number,
   y: number
 ): void {
-  /* Bloom morphs into a clone of Journey's Lantern A so the section joint
-   * is invisible: at b=1 the gradient stops, radius, and center relative
-   * to the joint (canvas bottom = Journey top) match the lantern exactly.
-   * Float-safe: b is clamped, easeOutCubic uses an integer exponent, all
-   * stop offsets stay ordered in [0,1], all alphas stay in range. */
+  /* Bloom morphs into Journey's Lantern A so the joint is seamless. At b=1
+   * the end state matches the lantern: same stops, same farthest-corner
+   * radius, same center relative to the joint (canvas bottom = Journey
+   * top). The lantern div is lanternHalf*2 px square, so its gradient
+   * center is (left+half, top+half) from the div's top-left corner.
+   * Geometry comes from a live DOM measurement when available (captures
+   * drift/pulse phase), else from the lantern's CSS values. Float-safe. */
   if (p < 0.82) return;
   const b = clamp01((p - 0.82) / 0.18);
   const e = easeOutCubic(b);
   const prm = st.params;
-  const r = 24 + e * (prm.lanternR - 24);
-  const cx = x + e * (prm.lanternCX * st.w - x);
-  const cy = y + e * (st.h + prm.lanternCYK * st.journeyH - y);
+  const live = st.lanternLive;
+  const rEnd = live ? live.r : prm.lanternR;
+  const cxEnd = live ? live.cx : prm.lanternCX * st.w + prm.lanternHalf;
+  const cyEnd = st.h + (live ? live.cy : prm.lanternCYK * st.journeyH + prm.lanternHalf);
+  const op = live ? live.op : 1;
+  const opE = 1 + e * (op - 1);
+  const r = 24 + e * (rEnd - 24);
+  const cx = x + e * (cxEnd - x);
+  const cy = y + e * (cyEnd - y);
   const cr = Math.round(91 - 83 * e);
   const cg = Math.round(155 - 66 * e);
   const cb = Math.round(255 - 43 * e);
-  const a0 = 0.55 - 0.15 * e;
+  const a0 = (0.55 - 0.15 * e) * opE;
   const off1 = 0.4 - 0.1 * e;
   const a1 = a0 * (0.25 + 0.3 * e);
   const tEnd = 1 - 0.45 * e;
@@ -377,14 +395,32 @@ export function TrailOfLight(props: TrailOfLightProps): ReactElement {
     if (!ctx) return;
     const st = createTLState(canvas, ctx);
     stRef.current = st;
-    const measureJourney = (): void => {
-      const el = document.getElementById("manifesto");
-      const h = el ? el.getBoundingClientRect().height : 0;
-      st.journeyH = h > 0 ? Math.round(h) : 4000;
+    const measureLantern = (): void => {
+      const sec = document.getElementById("manifesto");
+      const lan = document.querySelector(".journey-lantern-a");
+      if (sec && lan) {
+        const sr = sec.getBoundingClientRect();
+        const lr = lan.getBoundingClientRect();
+        if (lr.width > 0) {
+          const opRaw = parseFloat(getComputedStyle(lan).opacity);
+          st.lanternLive = {
+            cx: lr.left + lr.width / 2,
+            cy: lr.top + lr.height / 2 - sr.top,
+            r: (lr.width / 2) * Math.SQRT2,
+            op: isFinite(opRaw) ? opRaw : 1,
+          };
+        } else {
+          st.lanternLive = null;
+        }
+        const sh = sr.height;
+        st.journeyH = sh > 0 ? Math.round(sh) : 4000;
+      } else {
+        st.lanternLive = null;
+      }
     };
     const applySize = (): void => {
       resizeTLState(st);
-      measureJourney();
+      measureLantern();
       lastKeyRef.current = "";
       drawNow();
     };
@@ -394,7 +430,7 @@ export function TrailOfLight(props: TrailOfLightProps): ReactElement {
       (entries) => {
         visRef.current = entries.some((e) => e.isIntersecting);
         if (visRef.current) {
-          measureJourney();
+          measureLantern();
           lastKeyRef.current = "";
           drawNow();
         }

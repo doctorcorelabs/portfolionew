@@ -32,18 +32,23 @@ because the comet is a calmer gesture.
   canvases over 1.3M px, same pixel-count gate as sparkles), a subtle vertical light column wash (alpha <= 0.10,
   fades in 0.35 to 0.5, out 0.78 to 0.92), and 6 seeded sparkle flecks
   near the trail (visible 0.25 to 0.85, drift phase from p only).
-- p in [0.82, 1]: comet rests at the top; the bloom grows into the
-  an exact clone of Journey's Lantern A (no fade-out) so the joint (canvas bottom
-  edge = Journey top edge) is invisible. Gradient at b = 1:
-  `radial-gradient(circle, rgba(8, 89, 212, 0.40) 0%, rgba(8, 89, 212, 0.22) 30%, rgba(8, 89, 212, 0) 55%)`.
-  Radius = CSS farthest-corner = (divSize/2)*sqrt(2): 494.97 mobile/tablet
-  (700px div, top -4%/left -20%), 777.82 desktop (1100px div, top -6%/left -8%).
-  Clone center = (lanternCX*w, h + lanternCYK*journeyH), the same distance above
-  the joint as the lantern above Journey's top edge; both surfaces translate
-  together during the scroll sweep so the match persists. journeyH from #manifesto
-  via getElementById in applySize() and when the canvas becomes visible,
-  null/zero-guarded with a 4000 fallback; driftX and bloomScale removed
-  (bloomScale now unused); comet head swells 2.6x then fades out by p = 1.
+- p in [0.82, 1]: comet rests at the top; the bloom grows into an
+  exact clone of Journey's Lantern A (no fade-out) so the joint (canvas bottom
+  edge = Journey top edge) is invisible. End state at p = 1: gradient stops
+  (0, rgba(8,89,212,0.40)), (0.30, rgba(8,89,212,0.22)), (0.55, transparent);
+  radius = CSS farthest-corner = (divSize/2)*sqrt(2): 495 mobile/tablet
+  (700px div), 778 desktop (1100px div); center joint-relative, matching the
+  lantern's center above Journey's top edge.
+  Key insight: a CSS radial-gradient on a square div centers IN THE DIV, at
+  (left + divSize/2, top + divSize/2), not (left, top). The previous code
+  aimed at the div's top-left corner, a systematic 550px desktop /
+  350px mobile offset, and that was the visible seam line.
+  Geometry from measureLantern(): live #manifesto and .journey-lantern-a rects
+  (captures the drift translate3d and the pulse opacity phase); when the
+  elements are missing, falls back to the CSS values (lanternR/lanternCX/
+  lanternCYK/lanternHalf in TLParams). journeyH null/zero-guarded with a 4000
+  fallback. bloomScale and driftX were removed from TLParams (dead params);
+  comet head swells 2.6x then fades out by p = 1.
 - Background crossfade: smoothstep(0.55, 1.0, p) blends #010101 to
   #111111. At p = 1 the frame is flat #111111, pixel identical to the
   Journey section's top edge, so the sticky hand-off is invisible.
