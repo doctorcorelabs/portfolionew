@@ -53,7 +53,7 @@ In `src/App.tsx`, between the existing adjacent lines:
 </div>
 ```
 
-- `.q2s-wrap`: `position: relative; height: calc(100svh + ZONE); background: #FFFFFF;`
+- `.q2s-wrap`: `position: relative; height: calc(100svh + ZONE); background: #FFFFFF; margin-bottom: -2px;` (the -2px margin overlaps the wrap/Services junction by 2px of black-on-black, killing iOS fractional-rounding hairlines at that seam, fix 2026-10-30)
   where ZONE is the per-breakpoint scroll runway (section 6). The extra page
   height is intentional: the choreography needs scroll distance. It does not
   shift Services content, it only pushes it further down the page.

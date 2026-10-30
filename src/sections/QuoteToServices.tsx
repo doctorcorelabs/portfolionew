@@ -30,6 +30,7 @@ const ZONE_STYLE = `
   position: relative;
   height: calc(100svh + 1190px);
   background: #FFFFFF;
+  margin-bottom: -2px;
 }
 .q2s-sticky {
   position: sticky;
