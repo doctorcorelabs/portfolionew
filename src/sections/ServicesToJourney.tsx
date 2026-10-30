@@ -4,9 +4,11 @@
  * (top edge #111111, the first stop of its gradient to #0E1626).
  *
  * The zone is a plain block of 100svh plus a per-breakpoint scroll
- * runway (174px mobile, 216px tablet, 291px desktop): 20% shorter again
- * (user 2026-10-30: trim the black scroll before the light pillar), because
- * the comet is a calmer gesture. A sticky
+ * runway (260px mobile, 216px tablet, 291px desktop): mobile got a longer
+ * runway back (user 2026-10-30: the pillar felt too rushed on phones;
+ * 174px is less than one swipe). The pillar starts earlier on mobile so
+ * the black lead-in stays tight. Because the comet is a calmer gesture.
+ * A sticky
  * viewport-height child pins while the runway scrolls; progress 0..1
  * is a pure rAF-throttled function of scroll position through the
  * runway, so scrolling back reverses every phase exactly.
@@ -59,7 +61,7 @@ const ZONE_STYLE = `
 }
 @media (max-width: 720px) {
   .s2j-wrap {
-    height: calc(100svh + 174px);
+    height: calc(100svh + 260px);
   }
 }
 `;

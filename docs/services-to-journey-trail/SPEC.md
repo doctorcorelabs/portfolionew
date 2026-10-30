@@ -18,7 +18,7 @@ Progress: `p = clamp01(-wrapRect.top / (wrapRect.height - stickyRect.height + 1)
 measured live via getBoundingClientRect on every scroll (rAF-throttled,
 passive listener, IntersectionObserver gate). p = 1 exactly at unstick.
 
-RUNWAY per breakpoint: 174px mobile (<=720px), 216px tablet (<=1100px),
+RUNWAY per breakpoint: 260px mobile (<=720px), 216px tablet (<=1100px),
 291px desktop. Shorter than the dot zone's runway (689/842/1071)
 because the comet is a calmer gesture.
 
@@ -34,10 +34,10 @@ because the comet is a calmer gesture.
   p only), and a full-height light pillar the comet charges as it climbs.
   The old weak column wash (alpha <= 0.10, faded in 0.35-0.5, out
   0.78-0.92) is gone, replaced by the pillar.
-- Light pillar: pillarStrength(p) = smoothstep(0.05, pillarEnd, p).
-  pillarEnd 0.67 tablet/desktop, 0.79 mobile (20% longer charge, user
-  2026-10-30). 0 until the comet is underway, full by pillarEnd, holds
-  through the bloom phase.
+- Light pillar: pillarStrength(p) = smoothstep(pillarStart, pillarEnd, p).
+  Tablet/desktop 0.05-0.67; mobile 0.03-0.78 (earlier start, longer charge
+  so it does not feel rushed on phones, user 2026-10-30). Holds 1 through
+  the bloom phase.
   Full-height vertical beam centered on the comet head's x, including the
   sway term (recomputed identically so it stays under the head). Width
   ramps 10px to 16% of viewport width; alpha ramps to 0.55 with a brighter
