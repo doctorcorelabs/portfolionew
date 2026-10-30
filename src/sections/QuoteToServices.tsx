@@ -33,8 +33,8 @@ const ZONE_STYLE = `
 }
 .q2s-sticky {
   position: sticky;
-  top: 0;
-  height: 100svh;
+  top: -1px;
+  height: calc(100svh + 2px);
   overflow: hidden;
   background: #FFFFFF;
 }

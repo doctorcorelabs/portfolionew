@@ -57,8 +57,8 @@ In `src/App.tsx`, between the existing adjacent lines:
   where ZONE is the per-breakpoint scroll runway (section 6). The extra page
   height is intentional: the choreography needs scroll distance. It does not
   shift Services content, it only pushes it further down the page.
-- `.q2s-sticky`: `position: sticky; top: 0; height: 100svh; overflow: hidden;
-  background: #FFFFFF;`
+- `.q2s-sticky`: `position: sticky; top: -1px; height: calc(100svh + 2px); overflow: hidden;
+  background: #FFFFFF;` (the 1px overlap top and bottom hides subpixel hairlines of the wrap background, fix 2026-10-30)
 - `.q2s-canvas`: `position: absolute; inset: 0; width: 100%; height: 100%;
   display: block;` Sized in JS to `clientWidth * DPR` / `clientHeight * DPR`.
 - The whole component is `aria-hidden`; it renders no text and no
